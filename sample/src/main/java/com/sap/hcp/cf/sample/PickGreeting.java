@@ -20,12 +20,6 @@ public class PickGreeting {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PickGreeting.class);
 	
 	public static String pick() {
-		try {
-			Thread.sleep(random.nextInt(1000));
-		}
-		catch (Exception ex) {
-			LOGGER.error("Thread.sleep() failed", ex); 
-		}
 		String greeting = GREETINGS[random.nextInt(GREETINGS.length)];
 		LOGGER.info("Picked greeting : {}", greeting);
 		return greeting;
