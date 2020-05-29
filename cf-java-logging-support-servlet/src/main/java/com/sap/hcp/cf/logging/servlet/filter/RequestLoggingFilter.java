@@ -97,9 +97,7 @@ public class RequestLoggingFilter implements Filter {
 			RequestRecord rr = requestRecordFactory.create(httpRequest);
 			httpRequest.setAttribute(MDC.class.getName(), MDC.getCopyOfContextMap());
 			
-			if (!httpResponse.isCommitted() && httpResponse.getHeader(HttpHeaders.CORRELATION_ID.getName()) == null) {
-				httpResponse.setHeader(HttpHeaders.CORRELATION_ID.getName(), LogContext.getCorrelationId());
-			}
+			addCorrelationIdIfNotAlreadyFilled(httpResponse);
 
 			/*
 			 * If request logging is disabled skip request instrumentation and continue the
@@ -152,6 +150,12 @@ public class RequestLoggingFilter implements Filter {
 			throws IOException, ServletException {
 		if (chain != null) {
 			chain.doFilter(httpRequest, httpResponse);
+		}
+	}
+	
+	private void addCorrelationIdIfNotAlreadyFilled(HttpServletResponse httpResponse) {
+		if (!httpResponse.isCommitted() && httpResponse.getHeader(HttpHeaders.CORRELATION_ID.getName()) == null) {
+			httpResponse.setHeader(HttpHeaders.CORRELATION_ID.getName(), LogContext.getCorrelationId());
 		}
 	}
 
