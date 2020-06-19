@@ -13,9 +13,14 @@ import com.sap.hcp.cf.logging.common.LogContext;
 
 public enum HttpHeaders implements HttpHeader {
 
-	CONTENT_LENGTH("content-length"), CONTENT_TYPE("content-type"), REFERER("referer"), X_FORWARDED_FOR(
-			"x-forwarded-for"), X_VCAP_REQUEST_ID("x-vcap-request-id"), CORRELATION_ID("X-CorrelationID",
-					Fields.CORRELATION_ID, true, X_VCAP_REQUEST_ID), TENANT_ID("tenantid", Fields.TENANT_ID, true);
+	CONTENT_LENGTH("content-length"),
+	CONTENT_TYPE("content-type"),
+	REFERER("referer"),
+	X_FORWARDED_FOR("x-forwarded-for"),
+	X_VCAP_REQUEST_ID("x-vcap-request-id"),
+	CORRELATION_ID("X-CorrelationID", Fields.CORRELATION_ID, true, X_CORRELATION_ID, X_VCAP_REQUEST_ID),
+	X_CORRELATION_ID("X-Correlation-ID"),
+	TENANT_ID("tenantid", Fields.TENANT_ID, true);
 
 	private HttpHeaders(String name) {
 		this(name, null, false);
