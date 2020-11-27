@@ -43,7 +43,7 @@ import com.sap.hcp.cf.logging.common.request.RequestRecord;
  * by subclassing the filter and overwrite its methods.
  * </p>
  */
-public class RequestLoggingFilterBase implements Filter {
+public class RequestLoggingBaseFilter implements Filter {
 
     public static final String LOG_PROVIDER = "[SERVLET]";
     public static final String WRAP_RESPONSE_INIT_PARAM = "wrapResponse";
@@ -53,17 +53,17 @@ public class RequestLoggingFilterBase implements Filter {
     private boolean wrapRequest = true;
     private RequestRecordFactory requestRecordFactory;
 
-    public RequestLoggingFilterBase() {
+    public RequestLoggingBaseFilter() {
         this(createDefaultRequestRecordFactory());
     }
 
     protected static RequestRecordFactory createDefaultRequestRecordFactory() {
-        String invokingClass = RequestLoggingFilterBase.class.getName();
+        String invokingClass = RequestLoggingBaseFilter.class.getName();
         LogOptionalFieldsSettings logOptionalFieldsSettings = new LogOptionalFieldsSettings(invokingClass);
         return new RequestRecordFactory(logOptionalFieldsSettings);
     }
 
-    public RequestLoggingFilterBase(RequestRecordFactory requestRecordFactory) {
+    public RequestLoggingBaseFilter(RequestRecordFactory requestRecordFactory) {
         this.requestRecordFactory = requestRecordFactory;
     }
 

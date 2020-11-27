@@ -51,13 +51,13 @@ import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelProcessor;
  * by subclassing the filter and overwrite its methods.
  * </p>
  */
-public class RequestLoggingFilter extends RequestLoggingFilterBase {
+public class RequestLoggingFilter extends RequestLoggingBaseFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(RequestLoggingFilter.class);
 
-    public static final String LOG_PROVIDER = RequestLoggingFilterBase.LOG_PROVIDER;
-    public static final String WRAP_RESPONSE_INIT_PARAM = RequestLoggingFilterBase.WRAP_REQUEST_INIT_PARAM;
-    public static final String WRAP_REQUEST_INIT_PARAM = RequestLoggingFilterBase.WRAP_REQUEST_INIT_PARAM;
+    public static final String LOG_PROVIDER = RequestLoggingBaseFilter.LOG_PROVIDER;
+    public static final String WRAP_RESPONSE_INIT_PARAM = RequestLoggingBaseFilter.WRAP_REQUEST_INIT_PARAM;
+    public static final String WRAP_REQUEST_INIT_PARAM = RequestLoggingBaseFilter.WRAP_REQUEST_INIT_PARAM;
 
     private ConcurrentInitializer<DynLogConfiguration> dynLogEnvironment;
     private ConcurrentInitializer<DynamicLogLevelProcessor> dynamicLogLevelProcessor;
