@@ -16,11 +16,9 @@ public class TimestampConverter extends ClassicConverter {
 
     @Override
     public String convert(ILoggingEvent event) {
-        StringBuilder appendTo = new StringBuilder();
-		Instant now = Instant.now();
-		long timestamp = now.getEpochSecond() * 1_000_000_000L + now.getNano();
-		appendTo.append(timestamp);
-        return appendTo.toString();
+	Instant now = Instant.now();
+	long timestamp = now.getEpochSecond() * 1_000_000_000L + now.getNano();
+	return String.valueOf(timestamp);
     }
 
     @Override
