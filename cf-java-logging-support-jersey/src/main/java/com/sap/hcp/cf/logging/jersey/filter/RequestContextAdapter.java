@@ -5,6 +5,9 @@ import java.net.URI;
 import com.sap.hcp.cf.logging.common.request.HttpHeader;
 import com.sap.hcp.cf.logging.common.request.RequestRecord.Direction;
 
+// Jersey support has been deprecated in version 3.4.0 for removal in later versions.
+// Please migrate to cf-java-logging-support-servlet.
+@Deprecated
 public interface RequestContextAdapter {
 
     public String getHeader(String headerName);

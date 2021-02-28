@@ -4,6 +4,9 @@ import javax.ws.rs.container.ContainerResponseContext;
 
 import com.sap.hcp.cf.logging.common.request.HttpHeader;
 
+// Jersey support has been deprecated in version 3.4.0 for removal in later versions.
+// Please migrate to cf-java-logging-support-servlet.
+@Deprecated
 public class ContainerResponseContextAdapter implements ResponseContextAdapter {
 
 	private final ContainerResponseContext ctx;

@@ -6,6 +6,9 @@ import com.sap.hcp.cf.logging.common.LogContext;
 import com.sap.hcp.cf.logging.common.request.HttpHeader;
 import com.sap.hcp.cf.logging.common.request.HttpHeaders;
 
+// Jersey support has been deprecated in version 3.4.0 for removal in later versions.
+// Please migrate to cf-java-logging-support-servlet.
+@Deprecated
 public class ClientRequestUtils {
 
 	public static Invocation.Builder propagate(Invocation.Builder builder, javax.ws.rs.core.HttpHeaders reqHeaders) {
