@@ -12,7 +12,7 @@ import com.sap.hcp.cf.logging.common.request.RequestRecord;
 
 public class PerfTestRequestRecord {
 
-    private static final int DEF_ITERATIONS = 1000000;
+	private static final int DEF_ITERATIONS = 1000000;
 	private final int iterations;
 	private static final Logger LOGGER = LoggerFactory.getLogger(PerfTestRequestRecord.class);
 
