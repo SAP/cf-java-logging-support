@@ -22,12 +22,12 @@ import com.sap.hcp.cf.logging.common.DoubleValue;
 import com.sap.hcp.cf.logging.common.Fields;
 import com.sap.hcp.cf.logging.common.Markers;
 import com.sap.hcp.cf.logging.common.request.RequestRecord;
-import com.sap.hcp.cf.logging.common.request.TestRequestRecord;
+import com.sap.hcp.cf.logging.common.request.RequestRecordTest;
 import com.sap.hcp.cf.logging.common.request.RequestRecord.Direction;
 
 public class TestRequestRecord extends AbstractTest {
 
-    private final Logger logger = LoggerFactory.getLogger(TestRequestRecord.class);
+    private final Logger logger = LoggerFactory.getLogger(RequestRecordTest.class);
     private RequestRecord rrec;
 
     @Test

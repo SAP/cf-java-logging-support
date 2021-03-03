@@ -1,5 +1,8 @@
 package com.sap.hcp.cf.logging.common.request;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,7 +14,6 @@ import org.slf4j.MDC;
 import com.fasterxml.jackson.jr.ob.JSON;
 import com.fasterxml.jackson.jr.ob.JSONComposer;
 import com.fasterxml.jackson.jr.ob.comp.ObjectComposer;
-import com.sap.hcp.cf.logging.common.DateTimeValue;
 import com.sap.hcp.cf.logging.common.Defaults;
 import com.sap.hcp.cf.logging.common.DoubleValue;
 import com.sap.hcp.cf.logging.common.Fields;
@@ -67,10 +69,8 @@ public class RequestRecord {
                            IN, OUT
     }
 
-    private long startNano = 0;
-    private long endNano = 0;
-    private long startMs = 0;
-    private long endMs = 0;
+    private Instant start;
+    private Instant end;
 
     private Direction direction = Direction.IN;
 
@@ -184,12 +184,8 @@ public class RequestRecord {
      * @return the assigned start time.
      */
     public long start() {
-        startMs = System.currentTimeMillis();
-        startNano = System.nanoTime();
-        if (startNano > endNano) {
-            endNano = startNano;
-        }
-        return startMs;
+        start = Instant.now(ClockHolder.getInstance());
+        return start.toEpochMilli();
     }
 
     /**
@@ -198,10 +194,8 @@ public class RequestRecord {
      * @return the assigned end time.
      */
     public long stop() {
-        endMs = System.currentTimeMillis();
-        endNano = System.nanoTime();
-
-        return endMs;
+        end = Instant.now(ClockHolder.getInstance());
+        return end.toEpochMilli();
     }
 
     @Override
@@ -239,11 +233,11 @@ public class RequestRecord {
          * sure, we stopped the timer and then compute the delta
          */
         if (!fields.containsKey(Fields.RESPONSE_TIME_MS)) {
-            if (endMs == 0) {
+            if (end == null) {
                 stop();
             }
-            setEndTimingTag(new DateTimeValue(endMs).toString());
-            addValue(Fields.RESPONSE_TIME_MS, new DoubleValue((endNano - startNano) / 1000000.0));
+            setEndTimingTag(end.toString());
+            addValue(Fields.RESPONSE_TIME_MS, new DoubleValue(Duration.between(start, end).toNanos() / 1_000_000.0));
         } else {
             Value respTime = fields.get(Fields.RESPONSE_TIME_MS);
             if (respTime != null) {
@@ -253,10 +247,10 @@ public class RequestRecord {
                 } else if (LongValue.class.isAssignableFrom(respTime.getClass())) {
                     delta = ((Long) respTime.getValue()).longValue();
                 }
-                setEndTimingTag(new DateTimeValue(startMs + delta).toString());
+                setEndTimingTag(start.plusMillis(delta).toString());
             }
         }
-        setStartTimingTag(new DateTimeValue(startMs).toString());
+        setStartTimingTag(start.toString());
     }
 
     private void setStartTimingTag(String dateValue) {
@@ -279,5 +273,13 @@ public class RequestRecord {
         }
         addTag(tag, dateValue);
 
+    }
+
+    static class ClockHolder {
+        static Clock instance = Clock.systemUTC();
+
+        public static Clock getInstance() {
+            return ClockHolder.instance;
+        }
     }
 }

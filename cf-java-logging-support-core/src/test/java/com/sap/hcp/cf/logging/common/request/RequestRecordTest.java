@@ -1,14 +1,19 @@
 package com.sap.hcp.cf.logging.common.request;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.MDC;
 
@@ -17,12 +22,19 @@ import com.fasterxml.jackson.jr.ob.JSONObjectException;
 import com.sap.hcp.cf.logging.common.Defaults;
 import com.sap.hcp.cf.logging.common.DoubleValue;
 import com.sap.hcp.cf.logging.common.Fields;
-import com.sap.hcp.cf.logging.common.request.RequestRecord;
 import com.sap.hcp.cf.logging.common.request.RequestRecord.Direction;
 
-public class TestRequestRecord {
+public class RequestRecordTest {
+
+    private static final Clock FIXED_CLOCK_EPOCH = Clock.fixed(Instant.EPOCH, ZoneOffset.UTC);
+    private static final Duration RESPONSE_DELAY = Duration.ofMillis(150);
 
     private RequestRecord rrec;
+
+    @Before
+    public void resetRequestRecordClock() {
+        setRequestRecordClock(FIXED_CLOCK_EPOCH);
+    }
 
     @Test
     public void testDefaults() throws JSONObjectException, IOException {
@@ -34,7 +46,7 @@ public class TestRequestRecord {
         assertThat(getField(Fields.REQUEST_SIZE_B), is("-1"));
         assertThat(getField(Fields.REQUEST_RECEIVED_AT), not(nullValue()));
         assertThat(getField(Fields.REQUEST_RECEIVED_AT), not(nullValue()));
-        assertThat(Double.valueOf(getField(Fields.RESPONSE_TIME_MS)), greaterThan(new Double(0.0)));
+        assertThat(Double.valueOf(getField(Fields.RESPONSE_TIME_MS)), greaterThanOrEqualTo(0.0d));
 
         assertThat(getField(Fields.REQUEST), is(Defaults.UNKNOWN));
         assertThat(getField(Fields.REMOTE_IP), is(Defaults.UNKNOWN));
@@ -101,16 +113,14 @@ public class TestRequestRecord {
         MDC.clear();
         String layer = "testResponseTimeIn";
         rrec = new RequestRecord(layer);
-        long start = rrec.start();
-        doWait(150);
-        long end = rrec.stop();
+        rrec.start();
+        advanceRequestRecordClock(RESPONSE_DELAY);
+        rrec.stop();
         assertThat(getField(Fields.LAYER), is(layer));
         assertThat(getField(Fields.DIRECTION), is(Direction.IN.toString()));
-        assertThat(Double.valueOf(getField(Fields.RESPONSE_TIME_MS)).longValue(), lessThanOrEqualTo(Double.valueOf(end -
-                                                                                                                   start)
-                                                                                                          .longValue()));
-        assertThat(getField(Fields.RESPONSE_SENT_AT), not(nullValue()));
-        assertThat(getField(Fields.REQUEST_RECEIVED_AT), not(nullValue()));
+        assertThat(Double.valueOf(getField(Fields.RESPONSE_TIME_MS)), is(RESPONSE_DELAY.getNano() / 1_000_000.0));
+        assertThat(getField(Fields.RESPONSE_SENT_AT), is(equalTo(Instant.EPOCH.plus(RESPONSE_DELAY).toString())));
+        assertThat(getField(Fields.REQUEST_RECEIVED_AT), is(equalTo(Instant.EPOCH.toString())));
     }
 
     @Test
@@ -118,24 +128,27 @@ public class TestRequestRecord {
         MDC.clear();
         String layer = "testResponseTimeOut";
         rrec = new RequestRecord(layer, Direction.OUT);
-        long start = rrec.start();
-        doWait(150);
-        long end = rrec.stop();
+        rrec.start();
+        advanceRequestRecordClock(RESPONSE_DELAY);
+        rrec.stop();
         assertThat(getField(Fields.LAYER), is(layer));
         assertThat(getField(Fields.DIRECTION), is(Direction.OUT.toString()));
-        assertThat(Double.valueOf(getField(Fields.RESPONSE_TIME_MS)).longValue(), lessThanOrEqualTo(Double.valueOf(end -
-                                                                                                                   start)
-                                                                                                          .longValue()));
+        assertThat(Double.valueOf(getField(Fields.RESPONSE_TIME_MS)), is(RESPONSE_DELAY.getNano() / 1_000_000.0));
         assertThat(getField(Fields.RESPONSE_RECEIVED_AT), not(nullValue()));
         assertThat(getField(Fields.REQUEST_SENT_AT), not(nullValue()));
     }
 
-    private void doWait(long p) {
-        try {
-            Thread.sleep(p);
-        } catch (Exception e) {
+    private Clock getRequestRecordClock() {
+        return RequestRecord.ClockHolder.getInstance();
+    }
 
-        }
+    private void setRequestRecordClock(Clock clock) {
+        RequestRecord.ClockHolder.instance = clock;
+    }
+
+    private void advanceRequestRecordClock(Duration duration) {
+        Clock advancedClock = Clock.offset(getRequestRecordClock(), duration);
+        setRequestRecordClock(advancedClock);
     }
 
     private String getField(String fieldName) throws JSONObjectException, IOException {

@@ -26,7 +26,7 @@ import com.sap.hcp.cf.logging.common.request.RequestRecord.Direction;
 
 public class TestRequestRecord extends AbstractTest {
 
-    private final Logger logger = LoggerFactory.getLogger(TestRequestRecord.class);
+    private final Logger logger = LoggerFactory.getLogger(RequestRecordTest.class);
     private RequestRecord rrec;
 
     @Test
