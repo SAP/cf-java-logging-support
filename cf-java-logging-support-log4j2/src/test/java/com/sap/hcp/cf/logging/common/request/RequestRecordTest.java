@@ -1,12 +1,12 @@
 package com.sap.hcp.cf.logging.common.request;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 
@@ -21,11 +21,9 @@ import com.sap.hcp.cf.logging.common.Defaults;
 import com.sap.hcp.cf.logging.common.DoubleValue;
 import com.sap.hcp.cf.logging.common.Fields;
 import com.sap.hcp.cf.logging.common.Markers;
-import com.sap.hcp.cf.logging.common.request.RequestRecord;
-import com.sap.hcp.cf.logging.common.request.RequestRecordTest;
 import com.sap.hcp.cf.logging.common.request.RequestRecord.Direction;
 
-public class TestRequestRecord extends AbstractTest {
+public class RequestRecordTest extends AbstractTest {
 
     private final Logger logger = LoggerFactory.getLogger(RequestRecordTest.class);
     private RequestRecord rrec;
@@ -42,7 +40,7 @@ public class TestRequestRecord extends AbstractTest {
         assertThat(getField(Fields.REQUEST_SIZE_B), is("-1"));
         assertThat(getField(Fields.REQUEST_RECEIVED_AT), not(nullValue()));
         assertThat(getField(Fields.REQUEST_RECEIVED_AT), not(nullValue()));
-        assertThat(Double.valueOf(getField(Fields.RESPONSE_TIME_MS)), greaterThan(new Double(0.0)));
+        assertThat(Double.valueOf(getField(Fields.RESPONSE_TIME_MS)), greaterThan(0.0d));
 
         assertThat(getField(Fields.REQUEST), is(Defaults.UNKNOWN));
         assertThat(getField(Fields.REMOTE_IP), is(Defaults.UNKNOWN));
@@ -57,7 +55,6 @@ public class TestRequestRecord extends AbstractTest {
         assertThat(getField(Fields.X_FORWARDED_FOR), is(nullValue()));
         assertThat(getField(Fields.REMOTE_PORT), is(nullValue()));
         assertThat(getField(Fields.WRITTEN_TS), is(notNullValue()));
-
     }
 
     @Test
