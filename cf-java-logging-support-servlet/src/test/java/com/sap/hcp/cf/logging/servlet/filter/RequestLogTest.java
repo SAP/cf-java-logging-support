@@ -13,10 +13,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.DispatcherType;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -29,7 +25,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sap.hcp.cf.logging.common.Fields;
@@ -41,10 +36,7 @@ import ch.qos.logback.classic.LoggerContext;
 
 public class RequestLogTest {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RequestLogTest.class);
-	private static final String REQUEST_RECEIVED = "Request received";
-
-	@Rule
+    @Rule
 	public SystemOutRule systemOut = new SystemOutRule();
 
 	private Server server;
@@ -65,7 +57,7 @@ public class RequestLogTest {
         handler.addFilter(RequestLoggingFilter.class, "/*", EnumSet.of(DispatcherType.INCLUDE,
                                                                           DispatcherType.REQUEST,
 				DispatcherType.ERROR, DispatcherType.FORWARD, DispatcherType.ASYNC));
-		handler.addServlet(TestServlet.class, "/test");
+        handler.addServlet(LoggingTestServlet.class, "/test");
 		server.start();
 		return server;
 	}
@@ -205,24 +197,15 @@ public class RequestLogTest {
 	}
 
 	private Map<String, Object> getRequestMessage() throws IOException {
-		return systemOut.fineLineAsMapWith("msg", REQUEST_RECEIVED);
+		return systemOut.finedLineAsMapWith("msg", LoggingTestServlet.LOG_MESSAGE);
 	}
 
-	private Map<String, Object> getRequestLog() throws IOException {
+    private Map<String, Object> getRequestLog() throws IOException {
 		return systemOut.fineLineAsMapWith("layer", "[SERVLET]");
 	}
 
 	private static void assertFirstHeaderValue(String expected, CloseableHttpResponse response, HttpHeader header) {
 		String headerValue = response.getFirstHeader(header.getName()).getValue();
 		assertThat(headerValue, is(equalTo(expected)));
-	}
-
-	@SuppressWarnings("serial")
-	public static class TestServlet extends HttpServlet {
-
-		@Override
-		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			LOG.info(REQUEST_RECEIVED);
-		}
 	}
 }

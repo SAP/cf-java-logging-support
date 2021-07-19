@@ -36,9 +36,6 @@ public class RequestRecordFactory {
 						getHeader(request, HttpHeaders.X_FORWARDED_FOR))
 				.addOptionalTag(isLogRemoteUserField, Fields.REMOTE_USER, getValue(request.getRemoteUser()))
 				.addOptionalTag(isLogRefererField, Fields.REFERER, getHeader(request, HttpHeaders.REFERER));
-		for (HttpHeader header : HttpHeaders.propagated()) {
-			rrb.addContextTag(header.getField(), getHeaderValue(request, header, null));
-		}
 		return rrb.build();
 	}
 

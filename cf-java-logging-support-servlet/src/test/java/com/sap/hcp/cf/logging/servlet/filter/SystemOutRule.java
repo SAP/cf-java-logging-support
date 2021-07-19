@@ -48,4 +48,8 @@ public class SystemOutRule extends ExternalResource {
 		return value != null ? value.toString() : null;
 	}
 
+    Map<String, Object> finedLineAsMapWith(String key, String expected) throws IOException {
+        return fineLineAsMapWith(key, expected);
+    }
+
 }
