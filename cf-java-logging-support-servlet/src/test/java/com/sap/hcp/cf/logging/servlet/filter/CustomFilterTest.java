@@ -39,7 +39,7 @@ public class CustomFilterTest {
             jetty.start();
             try (CloseableHttpResponse response = client.execute(createBasicGetRequest(jetty))) {
                 assertThat(response.getStatusLine().getStatusCode(), is(equalTo(200)));
-                assertThat(systemOutRule.fineLineAsMapWith(Fields.MSG, LoggingTestServlet.LOG_MESSAGE), hasEntry(
+                assertThat(systemOutRule.findLineAsMapWith(Fields.MSG, LoggingTestServlet.LOG_MESSAGE), hasEntry(
                                                                                                                  Fields.TENANT_ID,
                                                                                                                  "my_tenant"));
             }
@@ -67,10 +67,10 @@ public class CustomFilterTest {
             request.addHeader(HttpHeaders.TENANT_ID.getName(), "other_tenant");
             try (CloseableHttpResponse response = client.execute(request)) {
                 assertThat(response.getStatusLine().getStatusCode(), is(equalTo(200)));
-                assertThat(systemOutRule.fineLineAsMapWith(Fields.MSG, LoggingTestServlet.LOG_MESSAGE), hasEntry(
+                assertThat(systemOutRule.findLineAsMapWith(Fields.MSG, LoggingTestServlet.LOG_MESSAGE), hasEntry(
                                                                                                                  Fields.TENANT_ID,
                                                                                                                  "custom_tenant"));
-                assertThat(systemOutRule.fineLineAsMapWith(Fields.LAYER, "[SERVLET]"), hasEntry(Fields.TENANT_ID,
+                assertThat(systemOutRule.findLineAsMapWith(Fields.LAYER, "[SERVLET]"), hasEntry(Fields.TENANT_ID,
                                                                                                 "custom_tenant"));
             }
         } finally {
@@ -89,10 +89,10 @@ public class CustomFilterTest {
             request.addHeader(HttpHeaders.TENANT_ID.getName(), "other_tenant");
             try (CloseableHttpResponse response = client.execute(request)) {
                 assertThat(response.getStatusLine().getStatusCode(), is(equalTo(200)));
-                assertThat(systemOutRule.fineLineAsMapWith(Fields.MSG, LoggingTestServlet.LOG_MESSAGE), hasEntry(
+                assertThat(systemOutRule.findLineAsMapWith(Fields.MSG, LoggingTestServlet.LOG_MESSAGE), hasEntry(
                                                                                                                  Fields.CORRELATION_ID,
                                                                                                                  "my_correlation"));
-                assertThat(systemOutRule.fineLineAsMapWith(Fields.LAYER, "[SERVLET]"), hasEntry(Fields.CORRELATION_ID,
+                assertThat(systemOutRule.findLineAsMapWith(Fields.LAYER, "[SERVLET]"), hasEntry(Fields.CORRELATION_ID,
                                                                                                 "my_correlation"));
             }
         } finally {

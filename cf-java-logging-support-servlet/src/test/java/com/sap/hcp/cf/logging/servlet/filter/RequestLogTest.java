@@ -188,7 +188,7 @@ public class RequestLogTest {
 	}
 
 	private String getCorrelationIdGenerated() throws IOException {
-        Map<String, Object> generationLog = systemOut.fineLineAsMapWith("logger", CorrelationIdFilter.class.getName());
+        Map<String, Object> generationLog = systemOut.findLineAsMapWith("logger", CorrelationIdFilter.class.getName());
 		if (generationLog == null) {
 			return null;
 		}
@@ -197,11 +197,11 @@ public class RequestLogTest {
 	}
 
 	private Map<String, Object> getRequestMessage() throws IOException {
-		return systemOut.finedLineAsMapWith("msg", LoggingTestServlet.LOG_MESSAGE);
+        return systemOut.findLineAsMapWith("msg", LoggingTestServlet.LOG_MESSAGE);
 	}
 
     private Map<String, Object> getRequestLog() throws IOException {
-		return systemOut.fineLineAsMapWith("layer", "[SERVLET]");
+		return systemOut.findLineAsMapWith("layer", "[SERVLET]");
 	}
 
 	private static void assertFirstHeaderValue(String expected, CloseableHttpResponse response, HttpHeader header) {
