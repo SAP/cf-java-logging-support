@@ -85,9 +85,7 @@ public class CustomFilterTest {
         Server jetty = initJetty(filter);
         try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
             jetty.start();
-            HttpGet request = createBasicGetRequest(jetty);
-            request.addHeader(HttpHeaders.TENANT_ID.getName(), "other_tenant");
-            try (CloseableHttpResponse response = client.execute(request)) {
+            try (CloseableHttpResponse response = client.execute(createBasicGetRequest(jetty))) {
                 assertThat(response.getStatusLine().getStatusCode(), is(equalTo(200)));
                 assertThat(systemOutRule.findLineAsMapWith(Fields.MSG, LoggingTestServlet.LOG_MESSAGE), hasEntry(
                                                                                                                  Fields.CORRELATION_ID,
