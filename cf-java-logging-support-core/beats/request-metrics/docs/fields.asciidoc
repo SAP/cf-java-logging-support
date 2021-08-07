@@ -695,3 +695,38 @@ client, followed by proxy server addresses that forwarded the client
 request.
 
 
+==== x_forwarded_host
+
+type: string
+
+example: requested-host.example.com
+
+required: False
+
+The originally reqeusted host by the client in the host HTTP request header.
+A proxy may forward the host header using the x-forwarded-host header.
+
+
+==== x_forwarded_proto
+
+type: string
+
+example: https
+
+required: False
+
+The original protocol used by the client to connect to the proxy or load balancer
+before the application.
+
+
+==== x_custom_host
+
+type: string
+
+example: central-host.example.com
+
+required: False
+
+An header set by a proxy or load balancer for special use-cases.
+
+

@@ -15,7 +15,10 @@ public enum HttpHeaders implements HttpHeader {
                                                CONTENT_LENGTH("content-length"), //
                                                CONTENT_TYPE("content-type"), //
                                                REFERER("referer"), //
-                                               X_FORWARDED_FOR("x-forwarded-for"), //
+                                               X_CUSTOM_HOST("x-custom-host", Fields.X_CUSTOM_HOST, false), //
+                                               X_FORWARDED_FOR("x-forwarded-for", Fields.X_FORWARDED_FOR, false), //
+                                               X_FORWARDED_HOST("x-forwarded-host", Fields.X_FORWARDED_HOST, false), //
+                                               X_FORWARDED_PROTO("x-forwarded-proto", Fields.X_FORWARDED_PROTO, false), //
                                                X_VCAP_REQUEST_ID("x-vcap-request-id", Fields.REQUEST_ID, true), //
                                                CORRELATION_ID("X-CorrelationID", Fields.CORRELATION_ID, true,
                                                               X_VCAP_REQUEST_ID), //

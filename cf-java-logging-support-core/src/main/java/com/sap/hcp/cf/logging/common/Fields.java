@@ -65,4 +65,7 @@ public interface Fields {
   public String RESPONSE_CONTENT_TYPE = "response_content_type";
   public String REFERER = "referer";
   public String X_FORWARDED_FOR = "x_forwarded_for";
+  public String X_FORWARDED_HOST = "x_forwarded_host";
+  public String X_FORWARDED_PROTO = "x_forwarded_proto";
+  public String X_CUSTOM_HOST = "x_custom_host";
 }

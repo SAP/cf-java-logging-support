@@ -501,3 +501,26 @@ request-metrics:
         Comma-separated list of IP addresses, the left-most being the original
         client, followed by proxy server addresses that forwarded the client
         request.
+
+    - name: "x_forwarded_host"
+      type: string
+      required: false
+      example: "requested-host.example.com"
+      description: |
+        The originally reqeusted host by the client in the host HTTP request header.
+        A proxy may forward the host header using the x-forwarded-host header.
+
+    - name: "x_forwarded_proto"
+      type: string
+      required: false
+      example: "https"
+      description: |
+        The original protocol used by the client to connect to the proxy or load balancer
+        before the application.
+
+    - name: "x_custom_host"
+      type: string
+      required: false
+      example: "central-host.example.com"
+      description: |
+        An header set by a proxy or load balancer for special use-cases.

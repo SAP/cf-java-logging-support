@@ -273,7 +273,22 @@
           "ignore_malformed": true,
           "type": "long"
         },
+        "x_custom_host": {
+          "doc_values": true,
+          "index": "not_analyzed",
+          "type": "string"
+        },
         "x_forwarded_for": {
+          "doc_values": true,
+          "index": "not_analyzed",
+          "type": "string"
+        },
+        "x_forwarded_host": {
+          "doc_values": true,
+          "index": "not_analyzed",
+          "type": "string"
+        },
+        "x_forwarded_proto": {
           "doc_values": true,
           "index": "not_analyzed",
           "type": "string"

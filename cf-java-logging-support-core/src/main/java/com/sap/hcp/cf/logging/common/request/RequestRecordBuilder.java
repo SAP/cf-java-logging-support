@@ -39,7 +39,7 @@ public class RequestRecordBuilder {
 			requestRecord.addTag(fieldKey, Defaults.REDACTED);
 		}
 
-		if (!optionalFieldCanBeLogged && tag.equals(Defaults.UNKNOWN)) {
+        if (!optionalFieldCanBeLogged && Defaults.UNKNOWN.equals(tag)) {
 			requestRecord.addTag(fieldKey, tag);
 		}
 
