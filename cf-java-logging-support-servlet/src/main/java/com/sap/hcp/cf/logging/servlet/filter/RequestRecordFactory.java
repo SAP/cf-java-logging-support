@@ -25,23 +25,35 @@ public class RequestRecordFactory {
         boolean isSensitiveConnectionData = logOptionalFieldsSettings.isLogSensitiveConnectionData();
         boolean isLogRemoteUserField = logOptionalFieldsSettings.isLogRemoteUserField();
         boolean isLogRefererField = logOptionalFieldsSettings.isLogRefererField();
+        boolean isLogSslHeaders = logOptionalFieldsSettings.isLogSslHeaders();
         RequestRecordBuilder rrb = requestRecord("[SERVLET]");
         rrb.addTag(Fields.REQUEST, getFullRequestUri(request)).addTag(Fields.METHOD, request.getMethod()) //
            .addTag(Fields.PROTOCOL, getValue(request.getProtocol())) //
            .addOptionalTag(isSensitiveConnectionData, Fields.REMOTE_IP, getValue(request.getRemoteAddr())) //
            .addOptionalTag(isSensitiveConnectionData, Fields.REMOTE_HOST, getValue(request.getRemoteHost())) //
            .addOptionalTag(isSensitiveConnectionData, Fields.REMOTE_PORT, Integer.toString(request.getRemotePort())) //
-           .addOptionalTag(isSensitiveConnectionData, HttpHeaders.X_CUSTOM_HOST.getField(), getHeaderValue(request,
-                                                                                                           HttpHeaders.X_CUSTOM_HOST)) //
-           .addOptionalTag(isSensitiveConnectionData, HttpHeaders.X_FORWARDED_FOR.getField(), getHeaderValue(request,
-                                                                                                             HttpHeaders.X_FORWARDED_FOR)) //
-           .addOptionalTag(isSensitiveConnectionData, HttpHeaders.X_FORWARDED_HOST.getField(), getHeaderValue(request,
-                                                                                                              HttpHeaders.X_FORWARDED_HOST)) //
-           .addOptionalTag(isSensitiveConnectionData, HttpHeaders.X_FORWARDED_PROTO.getField(), getHeaderValue(request,
-                                                                                                               HttpHeaders.X_FORWARDED_PROTO)) //
            .addOptionalTag(isLogRemoteUserField, Fields.REMOTE_USER, getValue(request.getRemoteUser())) //
-           .addOptionalTag(isLogRefererField, Fields.REFERER, getHeader(request, HttpHeaders.REFERER));
+           .addOptionalTag(isLogRefererField, Fields.REFERER, getHeader(request, HttpHeaders.REFERER)); //
+        addOptionalHeader(rrb, isSensitiveConnectionData, HttpHeaders.X_CUSTOM_HOST, request);
+        addOptionalHeader(rrb, isSensitiveConnectionData, HttpHeaders.X_FORWARDED_FOR, request);
+        addOptionalHeader(rrb, isSensitiveConnectionData, HttpHeaders.X_FORWARDED_HOST, request);
+        addOptionalHeader(rrb, isSensitiveConnectionData, HttpHeaders.X_FORWARDED_PROTO, request);
+        if (isLogSslHeaders) {
+            addOptionalHeader(rrb, isLogSslHeaders, HttpHeaders.X_SSL_CLIENT, request);
+            addOptionalHeader(rrb, isLogSslHeaders, HttpHeaders.X_SSL_CLIENT_VERIFY, request);
+            addOptionalHeader(rrb, isLogSslHeaders, HttpHeaders.X_SSL_CLIENT_SUBJECT_DN, request);
+            addOptionalHeader(rrb, isLogSslHeaders, HttpHeaders.X_SSL_CLIENT_SUBJECT_CN, request);
+            addOptionalHeader(rrb, isLogSslHeaders, HttpHeaders.X_SSL_CLIENT_ISSUER_DN, request);
+            addOptionalHeader(rrb, isLogSslHeaders, HttpHeaders.X_SSL_CLIENT_NOTBEFORE, request);
+            addOptionalHeader(rrb, isLogSslHeaders, HttpHeaders.X_SSL_CLIENT_NOTAFTER, request);
+            addOptionalHeader(rrb, isLogSslHeaders, HttpHeaders.X_SSL_CLIENT_SESSION_ID, request);
+        }
         return rrb.build();
+    }
+
+    private RequestRecordBuilder addOptionalHeader(RequestRecordBuilder rrb, boolean canBeLogged, HttpHeaders header,
+                                                   HttpServletRequest request) {
+        return rrb.addOptionalTag(canBeLogged, header.getField(), getHeaderValue(request, header));
     }
 
     private String getFullRequestUri(HttpServletRequest request) {

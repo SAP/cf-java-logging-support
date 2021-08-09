@@ -292,6 +292,46 @@
           "doc_values": true,
           "index": "not_analyzed",
           "type": "string"
+        },
+        "x_ssl_client": {
+          "doc_values": true,
+          "index": "not_analyzed",
+          "type": "string"
+        },
+        "x_ssl_client_issuer_dn": {
+          "doc_values": true,
+          "index": "not_analyzed",
+          "type": "string"
+        },
+        "x_ssl_client_notafter": {
+          "doc_values": true,
+          "index": "not_analyzed",
+          "type": "string"
+        },
+        "x_ssl_client_notbefore": {
+          "doc_values": true,
+          "index": "not_analyzed",
+          "type": "string"
+        },
+        "x_ssl_client_session_id": {
+          "doc_values": true,
+          "index": "not_analyzed",
+          "type": "string"
+        },
+        "x_ssl_client_subject_cn": {
+          "doc_values": true,
+          "index": "not_analyzed",
+          "type": "string"
+        },
+        "x_ssl_client_subject_dn": {
+          "doc_values": true,
+          "index": "not_analyzed",
+          "type": "string"
+        },
+        "x_ssl_client_verify": {
+          "doc_values": true,
+          "index": "not_analyzed",
+          "type": "string"
         }
       }
     }

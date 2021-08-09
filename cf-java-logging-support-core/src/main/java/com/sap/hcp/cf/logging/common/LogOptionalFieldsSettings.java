@@ -12,6 +12,7 @@ public class LogOptionalFieldsSettings {
     private final boolean logSensitiveConnectionData;
     private final boolean logRemoteUserField;
     private final boolean logRefererField;
+    private final boolean logSslHeaders;
 
     public LogOptionalFieldsSettings(String invokingClass) {
         this(new Environment(), invokingClass);
@@ -22,6 +23,7 @@ public class LogOptionalFieldsSettings {
                                                              invokingClass);
         logRemoteUserField = readEnvironmentVariable(Environment.LOG_REMOTE_USER, environment, invokingClass);
         logRefererField = readEnvironmentVariable(Environment.LOG_REFERER, environment, invokingClass);
+        logSslHeaders = readEnvironmentVariable(Environment.LOG_SSL_HEADERS, environment, invokingClass);
     }
 
     private static boolean readEnvironmentVariable(String environmentVariableKey, Environment environment,
@@ -62,5 +64,9 @@ public class LogOptionalFieldsSettings {
 
     public boolean isLogRefererField() {
         return logRefererField;
+    }
+
+    public boolean isLogSslHeaders() {
+        return logSslHeaders;
     }
 }

@@ -523,4 +523,66 @@ request-metrics:
       required: false
       example: "central-host.example.com"
       description: |
-        An header set by a proxy or load balancer for special use-cases.
+        A header set by a proxy or load balancer for special use-cases.
+
+    - name: "x_ssl_client"
+      type: string
+      required: false
+      example: "0"
+      description: |
+        A header set by HA-Proxy to indicate usage of a secured connection by the 
+        client (1) or not (0).
+
+    - name: "x_ssl_client_verify"
+      type: string
+      required: false
+      example: "0"
+      description: |
+        A header set by HA-Proxy to indicate the status code of the TLS/SSL connection.
+
+    - name: "x_ssl_client_subject_dn"
+      type: string
+      required: false
+      example: "/C=FR/ST=Ile de France/L=Jouy en Josas/O=haproxy.com/CN=client1/emailAddress=ba@haproxy.com"
+      description: |
+        A header set by HA-Proxy to provide the full distinguished name of the
+        client certificate.
+
+    - name: "x_ssl_client_subject_cn"
+      type: string
+      required: false
+      example: "client1"
+      description: |
+        A header set by HA-Proxy to provide the full common name of the
+        client certificate.
+
+    - name: "x_ssl_client_issuer_dn"
+      type: string
+      required: false
+      example: "/C=FR/ST=Ile de France/L=Jouy en Josas/O=haproxy.com/CN=haproxy.com/emailAddress=ba@haproxy.com"
+      description: |
+        A header set by HA-Proxy to provide the full distinguished name of the
+        issuer of the client certificate.
+
+    - name: "x_ssl_client_notbefore"
+      type: string
+      required: false
+      example: "/C=FR/ST=Ile de France/L=Jouy en Josas/O=haproxy.com/CN=haproxy.com/emailAddress=ba@haproxy.com"
+      description: |
+        A header set by HA-Proxy to provide the start date of the client
+        certificate as a formatted string YYMMDDhhmmss.
+
+    - name: "x_ssl_client_notafter"
+      type: string
+      required: false
+      example: "/C=FR/ST=Ile de France/L=Jouy en Josas/O=haproxy.com/CN=haproxy.com/emailAddress=ba@haproxy.com"
+      description: |
+        A header set by HA-Proxy to provide the end date of the client
+        certificate as a formatted string YYMMDDhhmmss.
+
+    - name: "x_ssl_client_session_id"
+      type: string
+      required: false
+      example: "session-id"
+      description: |
+        A header to indicate the SSL client session id.

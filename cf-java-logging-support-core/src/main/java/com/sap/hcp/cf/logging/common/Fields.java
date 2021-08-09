@@ -68,4 +68,12 @@ public interface Fields {
   public String X_FORWARDED_HOST = "x_forwarded_host";
   public String X_FORWARDED_PROTO = "x_forwarded_proto";
   public String X_CUSTOM_HOST = "x_custom_host";
+  public String X_SSL_CLIENT = "x_ssl_client";
+  public String X_SSL_CLIENT_VERIFY = "x_ssl_client_verify";
+  public String X_SSL_CLIENT_SUBJECT_DN = "x_ssl_client_subject_dn";
+  public String X_SSL_CLIENT_SUBJECT_CN = "x_ssl_client_subject_cn";
+  public String X_SSL_CLIENT_ISSUER_DN = "x_ssl_client_issuer_dn";
+  public String X_SSL_CLIENT_NOTBEFORE = "x_ssl_client_notbefore";
+  public String X_SSL_CLIENT_NOTAFTER = "x_ssl_client_notafter";
+  public String X_SSL_CLIENT_SESSION_ID = "x_ssl_client_session_id";
 }

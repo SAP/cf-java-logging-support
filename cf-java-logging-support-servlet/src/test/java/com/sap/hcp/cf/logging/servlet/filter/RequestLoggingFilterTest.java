@@ -252,6 +252,78 @@ public class RequestLoggingFilterTest {
         assertThat(getField(Fields.X_FORWARDED_PROTO), is("redacted"));
     }
 
+    @Test
+    public void testSslHeadersLogged() throws Exception {
+        LogOptionalFieldsSettings settings = mock(LogOptionalFieldsSettings.class);
+        when(settings.isLogSslHeaders()).thenReturn(true).getMock();
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT, "1");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_VERIFY, "2");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_SUBJECT_DN, "subject/dn");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_SUBJECT_CN, "subject/cn");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_ISSUER_DN, "issuer/dn");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_NOTBEFORE, "start");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_NOTAFTER, "end");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_SESSION_ID, "session-id");
+        FilterChain mockFilterChain = mock(FilterChain.class);
+        RequestLoggingFilter filter = new RequestLoggingFilter(new RequestRecordFactory(settings));
+        filter.doFilter(mockReq, mockResp, mockFilterChain);
+        assertThat(getField(Fields.X_SSL_CLIENT), is("1"));
+        assertThat(getField(Fields.X_SSL_CLIENT_VERIFY), is("2"));
+        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_DN), is("subject/dn"));
+        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_CN), is("subject/cn"));
+        assertThat(getField(Fields.X_SSL_CLIENT_ISSUER_DN), is("issuer/dn"));
+        assertThat(getField(Fields.X_SSL_CLIENT_NOTBEFORE), is("start"));
+        assertThat(getField(Fields.X_SSL_CLIENT_NOTAFTER), is("end"));
+        assertThat(getField(Fields.X_SSL_CLIENT_SESSION_ID), is("session-id"));
+    }
+
+    @Test
+    public void testSslHeadersNotLoggedByDefault() throws Exception {
+        LogOptionalFieldsSettings settings = mock(LogOptionalFieldsSettings.class);
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT, "1");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_VERIFY, "2");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_SUBJECT_DN, "subject/dn");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_SUBJECT_CN, "subject/cn");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_ISSUER_DN, "issuer/dn");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_NOTBEFORE, "start");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_NOTAFTER, "end");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_SESSION_ID, "session-id");
+        FilterChain mockFilterChain = mock(FilterChain.class);
+        RequestLoggingFilter filter = new RequestLoggingFilter(new RequestRecordFactory(settings));
+        filter.doFilter(mockReq, mockResp, mockFilterChain);
+        assertThat(getField(Fields.X_SSL_CLIENT), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_VERIFY), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_DN), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_CN), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_ISSUER_DN), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_NOTBEFORE), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_NOTAFTER), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_SESSION_ID), is(nullValue()));
+    }
+
+    @Test
+    public void testSslHeadersAbsentOrUnknownValues() throws Exception {
+        LogOptionalFieldsSettings settings = mock(LogOptionalFieldsSettings.class);
+        when(settings.isLogSslHeaders()).thenReturn(true).getMock();
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT, "0");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_VERIFY, "0");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_SUBJECT_DN, "-");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_SUBJECT_CN, "-");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_ISSUER_DN, "");
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_NOTBEFORE, null);
+        mockGetHeader(HttpHeaders.X_SSL_CLIENT_NOTAFTER, null);
+        FilterChain mockFilterChain = mock(FilterChain.class);
+        RequestLoggingFilter filter = new RequestLoggingFilter(new RequestRecordFactory(settings));
+        filter.doFilter(mockReq, mockResp, mockFilterChain);
+        assertThat(getField(Fields.X_SSL_CLIENT), is("0"));
+        assertThat(getField(Fields.X_SSL_CLIENT_VERIFY), is("0"));
+        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_DN), is("-"));
+        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_CN), is("-"));
+        assertThat(getField(Fields.X_SSL_CLIENT_ISSUER_DN), is(""));
+        assertThat(getField(Fields.X_SSL_CLIENT_NOTBEFORE), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_NOTAFTER), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_SESSION_ID), is(nullValue()));
+    }
 
     protected String getField(String fieldName) throws JSONObjectException, IOException {
         Object fieldValue = JSON.std.mapFrom(getLastLine()).get(fieldName);
