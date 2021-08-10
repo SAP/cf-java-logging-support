@@ -703,7 +703,7 @@ example: requested-host.example.com
 
 required: False
 
-The originally reqeusted host by the client in the host HTTP request header.
+The originally requested host by the client in the host HTTP request header.
 A proxy may forward the host header using the x-forwarded-host header.
 
 
@@ -793,7 +793,7 @@ issuer of the client certificate.
 
 type: string
 
-example: /C=FR/ST=Ile de France/L=Jouy en Josas/O=haproxy.com/CN=haproxy.com/emailAddress=ba@haproxy.com
+example: 130613144555Z
 
 required: False
 
@@ -805,7 +805,7 @@ certificate as a formatted string YYMMDDhhmmss.
 
 type: string
 
-example: /C=FR/ST=Ile de France/L=Jouy en Josas/O=haproxy.com/CN=haproxy.com/emailAddress=ba@haproxy.com
+example: 140613144555Z
 
 required: False
 
