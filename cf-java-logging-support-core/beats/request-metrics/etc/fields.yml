@@ -507,7 +507,7 @@ request-metrics:
       required: false
       example: "requested-host.example.com"
       description: |
-        The originally reqeusted host by the client in the host HTTP request header.
+        The originally requested host by the client in the host HTTP request header.
         A proxy may forward the host header using the x-forwarded-host header.
 
     - name: "x_forwarded_proto"
