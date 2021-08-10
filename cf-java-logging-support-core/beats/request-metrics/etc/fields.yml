@@ -567,7 +567,7 @@ request-metrics:
     - name: "x_ssl_client_notbefore"
       type: string
       required: false
-      example: "/C=FR/ST=Ile de France/L=Jouy en Josas/O=haproxy.com/CN=haproxy.com/emailAddress=ba@haproxy.com"
+      example: "130613144555Z"
       description: |
         A header set by HA-Proxy to provide the start date of the client
         certificate as a formatted string YYMMDDhhmmss.
@@ -575,7 +575,7 @@ request-metrics:
     - name: "x_ssl_client_notafter"
       type: string
       required: false
-      example: "/C=FR/ST=Ile de France/L=Jouy en Josas/O=haproxy.com/CN=haproxy.com/emailAddress=ba@haproxy.com"
+      example: "140613144555Z"
       description: |
         A header set by HA-Proxy to provide the end date of the client
         certificate as a formatted string YYMMDDhhmmss.
