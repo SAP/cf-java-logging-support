@@ -1,11 +1,11 @@
 package com.sap.hcp.cf.logging.jersey.filter;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -70,7 +70,7 @@ public class RequestMetricsClientFilterTest extends AbstractFilterTest {
             correlationIds.add(id);
         }
         assertThat(correlationIds.size(), is(1));
-        assertThat(getField(Fields.TENANT_ID), is(Defaults.UNKNOWN));
+		assertThat(getField(Fields.TENANT_ID), is(nullValue()));
     }
 
     @Test
@@ -79,7 +79,7 @@ public class RequestMetricsClientFilterTest extends AbstractFilterTest {
         final Response response = getClient().target(getBaseUri() + "testresource").request().header(
                                                                                                      HttpHeaders.CORRELATION_ID.getName(),
                                                                                                      "1").get();
-        assertThat(getField(Fields.COMPONENT_ID), is(Defaults.UNKNOWN));
+		assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
         assertThat(getField(Fields.RESPONSE_SIZE_B), is("4"));
         assertThat(getField(Fields.RESPONSE_TIME_MS), not(nullValue()));
         assertThat(getField(Fields.RESPONSE_STATUS), is(Integer.toString(TestResource.EXPECTED_STATUS_CODE)));
@@ -87,7 +87,7 @@ public class RequestMetricsClientFilterTest extends AbstractFilterTest {
         assertThat(getField(Fields.DIRECTION), is(Direction.OUT.toString()));
         assertThat(getField(Fields.METHOD), is(TestResource.EXPECTED_REQUEST_METHOD));
         assertThat(getField(Fields.LAYER), is(ClientRequestContextAdapter.LAYER_NAME));
-        assertThat(getField(Fields.TENANT_ID), is(Defaults.UNKNOWN));
+		assertThat(getField(Fields.TENANT_ID), is(nullValue()));
     }
 
     @Test
@@ -96,7 +96,7 @@ public class RequestMetricsClientFilterTest extends AbstractFilterTest {
         final Response response = target("testresource").request().delete();
 
         assertThat(new Double(getField(Fields.RESPONSE_TIME_MS)), greaterThan(TestResource.EXPECTED_REQUEST_TIME));
-        assertThat(getField(Fields.TENANT_ID), is(Defaults.UNKNOWN));
+		assertThat(getField(Fields.TENANT_ID), is(nullValue()));
 
     }
     @Test

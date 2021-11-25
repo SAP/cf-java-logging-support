@@ -3,6 +3,7 @@
 <configuration debug="false" scan="false">
     <appender name="STDOUT-JSON" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="com.sap.hcp.cf.logback.encoder.JsonEncoder">
+        	<sendDefaultValues>true</sendDefaultValues>
         	<customFieldMdcKeyName>custom-field</customFieldMdcKeyName>
         	<customFieldMdcKeyName>test-field</customFieldMdcKeyName>
         	<customFieldMdcKeyName>retained-field</customFieldMdcKeyName>

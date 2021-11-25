@@ -43,6 +43,7 @@ import ch.qos.logback.core.pattern.PostCompileProcessor;
  */
 public class JsonEncoder extends LayoutWrappingEncoder<ILoggingEvent> {
 
+
 	public static class JsonLayout extends LayoutBase<ILoggingEvent> {
 
 		private final Map<Marker, PatternLayout> layouts = new HashMap<Marker, PatternLayout>();
@@ -121,19 +122,25 @@ public class JsonEncoder extends LayoutWrappingEncoder<ILoggingEvent> {
 
 	private List<String> customFieldMdcKeyNames = new ArrayList<>();
 	private List<String> retainFieldMdcKeyNames = new ArrayList<>();
+    private boolean sendDefaultValues = false;
 
 	public void addCustomFieldMdcKeyName(String name) {
-		customFieldMdcKeyNames.add(name);
+        customFieldMdcKeyNames.add(name);
 	}
 
 	public void addRetainFieldMdcKeyName(String name) {
 		retainFieldMdcKeyNames.add(name);
 	}
 
+    public void setSendDefaultValues(boolean sendDefaultValues) {
+        this.sendDefaultValues = sendDefaultValues;
+    }
+
 	@Override
 	public void start() {
 		context.putObject(CustomFieldsAdapter.OPTION_MDC_CUSTOM_FIELDS, customFieldMdcKeyNames);
 		context.putObject(CustomFieldsAdapter.OPTION_MDC_RETAINED_FIELDS, retainFieldMdcKeyNames);
+        context.putObject(CustomFieldsAdapter.OPTION_SEND_DEFAULT_VALUES, sendDefaultValues);
 
 		JsonLayout jsonLayout = new JsonLayout();
 		jsonLayout.setContext(context);

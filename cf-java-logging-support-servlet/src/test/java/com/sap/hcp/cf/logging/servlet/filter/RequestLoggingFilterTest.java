@@ -92,8 +92,8 @@ public class RequestLoggingFilterTest {
         assertThat(getField(Fields.CORRELATION_ID), not(isEmptyOrNullString()));
         assertThat(getField(Fields.REQUEST_ID), is(nullValue()));
         assertThat(getField(Fields.REMOTE_HOST), is(Defaults.UNKNOWN));
-        assertThat(getField(Fields.COMPONENT_ID), is(Defaults.UNKNOWN));
-        assertThat(getField(Fields.CONTAINER_ID), is(Defaults.UNKNOWN));
+        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
+        assertThat(getField(Fields.CONTAINER_ID), is(nullValue()));
         assertThat(getField(Fields.REQUEST_SIZE_B), is("-1"));
     }
 
@@ -115,8 +115,8 @@ public class RequestLoggingFilterTest {
         assertThat(getField(Fields.CORRELATION_ID), not(isEmptyOrNullString()));
         assertThat(getField(Fields.REQUEST_ID), is(nullValue()));
         assertThat(getField(Fields.REMOTE_HOST), is(Defaults.UNKNOWN));
-        assertThat(getField(Fields.COMPONENT_ID), is(Defaults.UNKNOWN));
-        assertThat(getField(Fields.CONTAINER_ID), is(Defaults.UNKNOWN));
+        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
+        assertThat(getField(Fields.CONTAINER_ID), is(nullValue()));
         assertThat(getField(Fields.REQUEST_SIZE_B), is("1"));
     }
 
@@ -137,10 +137,10 @@ public class RequestLoggingFilterTest {
         assertThat(getField(Fields.CORRELATION_ID), not(isEmptyOrNullString()));
         assertThat(getField(Fields.REQUEST_ID), is(nullValue()));
         assertThat(getField(Fields.REMOTE_HOST), is(Defaults.UNKNOWN));
-        assertThat(getField(Fields.COMPONENT_ID), is(Defaults.UNKNOWN));
-        assertThat(getField(Fields.CONTAINER_ID), is(Defaults.UNKNOWN));
+        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
+        assertThat(getField(Fields.CONTAINER_ID), is(nullValue()));
         assertThat(getField(Fields.REQUEST_SIZE_B), is("4"));
-        assertThat(getField(Fields.TENANT_ID), is(Defaults.UNKNOWN));
+        assertThat(getField(Fields.TENANT_ID), is(nullValue()));
     }
 
     @Test
@@ -163,10 +163,10 @@ public class RequestLoggingFilterTest {
         assertThat(getField(Fields.CORRELATION_ID), is(REQUEST_ID));
         assertThat(getField(Fields.REQUEST_ID), is(REQUEST_ID));
         assertThat(getField(Fields.REMOTE_HOST), is(REMOTE_HOST));
-        assertThat(getField(Fields.COMPONENT_ID), is(Defaults.UNKNOWN));
-        assertThat(getField(Fields.CONTAINER_ID), is(Defaults.UNKNOWN));
+        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
+        assertThat(getField(Fields.CONTAINER_ID), is(nullValue()));
         assertThat(getField(Fields.REFERER), is(REFERER));
-        assertThat(getField(Fields.TENANT_ID), is(Defaults.UNKNOWN));
+        assertThat(getField(Fields.TENANT_ID), is(nullValue()));
     }
 
     private void mockGetHeader(HttpHeader header, String value) {
@@ -194,9 +194,9 @@ public class RequestLoggingFilterTest {
         assertThat(getField(Fields.REQUEST_ID), is(REQUEST_ID));
         assertThat(getField(Fields.REMOTE_IP), is(Defaults.UNKNOWN));
         assertThat(getField(Fields.REMOTE_HOST), is(Defaults.REDACTED));
-        assertThat(getField(Fields.COMPONENT_ID), is(Defaults.UNKNOWN));
-        assertThat(getField(Fields.CONTAINER_ID), is(Defaults.UNKNOWN));
-        assertThat(getField(Fields.TENANT_ID), is(Defaults.UNKNOWN));
+        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
+        assertThat(getField(Fields.CONTAINER_ID), is(nullValue()));
+        assertThat(getField(Fields.TENANT_ID), is(nullValue()));
     }
 
     @Test
@@ -208,7 +208,7 @@ public class RequestLoggingFilterTest {
         assertThat(getField(Fields.CORRELATION_ID), is(CORRELATION_ID));
         assertThat(getField(Fields.CORRELATION_ID), not(REQUEST_ID));
         assertThat(getField(Fields.REQUEST_ID), is(REQUEST_ID));
-        assertThat(getField(Fields.TENANT_ID), is(Defaults.UNKNOWN));
+        assertThat(getField(Fields.TENANT_ID), is(nullValue()));
     }
 
     @Test

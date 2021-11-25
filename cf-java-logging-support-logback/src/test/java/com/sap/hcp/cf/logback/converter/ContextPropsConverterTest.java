@@ -1,9 +1,9 @@
 package com.sap.hcp.cf.logback.converter;
 
 import static java.util.Arrays.asList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasItems;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -122,7 +122,14 @@ public class ContextPropsConverterTest {
 		
 		verify(defaultConverter).convert(any(StringBuilder.class), eventProperties.capture());
 		assertThat(eventProperties.getValue(), hasEntry("this key", "this value"));
-		
 	}
 
+    @Test
+    public void setsSendDefaultValuesFromCustomFieldsAdapter() throws Exception {
+        when(customFieldsAdapter.isSendDefaultValues()).thenReturn(true);
+
+        converter.start();
+
+        verify(defaultConverter).setSendDefaultValues(true);
+    }
 }

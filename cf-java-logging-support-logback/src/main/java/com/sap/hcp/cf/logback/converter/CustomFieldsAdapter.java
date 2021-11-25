@@ -15,9 +15,11 @@ public class CustomFieldsAdapter {
 
 	public static final String OPTION_MDC_CUSTOM_FIELDS = "customFieldMdcKeyNames";
 	public static final String OPTION_MDC_RETAINED_FIELDS = "retainFieldMdcKeyNames";
+    public static final String OPTION_SEND_DEFAULT_VALUES = "sendDefaultValues";
 
 	private List<String> customFieldMdcKeyNames = emptyList();
 	private List<String> customFieldExclusions = emptyList();
+    private boolean sendDefaultValues;
 
 	public void initialize(Context context) {
 		if (context == null) {
@@ -25,6 +27,7 @@ public class CustomFieldsAdapter {
 		}
 		customFieldExclusions = calculateExclusions(context);
 		customFieldMdcKeyNames = getListItemsAsStrings(context, OPTION_MDC_CUSTOM_FIELDS);
+        sendDefaultValues = getBoolean(context, OPTION_SEND_DEFAULT_VALUES);
 	}
 
 	private List<String> calculateExclusions(Context context) {
@@ -47,6 +50,14 @@ public class CustomFieldsAdapter {
 		return emptyList();
 	}
 	
+    private boolean getBoolean(Context context, String key) {
+        Object object = context.getObject(key);
+        if (object instanceof Boolean) {
+            return ((Boolean) object).booleanValue();
+        }
+        return false;
+    }
+
 	public List<String> getCustomFieldExclusions() {
 		return customFieldExclusions;
 	}
@@ -54,5 +65,9 @@ public class CustomFieldsAdapter {
 	public List<String> getCustomFieldMdcKeyNames() {
 		return customFieldMdcKeyNames;
 	}
+
+    public boolean isSendDefaultValues() {
+        return sendDefaultValues;
+    }
 
 }

@@ -36,7 +36,8 @@ public class ContextPropsConverter extends LogEventPatternConverter {
     public ContextPropsConverter(String[] options) {
         super(WORD, WORD);
         if (options != null) {
-            converter.setExclusions(Arrays.asList(options));
+            converter.setSendDefaultValues(Boolean.parseBoolean(options[0]));
+            converter.setExclusions(Arrays.asList(Arrays.copyOfRange(options, 1, options.length)));
         }
     }
 
@@ -48,7 +49,13 @@ public class ContextPropsConverter extends LogEventPatternConverter {
     public void format(LogEvent event, StringBuilder toAppendTo) {
 		Map<String, String> contextData = event.getContextData().toMap();
 		addCustomFieldsFromArguments(contextData, event);
+        int lengthBefore = toAppendTo.length();
 		converter.convert(toAppendTo, contextData);
+        // append comma only, if at least one field was added
+        // otherwise, there will be to commas ",," rendering the JSON invalid
+        if (toAppendTo.length() > lengthBefore) {
+            toAppendTo.append(",");
+        }
 	}
 
 	private void addCustomFieldsFromArguments(Map<String, String> contextData, LogEvent event) {

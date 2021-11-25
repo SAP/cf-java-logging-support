@@ -1,5 +1,7 @@
 package com.sap.hcp.cf.log4j2.layout;
 
+import static java.util.Arrays.asList;
+
 import java.util.List;
 
 import com.sap.hcp.cf.log4j2.converter.ContextPropsConverter;
@@ -20,14 +22,16 @@ public final class LayoutPatternBuilder {
 	private static final String COMMON_POSTFIX_PATTERN = "}%n";
 
 	private final StringBuilder sb;
+    private final boolean sendDefaultValues;
 
 	/*
 	 * -- this defines the common prefix to all variants. -- the final line will
 	 * add non-predefined context parameters from the MDC -- as this list may be
 	 * empty, we use "replace" to at a colon if it's not
 	 */
-	public LayoutPatternBuilder() {
-		this.sb = new StringBuilder("{ ");
+    public LayoutPatternBuilder(boolean sendDefaultValues) {
+        this.sendDefaultValues = sendDefaultValues;
+        this.sb = new StringBuilder("{ ");
 		appendQuoted(Fields.WRITTEN_AT, "%d{yyyy-MM-dd'T'HH:mm:ss.SSSX}{UTC}").append(",");
 		appendUnquoted(Fields.WRITTEN_TS, "%tstamp").append(",");
 	}
@@ -50,8 +54,8 @@ public final class LayoutPatternBuilder {
 
 	public LayoutPatternBuilder addContextProperties(List<String> exclusions) {
 		sb.append("%").append(ContextPropsConverter.WORD);
+        appendParameters(asList(Boolean.toString(sendDefaultValues)));
 		appendParameters(exclusions);
-		sb.append(",");
 		return this;
 	}
 

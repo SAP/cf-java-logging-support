@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 
@@ -29,9 +30,9 @@ public class TestAppLog extends AbstractTest {
         logMsg = "Running test()";
         LOGGER.info(logMsg);
         assertThat(getMessage(), is(logMsg));
-        assertThat(getField(Fields.COMPONENT_ID), is("-"));
-        assertThat(getField(Fields.COMPONENT_NAME), is("-"));
-        assertThat(getField(Fields.COMPONENT_INSTANCE), is("0"));
+        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
+        assertThat(getField(Fields.COMPONENT_NAME), is(nullValue()));
+        assertThat(getField(Fields.COMPONENT_INSTANCE), is(nullValue()));
         assertThat(getField(Fields.WRITTEN_TS), is(notNullValue()));
     }
 
@@ -42,9 +43,9 @@ public class TestAppLog extends AbstractTest {
 
         LOGGER.info(cat0, logMsg);
         assertThat(getMessage(), is(logMsg));
-        assertThat(getField(Fields.COMPONENT_ID), is("-"));
-        assertThat(getField(Fields.COMPONENT_NAME), is("-"));
-        assertThat(getField(Fields.COMPONENT_INSTANCE), is("0"));
+        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
+        assertThat(getField(Fields.COMPONENT_NAME), is(nullValue()));
+        assertThat(getField(Fields.COMPONENT_INSTANCE), is(nullValue()));
         assertThat(getField(Fields.WRITTEN_TS), is(notNullValue()));
         assertThat(getList(Fields.CATEGORIES), contains(cat0.getName()));
 
@@ -53,9 +54,9 @@ public class TestAppLog extends AbstractTest {
 
         LOGGER.info(cat1, logMsg);
         assertThat(getMessage(), is(logMsg));
-        assertThat(getField(Fields.COMPONENT_ID), is("-"));
-        assertThat(getField(Fields.COMPONENT_NAME), is("-"));
-        assertThat(getField(Fields.COMPONENT_INSTANCE), is("0"));
+        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
+        assertThat(getField(Fields.COMPONENT_NAME), is(nullValue()));
+        assertThat(getField(Fields.COMPONENT_INSTANCE), is(nullValue()));
         assertThat(getField(Fields.WRITTEN_TS), is(notNullValue()));
         assertThat(getList(Fields.CATEGORIES), contains(cat1.getName(), cat0.getName()));
     }
@@ -69,9 +70,9 @@ public class TestAppLog extends AbstractTest {
         LOGGER.info(logMsg);
 		long afterTS = now();
         assertThat(getMessage(), is(logMsg));
-        assertThat(getField(Fields.COMPONENT_ID), is("-"));
-        assertThat(getField(Fields.COMPONENT_NAME), is("-"));
-        assertThat(getField(Fields.COMPONENT_INSTANCE), is("0"));
+        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
+        assertThat(getField(Fields.COMPONENT_NAME), is(nullValue()));
+        assertThat(getField(Fields.COMPONENT_INSTANCE), is(nullValue()));
         assertThat(getField(Fields.WRITTEN_TS), is(notNullValue()));
         assertThat(getField(Fields.WRITTEN_TS), greaterThanOrEqualTo(Long.toString(beforeTS)));
         assertThat(Long.toString(afterTS), greaterThanOrEqualTo(getField(Fields.WRITTEN_TS)));
@@ -84,9 +85,9 @@ public class TestAppLog extends AbstractTest {
 		LOGGER.info(logMsg, CustomField.customField(SOME_KEY, SOME_VALUE));
 		assertThat(getMessage(), is(logMsg));
 		assertThat(getField(SOME_KEY), is(SOME_VALUE));
-		assertThat(getField(Fields.COMPONENT_ID), is("-"));
-		assertThat(getField(Fields.COMPONENT_NAME), is("-"));
-		assertThat(getField(Fields.COMPONENT_INSTANCE), is("0"));
+        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
+        assertThat(getField(Fields.COMPONENT_NAME), is(nullValue()));
+        assertThat(getField(Fields.COMPONENT_INSTANCE), is(nullValue()));
 		assertThat(getField(Fields.WRITTEN_TS), is(notNullValue()));
 		assertThat(getField(Fields.WRITTEN_TS), greaterThanOrEqualTo(Long.toString(beforeTS)));
 		assertThat(Long.toString(beforeTS), lessThanOrEqualTo(getField(Fields.WRITTEN_TS)));
@@ -103,9 +104,9 @@ public class TestAppLog extends AbstractTest {
 				CustomField.customField(RETAINED_FIELD_KEY, SOME_OTHER_VALUE),
 				CustomField.customField(SOME_KEY, SOME_OTHER_VALUE));
 		assertThat(getMessage(), is(logMsg));
-		assertThat(getField(Fields.COMPONENT_ID), is("-"));
-		assertThat(getField(Fields.COMPONENT_NAME), is("-"));
-		assertThat(getField(Fields.COMPONENT_INSTANCE), is("0"));
+        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
+        assertThat(getField(Fields.COMPONENT_NAME), is(nullValue()));
+        assertThat(getField(Fields.COMPONENT_INSTANCE), is(nullValue()));
 		assertThat(getField(Fields.WRITTEN_TS), is(notNullValue()));
 		assertThat(getField(Fields.WRITTEN_TS), greaterThanOrEqualTo(Long.toString(beforeTS)));
 		assertThat(Long.toString(beforeTS), lessThanOrEqualTo(getField(Fields.WRITTEN_TS)));
@@ -125,9 +126,9 @@ public class TestAppLog extends AbstractTest {
             logMsg = "Running testStacktrace()";
             LOGGER.error(logMsg, ex);
             assertThat(getMessage(), is(logMsg));
-            assertThat(getField(Fields.COMPONENT_ID), is("-"));
-            assertThat(getField(Fields.COMPONENT_NAME), is("-"));
-            assertThat(getField(Fields.COMPONENT_INSTANCE), is("0"));
+            assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
+            assertThat(getField(Fields.COMPONENT_NAME), is(nullValue()));
+            assertThat(getField(Fields.COMPONENT_INSTANCE), is(nullValue()));
             assertThat(getField(Fields.STACKTRACE), is(notNullValue()));
             assertThat(getField(Fields.WRITTEN_TS), is(notNullValue()));
         }

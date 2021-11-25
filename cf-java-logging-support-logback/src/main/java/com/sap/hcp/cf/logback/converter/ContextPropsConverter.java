@@ -67,6 +67,7 @@ public class ContextPropsConverter extends ClassicConverter {
 	public void start() {
 		customFieldsAdapter.initialize(getContext());
 		converter.setExclusions(calculateExclusions());
+        converter.setSendDefaultValues(customFieldsAdapter.isSendDefaultValues());
 		super.start();
 	}
 

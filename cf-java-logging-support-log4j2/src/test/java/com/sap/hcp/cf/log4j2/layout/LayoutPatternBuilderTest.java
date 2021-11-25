@@ -20,7 +20,7 @@ public class LayoutPatternBuilderTest {
 
 	@Test
 	public void minimalPattern() throws Exception {
-		String pattern = new LayoutPatternBuilder().build();
+        String pattern = new LayoutPatternBuilder(false).build();
 
 		assertThat(pattern, is(COMMON_PREFIX + COMMON_SUFFIX));
 		assertThat(pattern, specificPart(is(isEmptyString())));
@@ -28,87 +28,96 @@ public class LayoutPatternBuilderTest {
 
 	@Test
 	public void requestPattern() throws Exception {
-		String pattern = new LayoutPatternBuilder().addRequestMetrics().build();
+        String pattern = new LayoutPatternBuilder(false).addRequestMetrics().build();
 
 		assertThat(pattern, specificPart(is(",\"type\":\"request\",%jsonmsg{flatten}")));
 	}
 
 	@Test
 	public void basicApplicationLogs() throws Exception {
-		String pattern = new LayoutPatternBuilder().addBasicApplicationLogs().build();
+        String pattern = new LayoutPatternBuilder(false).addBasicApplicationLogs().build();
 
 		assertThat(pattern, specificPart(is(
 				",\"type\":\"log\",\"logger\":\"%replace{%logger}{\"}{\\\\\"}\",\"thread\":\"%replace{%thread}{\"}{\\\\\"}\",\"level\":\"%p\",\"categories\":%categories,\"msg\":%jsonmsg{escape}")));
 	}
 
 	@Test
-	public void contextProperties() throws Exception {
-		String pattern = new LayoutPatternBuilder().addContextProperties(Arrays.asList("this key", "that key")).build();
+    public void contextPropertiesWithoutDefaultValues() throws Exception {
+        String pattern = new LayoutPatternBuilder(false).addContextProperties(Arrays.asList("this key", "that key"))
+                                                        .build();
 
-		assertThat(pattern, specificPart(is(",%ctxp{this key}{that key}")));
+        assertThat(pattern, specificPart(is(",%ctxp{false}{this key}{that key}")));
 	}
 
 	@Test
+    public void contextPropertiesWithDefaultValues() throws Exception {
+        String pattern = new LayoutPatternBuilder(true).addContextProperties(Arrays.asList("this key", "that key"))
+                                                       .build();
+
+        assertThat(pattern, specificPart(is(",%ctxp{true}{this key}{that key}")));
+    }
+
+    @Test
 	public void customFields() throws Exception {
-		String pattern = new LayoutPatternBuilder().addCustomFields(Arrays.asList("this key", "that key")).build();
+        String pattern = new LayoutPatternBuilder(false).addCustomFields(Arrays.asList("this key", "that key")).build();
 
 		assertThat(pattern, specificPart(is(",\"#cf\":{%cf{this key}{that key}}")));
 	}
 
 	@Test
 	public void emptyCustomFields() throws Exception {
-		String pattern = new LayoutPatternBuilder().addCustomFields(Collections.emptyList()).build();
+        String pattern = new LayoutPatternBuilder(false).addCustomFields(Collections.emptyList()).build();
 
 		assertThat(pattern, specificPart(is("")));
 	}
 
 	@Test
 	public void nullCustomFields() throws Exception {
-		String pattern = new LayoutPatternBuilder().addCustomFields(null).build();
+        String pattern = new LayoutPatternBuilder(false).addCustomFields(null).build();
 
 		assertThat(pattern, specificPart(is("")));
 	}
 
 	@Test
 	public void stacktrace() throws Exception {
-		String pattern = new LayoutPatternBuilder().addStacktraces().build();
+        String pattern = new LayoutPatternBuilder(false).addStacktraces().build();
 
 		assertThat(pattern, specificPart(is(",\"stacktrace\":%stacktrace")));
 	}
 
 	@Test
 	public void suppressExceptions() throws Exception {
-		String pattern = new LayoutPatternBuilder().suppressExceptions().build();
+        String pattern = new LayoutPatternBuilder(false).suppressExceptions().build();
 
 		assertThat(pattern, specificPart(is("%ex{0} ")));
 	}
 
 	@Test
 	public void requestMetricsScenario() throws Exception {
-		String pattern = new LayoutPatternBuilder().addRequestMetrics().addContextProperties(emptyList())
+        String pattern = new LayoutPatternBuilder(false).addRequestMetrics().addContextProperties(emptyList())
 				.suppressExceptions().build();
 
-		assertThat(pattern, specificPart(is(",\"type\":\"request\",%jsonmsg{flatten},%ctxp{}%ex{0} ")));
+        assertThat(pattern, specificPart(is(",\"type\":\"request\",%jsonmsg{flatten},%ctxp{false}{}%ex{0} ")));
 	}
 
 	@Test
 	public void applicationScenario() throws Exception {
-		String pattern = new LayoutPatternBuilder().addBasicApplicationLogs()
+        String pattern = new LayoutPatternBuilder(false).addBasicApplicationLogs()
 				.addContextProperties(asList("excluded-field")).addCustomFields(asList("custom-field"))
 				.suppressExceptions().build();
 
 		assertThat(pattern, specificPart(is(
-				",\"type\":\"log\",\"logger\":\"%replace{%logger}{\"}{\\\\\"}\",\"thread\":\"%replace{%thread}{\"}{\\\\\"}\",\"level\":\"%p\",\"categories\":%categories,\"msg\":%jsonmsg{escape},%ctxp{excluded-field},\"#cf\":{%cf{custom-field}}%ex{0} ")));
+                                            ",\"type\":\"log\",\"logger\":\"%replace{%logger}{\"}{\\\\\"}\",\"thread\":\"%replace{%thread}{\"}{\\\\\"}\",\"level\":\"%p\",\"categories\":%categories,\"msg\":%jsonmsg{escape},%ctxp{false}{excluded-field}\"#cf\":{%cf{custom-field}}%ex{0} ")));
 	}
 
 	@Test
 	public void exceptionScenario() throws Exception {
-		String pattern = new LayoutPatternBuilder().addBasicApplicationLogs()
+        String pattern = new LayoutPatternBuilder(false).addBasicApplicationLogs()
 				.addContextProperties(asList("excluded-field")).addCustomFields(asList("custom-field")).addStacktraces()
 				.build();
 
 		assertThat(pattern, specificPart(is(
-				",\"type\":\"log\",\"logger\":\"%replace{%logger}{\"}{\\\\\"}\",\"thread\":\"%replace{%thread}{\"}{\\\\\"}\",\"level\":\"%p\",\"categories\":%categories,\"msg\":%jsonmsg{escape},%ctxp{excluded-field},\"#cf\":{%cf{custom-field}},\"stacktrace\":%stacktrace")));
+                                            ",\"type\":\"log\",\"logger\":\"%replace{%logger}{\"}{\\\\\"}\",\"thread\":\"%replace{%thread}{\"}{\\\\\"}\",\"level\":\"%p\",\"categories\":%categories,\"msg\":%jsonmsg{escape},%ctxp{false}{excluded-field}\"#cf\":{%cf{custom-field}},\"stacktrace\":%stacktrace")));
 	}
 
 	private static Matcher<String> specificPart(Matcher<String> expected) {

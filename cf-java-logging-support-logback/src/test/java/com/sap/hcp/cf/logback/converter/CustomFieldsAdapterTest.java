@@ -3,16 +3,17 @@ package com.sap.hcp.cf.logback.converter;
 
 import static com.sap.hcp.cf.logback.converter.CustomFieldsAdapter.OPTION_MDC_CUSTOM_FIELDS;
 import static com.sap.hcp.cf.logback.converter.CustomFieldsAdapter.OPTION_MDC_RETAINED_FIELDS;
+import static com.sap.hcp.cf.logback.converter.CustomFieldsAdapter.OPTION_SEND_DEFAULT_VALUES;
 import static java.util.Arrays.asList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,15 +28,6 @@ import ch.qos.logback.core.Context;
 @RunWith(MockitoJUnitRunner.class)
 public class CustomFieldsAdapterTest {
 
-	@SuppressWarnings("serial")
-	private static final Map<String, String> ALL_ENTRIES = new HashMap<String, String>() {
-		{
-			put("this key", "this value");
-			put("that key", "that value");
-			put("other key", "other value");
-		}
-	};
-
 	@Mock
 	private Context context;
 
@@ -48,7 +40,7 @@ public class CustomFieldsAdapterTest {
 
 		List<String> exclusions = adapter.getCustomFieldExclusions();
 
-		assertThat(exclusions, is(empty()));
+        assertThat(exclusions, is(empty()));
 	}
 
 	@Test
@@ -120,5 +112,33 @@ public class CustomFieldsAdapterTest {
 
 		assertThat(exclusions, is(empty()));
 	}
+
+    @Test
+    public void missingSendDefaultValueOption() throws Exception {
+        assertFalse("Should not send default values without config.", adapter.isSendDefaultValues());
+    }
+
+    @Test
+    public void falseSendDefaultValueOption() throws Exception {
+        when(context.getObject(OPTION_SEND_DEFAULT_VALUES)).thenReturn(Boolean.FALSE);
+        adapter.initialize(context);
+        assertFalse("Should not send default values when configured false.", adapter.isSendDefaultValues());
+    }
+
+    @Test
+    public void trueSendDefaultValueOption() throws Exception {
+        when(context.getObject(OPTION_SEND_DEFAULT_VALUES)).thenReturn(true);
+        adapter.initialize(context);
+        assertTrue("Should send default values when configured true.", adapter.isSendDefaultValues());
+    }
+
+    @Test
+    public void faultySendDefaultValueOption() throws Exception {
+        when(context.getObject(OPTION_SEND_DEFAULT_VALUES)).thenReturn(new Object());
+        adapter.initialize(context);
+        assertFalse("Should not send default values when configured with generic object.", adapter
+                                                                                                  .isSendDefaultValues());
+
+    }
 
 }

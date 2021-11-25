@@ -14,11 +14,13 @@ import org.slf4j.MDC;
 import com.fasterxml.jackson.jr.ob.JSON;
 import com.fasterxml.jackson.jr.ob.JSONComposer;
 import com.fasterxml.jackson.jr.ob.comp.ObjectComposer;
+import com.sap.hcp.cf.logging.common.Defaults;
 import com.sap.hcp.cf.logging.common.LogContext;
 
 public class DefaultPropertiesConverter {
 
     private final Set<String> exclusions = new HashSet<String>();
+    private boolean sendDefaultValues = false;
 
     public DefaultPropertiesConverter() {
     }
@@ -29,6 +31,10 @@ public class DefaultPropertiesConverter {
                 exclusions.add(exclusion);
             }
         }
+    }
+
+    public void setSendDefaultValues(boolean sendDefaultValues) {
+        this.sendDefaultValues = sendDefaultValues;
     }
 
     private static class LoggerHolder {
@@ -46,7 +52,14 @@ public class DefaultPropertiesConverter {
                 ObjectComposer<JSONComposer<String>> oc = JSON.std.composeString().startObject();
                 for (Entry<String, String> p: properties.entrySet()) {
                     if (!exclusions.contains(p.getKey())) {
-                        oc.put(p.getKey(), p.getValue());
+                        if (sendDefaultValues) {
+                            oc.put(p.getKey(), p.getValue());
+                        } else {
+                            String defaultValue = getDefaultValue(p.getKey());
+                            if (!defaultValue.equals(p.getValue())) {
+                                oc.put(p.getKey(), p.getValue());
+                            }
+                        }
                     }
                 }
                 String result = oc.end().finish().trim();
@@ -72,5 +85,10 @@ public class DefaultPropertiesConverter {
             }
         }
         return result;
+    }
+
+    private String getDefaultValue(String key) {
+        String defaultValue = LogContext.getDefault(key);
+        return defaultValue == null ? Defaults.UNKNOWN : defaultValue;
     }
 }
