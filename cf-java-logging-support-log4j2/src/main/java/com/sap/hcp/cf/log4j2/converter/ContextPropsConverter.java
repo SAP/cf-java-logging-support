@@ -48,38 +48,38 @@ public class ContextPropsConverter extends LogEventPatternConverter {
 
     @Override
     public void format(LogEvent event, StringBuilder toAppendTo) {
-		Map<String, String> contextData = event.getContextData().toMap();
+        Map<String, String> contextData = event.getContextData().toMap();
         contextData = addCustomFieldsFromArguments(contextData, event);
         int lengthBefore = toAppendTo.length();
-		converter.convert(toAppendTo, contextData);
+        converter.convert(toAppendTo, contextData);
         // remove comma from pattern, when no properties are added
         // this is to avoid a double comma in the JSON
         // Do not do this on empty messages
         if (toAppendTo.length() == lengthBefore && lengthBefore > 0 && toAppendTo.charAt(lengthBefore - 1) == ',') {
             toAppendTo.setLength(lengthBefore - 1);
         }
-	}
+    }
 
     private Map<String, String> addCustomFieldsFromArguments(Map<String, String> contextData, LogEvent event) {
-		Message message = event.getMessage();
-		Object[] parameters = message.getParameters();
-		if (parameters == null) {
-			return contextData;
-		}
-		boolean unchangedContextData = true;
+        Message message = event.getMessage();
+        Object[] parameters = message.getParameters();
+        if (parameters == null) {
+            return contextData;
+        }
+        boolean unchangedContextData = true;
         Map<String, String> result = contextData;
-		for (Object current : parameters) {
-			if (current instanceof CustomField) {
-				CustomField field = (CustomField) current;
+        for (Object current: parameters) {
+            if (current instanceof CustomField) {
+                CustomField field = (CustomField) current;
                 if (unchangedContextData) {
                     // contextData might be an unmodifiable map
                     result = new HashMap<>(contextData);
                     unchangedContextData = false;
-				}
+                }
                 result.put(field.getKey(), field.getValue());
-			}
-		}
+            }
+        }
         return result;
-	}
+    }
 
 }
