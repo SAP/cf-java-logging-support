@@ -93,20 +93,8 @@
 	<build>
 		<plugins>
 			<plugin>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<!-- ENSURE SOURCES ARE UPDATED -->
-			<plugin>
 				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.2.0</version>
 				<configuration>
 					<filesets>
 						<fileset>
@@ -117,9 +105,9 @@
 				</configuration>
 			</plugin>
 
-			<!-- EXTRACT SOURCES TO SRC DIRECTORY TO ENABLE ECLIPSE -->
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.5.0</version>
 				<executions>
 					<execution>
 						<id>unpack</id>
