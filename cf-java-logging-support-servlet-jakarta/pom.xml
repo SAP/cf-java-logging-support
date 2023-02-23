@@ -1,0 +1,206 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>cf-java-logging-support-servlet-jakarta</artifactId>
+	<packaging>jar</packaging>
+
+	<name>cf-java-logging-support-servlet-jakarta</name>
+	<parent>
+		<groupId>com.sap.hcp.cf.logging</groupId>
+		<artifactId>cf-java-logging-support-parent</artifactId>
+		<version>3.6.3</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<properties>
+		<servlet.api.version>5.0.0</servlet.api.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>com.sap.hcp.cf.logging</groupId>
+			<artifactId>cf-java-logging-support-servlet</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sap.hcp.cf.logging</groupId>
+			<artifactId>cf-java-logging-support-servlet</artifactId>
+			<version>${project.version}</version>
+			<classifier>tests</classifier>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- servlet api -->
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>${servlet.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sap.hcp.cf.logging</groupId>
+			<artifactId>cf-java-logging-support-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<!-- we need our logback implementation for testing! -->
+		<dependency>
+			<groupId>com.sap.hcp.cf.logging</groupId>
+			<artifactId>cf-java-logging-support-logback</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>${logback.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Library for token signing/verification -->
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
+			<version>3.18.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.13.4.1</version>
+		</dependency>
+
+		<!-- testing -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>11.0.13</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>11.0.13</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.13</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- ENSURE SOURCES ARE UPDATED -->
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${basedir}/src</directory>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+
+			<!-- EXTRACT SOURCES TO SRC DIRECTORY TO ENABLE ECLIPSE -->
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>cf-java-logging-support-servlet</artifactId>
+									<version>${project.version}</version>
+									<type>jar</type>
+									<classifier>sources</classifier>
+									<overWrite>false</overWrite>
+									<outputDirectory>${basedir}/src/main/java</outputDirectory>
+									<includes>**/*.java</includes>
+								</artifactItem>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>cf-java-logging-support-servlet</artifactId>
+									<version>${project.version}</version>
+									<type>jar</type>
+									<classifier>test-sources</classifier>
+									<overWrite>false</overWrite>
+									<outputDirectory>${basedir}/src/test/java</outputDirectory>
+									<includes>**/*.java</includes>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>io.github.floverfelt</groupId>
+				<artifactId>find-and-replace-maven-plugin</artifactId>
+				<version>1.1.0</version>
+				<executions>
+				   <execution>
+					  <id>replace-in-xml</id>
+					  <phase>process-resources</phase>
+					  <goals>
+						 <goal>find-and-replace</goal>
+					  </goals>
+					  <configuration>
+						 <replacementType>file-contents</replacementType>
+						 <baseDir>src/</baseDir>
+						 <findRegex>javax.servlet</findRegex>
+						 <replaceValue>jakarta.servlet</replaceValue>
+						 <recursive>true</recursive>
+						 <fileMask>.xml</fileMask>
+					  </configuration>
+				   </execution>
+				   <execution>
+					  <id>replace-in-java</id>
+					  <phase>process-resources</phase>
+					  <goals>
+						 <goal>find-and-replace</goal>
+					  </goals>
+					  <configuration>
+						 <replacementType>file-contents</replacementType>
+						 <baseDir>src/</baseDir>
+						 <findRegex>javax.servlet</findRegex>
+						 <replaceValue>jakarta.servlet</replaceValue>
+						 <recursive>true</recursive>
+						 <fileMask>.java</fileMask>
+					  </configuration>
+				   </execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>animal-sniffer-maven-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+		</plugin>
+
+		</plugins>
+	</build>
+</project>
