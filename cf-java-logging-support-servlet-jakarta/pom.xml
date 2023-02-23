@@ -127,7 +127,6 @@
 						<goals>
 							<goal>add-source</goal>
 						</goals>
-						<phase>generate-sources</phase>
 						<configuration>
 							<sources>
 								<source>target/generated-sources/java</source>
@@ -135,43 +134,14 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>add-generated-resources</id>
-						<goals>
-							<goal>add-resource</goal>
-						</goals>
-						<phase>generate-resources</phase>
-						<configuration>
-							<resources>
-								<resource>
-									<directory>target/generated-sources/resources</directory>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-					<execution>
 						<id>add-generated-test-sources</id>
 						<goals>
 							<goal>add-test-source</goal>
 						</goals>
-						<phase>generate-test-sources</phase>
 						<configuration>
 							<sources>
 								<source>target/generated-test-sources/java</source>
 							</sources>
-						</configuration>
-					</execution>
-					<execution>
-						<id>add-generated-test-resources</id>
-						<goals>
-							<goal>add-test-resource</goal>
-						</goals>
-						<phase>generate-test-resources</phase>
-						<configuration>
-							<resources>
-								<resource>
-									<directory>target/generated-test-sources/resources</directory>
-								</resource>
-							</resources>
 						</configuration>
 					</execution>
 				</executions>
