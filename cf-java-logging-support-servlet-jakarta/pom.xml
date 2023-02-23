@@ -109,7 +109,7 @@
 									<classifier>test-sources</classifier>
 									<overWrite>false</overWrite>
 									<outputDirectory>target/generated-test-sources/java</outputDirectory>
-									<includes>**/*.java,**/*.xml</includes>
+									<includes>**/*.java,**/logback-test.xml</includes>
 								</artifactItem>
 							</artifactItems>
 						</configuration>
