@@ -99,7 +99,7 @@
 									<classifier>sources</classifier>
 									<overWrite>false</overWrite>
 									<outputDirectory>target/generated-sources/java</outputDirectory>
-									<includes>**/*.java</includes>
+									<includes>**/*.*</includes>
 								</artifactItem>
 								<artifactItem>
 									<groupId>${project.groupId}</groupId>
@@ -109,7 +109,7 @@
 									<classifier>test-sources</classifier>
 									<overWrite>false</overWrite>
 									<outputDirectory>target/generated-test-sources/java</outputDirectory>
-									<includes>**/*.java</includes>
+									<includes>**/*.*</includes>
 								</artifactItem>
 							</artifactItems>
 						</configuration>
