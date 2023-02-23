@@ -80,19 +80,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.2.0</version>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>${basedir}/src</directory>
-							<followSymlinks>false</followSymlinks>
-						</fileset>
-					</filesets>
-				</configuration>
-			</plugin>
-
-			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<version>3.5.0</version>
 				<executions>
@@ -111,7 +98,7 @@
 									<type>jar</type>
 									<classifier>sources</classifier>
 									<overWrite>false</overWrite>
-									<outputDirectory>${basedir}/src/main/java</outputDirectory>
+									<outputDirectory>target/generated-sources/java</outputDirectory>
 									<includes>**/*.java</includes>
 								</artifactItem>
 								<artifactItem>
@@ -121,10 +108,70 @@
 									<type>jar</type>
 									<classifier>test-sources</classifier>
 									<overWrite>false</overWrite>
-									<outputDirectory>${basedir}/src/test/java</outputDirectory>
+									<outputDirectory>target/generated-test-sources/java</outputDirectory>
 									<includes>**/*.java</includes>
 								</artifactItem>
 							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.3.0</version>
+				<executions>
+					<execution>
+						<id>add-generated-sources</id>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<phase>generate-sources</phase>
+						<configuration>
+							<sources>
+								<source>target/generated-sources/java</source>
+							</sources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>add-generated-resources</id>
+						<goals>
+							<goal>add-resource</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<resources>
+								<resource>
+									<directory>target/generated-sources/resources</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>add-generated-test-sources</id>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<phase>generate-test-sources</phase>
+						<configuration>
+							<sources>
+								<source>target/generated-test-sources/java</source>
+							</sources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>add-generated-test-resources</id>
+						<goals>
+							<goal>add-test-resource</goal>
+						</goals>
+						<phase>generate-test-resources</phase>
+						<configuration>
+							<resources>
+								<resource>
+									<directory>target/generated-test-sources/resources</directory>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>
@@ -135,36 +182,36 @@
 				<artifactId>find-and-replace-maven-plugin</artifactId>
 				<version>1.1.0</version>
 				<executions>
-				   <execution>
-					  <id>replace-in-xml</id>
-					  <phase>process-resources</phase>
-					  <goals>
-						 <goal>find-and-replace</goal>
-					  </goals>
-					  <configuration>
-						 <replacementType>file-contents</replacementType>
-						 <baseDir>src/</baseDir>
-						 <findRegex>javax.servlet</findRegex>
-						 <replaceValue>jakarta.servlet</replaceValue>
-						 <recursive>true</recursive>
-						 <fileMask>.xml</fileMask>
-					  </configuration>
-				   </execution>
-				   <execution>
-					  <id>replace-in-java</id>
-					  <phase>process-resources</phase>
-					  <goals>
-						 <goal>find-and-replace</goal>
-					  </goals>
-					  <configuration>
-						 <replacementType>file-contents</replacementType>
-						 <baseDir>src/</baseDir>
-						 <findRegex>javax.servlet</findRegex>
-						 <replaceValue>jakarta.servlet</replaceValue>
-						 <recursive>true</recursive>
-						 <fileMask>.java</fileMask>
-					  </configuration>
-				   </execution>
+					<execution>
+						<id>replace-in-sources</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>find-and-replace</goal>
+						</goals>
+						<configuration>
+							<replacementType>file-contents</replacementType>
+							<baseDir>target/generated-sources/java/</baseDir>
+							<findRegex>javax.servlet</findRegex>
+							<replaceValue>jakarta.servlet</replaceValue>
+							<recursive>true</recursive>
+							<fileMask>.java</fileMask>
+						</configuration>
+					</execution>
+					<execution>
+						<id>replace-in-test-sources</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>find-and-replace</goal>
+						</goals>
+						<configuration>
+							<replacementType>file-contents</replacementType>
+							<baseDir>target/generated-test-sources/java/</baseDir>
+							<findRegex>javax.servlet</findRegex>
+							<replaceValue>jakarta.servlet</replaceValue>
+							<recursive>true</recursive>
+							<fileMask>.java</fileMask>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 
