@@ -183,6 +183,9 @@
         <javadoc.plugin.version>3.1.1</javadoc.plugin.version>
         <gpg.plugin.version>1.6</gpg.plugin.version>
         <maven.compiler.release>8</maven.compiler.release>
+        <java-jwt.version>3.18.2</java-jwt.version>
+        <jackson-databind.version>2.13.4.1</jackson-databind.version>
+        <httpclient.version>4.5.13</httpclient.version>
     </properties>
 
     <modules>

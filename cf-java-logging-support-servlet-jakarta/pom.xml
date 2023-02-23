@@ -16,21 +16,8 @@
 	<properties>
 		<servlet.api.version>5.0.0</servlet.api.version>
 	</properties>
-	<dependencies>
-		<dependency>
-			<groupId>com.sap.hcp.cf.logging</groupId>
-			<artifactId>cf-java-logging-support-servlet</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.sap.hcp.cf.logging</groupId>
-			<artifactId>cf-java-logging-support-servlet</artifactId>
-			<version>${project.version}</version>
-			<classifier>tests</classifier>
-			<scope>provided</scope>
-		</dependency>
 
+	<dependencies>
 		<!-- servlet api -->
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
@@ -60,12 +47,12 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
-			<version>3.18.2</version>
+			<version>${java-jwt.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.13.4.1</version>
+			<version>${jackson-databind.version}</version>
 		</dependency>
 
 		<!-- testing -->
@@ -84,7 +71,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.13</version>
+			<version>${httpclient.version}</version>
 			<scope>test</scope>
 		</dependency>
 
