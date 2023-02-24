@@ -15,6 +15,9 @@
 
 	<properties>
 		<servlet.api.version>5.0.0</servlet.api.version>
+		<maven-dependency-plugin.version>3.5.0</maven-dependency-plugin.version>
+		<build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+		<jetty.version>11.0.13</jetty.version>
 	</properties>
 
 	<dependencies>
