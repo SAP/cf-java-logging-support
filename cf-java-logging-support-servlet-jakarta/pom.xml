@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -15,6 +16,9 @@
 
 	<properties>
 		<servlet.api.version>5.0.0</servlet.api.version>
+		<maven-dependency-plugin.version>3.5.0</maven-dependency-plugin.version>
+		<build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+		<jetty.version>11.0.13</jetty.version>
 	</properties>
 
 	<dependencies>
@@ -59,13 +63,13 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>11.0.13</version>
+			<version>${jetty.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
-			<version>11.0.13</version>
+			<version>${jetty.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -81,7 +85,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.5.0</version>
+				<version>${maven-dependency-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>unpack</id>
@@ -111,6 +115,16 @@
 									<outputDirectory>target/generated-test-sources/java</outputDirectory>
 									<includes>**/*.java,**/logback-test.xml</includes>
 								</artifactItem>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>cf-java-logging-support-servlet</artifactId>
+									<version>${project.version}</version>
+									<type>jar</type>
+									<classifier>test-sources</classifier>
+									<overWrite>false</overWrite>
+									<outputDirectory>target/generated-test-sources/resources</outputDirectory>
+									<includes>**/logback-test.xml</includes>
+								</artifactItem>
 							</artifactItems>
 						</configuration>
 					</execution>
@@ -120,13 +134,14 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>${build-helper-maven-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>add-generated-sources</id>
 						<goals>
 							<goal>add-source</goal>
 						</goals>
+						<phase>generate-sources</phase>
 						<configuration>
 							<sources>
 								<source>target/generated-sources/java</source>
@@ -138,49 +153,52 @@
 						<goals>
 							<goal>add-test-source</goal>
 						</goals>
+						<phase>generate-test-sources</phase>
 						<configuration>
 							<sources>
 								<source>target/generated-test-sources/java</source>
 							</sources>
 						</configuration>
 					</execution>
+					<execution>
+						<id>add-generated-test-resources</id>
+						<goals>
+							<goal>add-test-resource</goal>
+						</goals>
+						<phase>generate-test-resources</phase>
+						<configuration>
+							<resources>
+								<resource>
+									<directory>target/generated-test-sources/resources</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 
 			<plugin>
-				<groupId>io.github.floverfelt</groupId>
-				<artifactId>find-and-replace-maven-plugin</artifactId>
-				<version>1.1.0</version>
+				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>replace-in-sources</id>
 						<phase>process-sources</phase>
-						<goals>
-							<goal>find-and-replace</goal>
-						</goals>
 						<configuration>
-							<replacementType>file-contents</replacementType>
-							<baseDir>target/generated-sources/java/</baseDir>
-							<findRegex>javax.servlet</findRegex>
-							<replaceValue>jakarta.servlet</replaceValue>
-							<recursive>true</recursive>
-							<fileMask>.java</fileMask>
+							<tasks>
+								<!-- replace javax.servlet with jakarta.servlet in generated-sources -->
+								<replace dir="target/generated-sources/java"
+									token="javax.servlet" value="jakarta.servlet">
+									<include name="**/*.java" />
+								</replace>
+								<!-- replace javax.servlet with jakarta.servlet in generated-test-sources -->
+								<replace dir="target/generated-test-sources/java"
+									token="javax.servlet" value="jakarta.servlet">
+									<include name="**/*.java" />
+								</replace>
+							</tasks>
 						</configuration>
-					</execution>
-					<execution>
-						<id>replace-in-test-sources</id>
-						<phase>process-sources</phase>
 						<goals>
-							<goal>find-and-replace</goal>
+							<goal>run</goal>
 						</goals>
-						<configuration>
-							<replacementType>file-contents</replacementType>
-							<baseDir>target/generated-test-sources/java/</baseDir>
-							<findRegex>javax.servlet</findRegex>
-							<replaceValue>jakarta.servlet</replaceValue>
-							<recursive>true</recursive>
-							<fileMask>.java</fileMask>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
