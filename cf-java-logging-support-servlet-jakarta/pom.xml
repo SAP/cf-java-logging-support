@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -123,7 +124,7 @@
 									<overWrite>false</overWrite>
 									<outputDirectory>target/generated-test-sources/resources</outputDirectory>
 									<includes>**/logback-test.xml</includes>
-								</artifactItem>								
+								</artifactItem>
 							</artifactItems>
 						</configuration>
 					</execution>
@@ -159,20 +160,20 @@
 							</sources>
 						</configuration>
 					</execution>
-		            <execution>
-		              <id>add-generated-test-resources</id>
-		              <goals>
-		                <goal>add-test-resource</goal>
-		              </goals>
-		              <phase>generate-test-resources</phase>
-		              <configuration>
-		                <resources>
-		                  <resource>
-		                    <directory>target/generated-test-sources/resources</directory>
-		                  </resource>
-		                </resources>
-		              </configuration>
-		            </execution>
+					<execution>
+						<id>add-generated-test-resources</id>
+						<goals>
+							<goal>add-test-resource</goal>
+						</goals>
+						<phase>generate-test-resources</phase>
+						<configuration>
+							<resources>
+								<resource>
+									<directory>target/generated-test-sources/resources</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 
@@ -183,14 +184,12 @@
 						<phase>process-sources</phase>
 						<configuration>
 							<tasks>
-								<!-- replace javax.servlet with jakarta.servlet in
-									generated-sources -->
+								<!-- replace javax.servlet with jakarta.servlet in generated-sources -->
 								<replace dir="target/generated-sources/java"
 									token="javax.servlet" value="jakarta.servlet">
 									<include name="**/*.java" />
 								</replace>
-								<!-- replace javax.servlet with jakarta.servlet in
-									generated-test-sources -->
+								<!-- replace javax.servlet with jakarta.servlet in generated-test-sources -->
 								<replace dir="target/generated-test-sources/java"
 									token="javax.servlet" value="jakarta.servlet">
 									<include name="**/*.java" />
