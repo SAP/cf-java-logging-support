@@ -141,7 +141,6 @@
 						<goals>
 							<goal>add-source</goal>
 						</goals>
-						<phase>generate-sources</phase>
 						<configuration>
 							<sources>
 								<source>target/generated-sources/java</source>
@@ -153,7 +152,6 @@
 						<goals>
 							<goal>add-test-source</goal>
 						</goals>
-						<phase>generate-test-sources</phase>
 						<configuration>
 							<sources>
 								<source>target/generated-test-sources/java</source>
@@ -165,7 +163,6 @@
 						<goals>
 							<goal>add-test-resource</goal>
 						</goals>
-						<phase>generate-test-resources</phase>
 						<configuration>
 							<resources>
 								<resource>
