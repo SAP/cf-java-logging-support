@@ -88,7 +88,7 @@
 				<version>${maven-dependency-plugin.version}</version>
 				<executions>
 					<execution>
-						<id>unpack-sources</id>
+						<id>unpack</id>
 						<phase>generate-sources</phase>
 						<goals>
 							<goal>unpack</goal>
@@ -105,17 +105,6 @@
 									<outputDirectory>target/generated-sources/java</outputDirectory>
 									<includes>**/*.java</includes>
 								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-					<execution>
-						<id>unpack-test-sources</id>
-						<phase>generate-test-sources</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
 								<artifactItem>
 									<groupId>${project.groupId}</groupId>
 									<artifactId>cf-java-logging-support-servlet</artifactId>
@@ -124,19 +113,8 @@
 									<classifier>test-sources</classifier>
 									<overWrite>false</overWrite>
 									<outputDirectory>target/generated-test-sources/java</outputDirectory>
-									<includes>**/*.java</includes>
+									<includes>**/*.java,**/logback-test.xml</includes>
 								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-					<execution>
-						<id>unpack-test-rersources</id>
-						<phase>generate-test-resources</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
 								<artifactItem>
 									<groupId>${project.groupId}</groupId>
 									<artifactId>cf-java-logging-support-servlet</artifactId>
@@ -149,7 +127,7 @@
 								</artifactItem>
 							</artifactItems>
 						</configuration>
-					</execution>										
+					</execution>
 				</executions>
 			</plugin>
 
@@ -163,6 +141,7 @@
 						<goals>
 							<goal>add-source</goal>
 						</goals>
+						<phase>generate-sources</phase>
 						<configuration>
 							<sources>
 								<source>target/generated-sources/java</source>
@@ -174,6 +153,7 @@
 						<goals>
 							<goal>add-test-source</goal>
 						</goals>
+						<phase>generate-test-sources</phase>
 						<configuration>
 							<sources>
 								<source>target/generated-test-sources/java</source>
@@ -185,6 +165,7 @@
 						<goals>
 							<goal>add-test-resource</goal>
 						</goals>
+						<phase>generate-test-resources</phase>
 						<configuration>
 							<resources>
 								<resource>
@@ -200,10 +181,6 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
-					    <id>package-replace-sources</id>
-						<goals>
-							<goal>run</goal>
-						</goals>					
 						<phase>process-sources</phase>
 						<configuration>
 							<tasks>
@@ -212,17 +189,6 @@
 									token="javax.servlet" value="jakarta.servlet">
 									<include name="**/*.java" />
 								</replace>
-							</tasks>
-						</configuration>
-					</execution>
-					<execution>
-					    <id>package-replace-test-sources</id>
-						<goals>
-							<goal>run</goal>
-						</goals>					
-						<phase>process-test-sources</phase>
-						<configuration>
-							<tasks>
 								<!-- replace javax.servlet with jakarta.servlet in generated-test-sources -->
 								<replace dir="target/generated-test-sources/java"
 									token="javax.servlet" value="jakarta.servlet">
@@ -230,7 +196,10 @@
 								</replace>
 							</tasks>
 						</configuration>
-					</execution>					
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
 
