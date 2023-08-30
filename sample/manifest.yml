@@ -5,8 +5,9 @@ applications:
 #
 - name: logging-sample-app
   instances: 1
-  memory: 592M
-  disk_quota: 140M
+  buildpack: sap_java_buildpack
+  memory: 256M
+  disk_quota: 256M
   path: target/logging-sample-app-3.7.0.war
   env:
     RANDOM_SLEEP: true
@@ -14,3 +15,5 @@ applications:
     LOG_SENSITIVE_CONNECTION_DATA: false
     LOG_REMOTE_USER: false
     LOG_REFERER: false
+    JAVA_OPTS: '-XX:ReservedCodeCacheSize=40M -XX:MaxMetaspaceSize=28M -Xss256K'
+    # Default: '-XX:ReservedCodeCacheSize=240M -XX:MaxMetaspaceSize=141152K -Xss1M'
