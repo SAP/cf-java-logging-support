@@ -195,6 +195,7 @@
         <module>cf-java-logging-support-servlet</module>
         <module>cf-java-logging-support-servlet-jakarta</module>
         <module>cf-java-logging-support-jersey</module>
+        <module>cf-java-logging-support-opentelemetry-agent-extension</module>
         <module>cf-java-monitoring-custom-metrics-clients</module>
         <module>sample</module>
         <module>sample-spring-boot</module>
