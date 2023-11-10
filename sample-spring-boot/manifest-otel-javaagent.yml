@@ -1,0 +1,21 @@
+---
+applications:
+  #
+  # You may want/need to change these to avoid naming conflicts
+  #
+  - name: otel-sample-app
+    instances: 1
+    path: target/sample-app-spring-boot-3.7.1.jar
+    buildpack: sap_java_buildpack
+    memory: 256M
+    env:
+      # Set LOG_*: true to activate logging of respective field
+      LOG_SENSITIVE_CONNECTION_DATA: false
+      LOG_REMOTE_USER: false
+      LOG_REFERER: false
+      JBP_CONFIG_COMPONENTS: "jres: ['com.sap.xs.java.buildpack.jre.SAPMachineJRE']"
+      JBP_CONFIG_SAP_MACHINE_JRE: '{ use_offline_repository: false, version: 17.+ }'
+      JBP_CONFIG_JAVA_OPTS: '[from_environment: false, java_opts: ''-javaagent:BOOT-INF/lib/opentelemetry-javaagent-1.31.0.jar -Dotel.javaagent.extensions=BOOT-INF/lib/cf-java-logging-support-opentelemetry-agent-extension-3.7.1.jar -Dotel.logs.exporter=otlp -Dotel.instrumentation.logback-appender.experimental.capture-mdc-attributes=* -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true -Dotel.instrumentation.logback-appender.experimental.capture-code-attributes=true -Dotel.instrumentation.logback-appender.experimental-log-attributes=true -Dotel.experimental.resource.disabled-keys=process.command_line,process.command_args,process.executable.path'']'
+    services:
+      - cls
+
