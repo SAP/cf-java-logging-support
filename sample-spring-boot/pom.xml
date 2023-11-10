@@ -85,17 +85,17 @@
 			<version>${project.version}</version>
 		</dependency>
 
-        <!-- OpenTelemetry Instrumentation -->
-        <dependency>
-            <groupId>com.sap.hcp.cf.logging</groupId>
-            <artifactId>cf-java-logging-support-opentelemetry-agent-extension</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry.javaagent</groupId>
-            <artifactId>opentelemetry-javaagent</artifactId>
-            <version>1.31.0</version>
-        </dependency>
+		<!-- OpenTelemetry Instrumentation -->
+		<dependency>
+			<groupId>com.sap.hcp.cf.logging</groupId>
+			<artifactId>cf-java-logging-support-opentelemetry-agent-extension</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry.javaagent</groupId>
+			<artifactId>opentelemetry-javaagent</artifactId>
+			<version>1.31.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
