@@ -18,7 +18,7 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
 
     private static final Logger LOG = Logger.getLogger(CloudLoggingBindingPropertiesSupplier.class.getName());
     private static final String CLOUD_LOGGING_LABEL = System.getProperty("com.sap.otel.extension.cloud-logging.label", "cloud-logging");
-    private static final String CLOUD_LOGGING_TAG = System.getProperty("com.sap.otel.extension.cloud-logging.label", "Cloud Logging");
+    private static final String CLOUD_LOGGING_TAG = System.getProperty("com.sap.otel.extension.cloud-logging.tag", "Cloud Logging");
     private static final String USER_PROVIDED_LABEL = "user-provided";
     public static final String OTLP_ENDPOINT = "ingest-otlp-endpoint";
     public static final String OTLP_CLIENT_KEY = "ingest-otlp-key";
