@@ -33,7 +33,7 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
 
     /**
      * Scans service bindings, both managed and user-provided for Cloud Logging.
-     * Managed service require the label "cloud-logging" to be considered.
+     * Managed services require the label "cloud-logging" to be considered.
      * Services will be selected by the tag "Cloud Logging".
      * User-provided services will be preferred over managed service instances.
      *

@@ -24,7 +24,7 @@ java -javaagent:/path/to/opentelemetry-javaagent-<version>.jar \
 
 If you are using Spring Boot, you can bundle both dependencies with the application.
 See the Maven pom of the [Spring Boot sample application](../sample-spring-boot/pom.xml) for details.
-When deployed to a CloudFoundry runtime environment, the Spring Boot jar is expanded, so that the agent and extension jar are available during application start.
+When deployed to a Cloud Foundry runtime environment, the Spring Boot jar is expanded, so that the agent and extension jar are available during application start.
 In that case, the following Java arguments are required:
 
 ```sh
@@ -49,12 +49,12 @@ Users can easily overwrite any setting using environment variables or system pro
 
 ### Configuring the Extension
 
-The extension itself can be configured by the following system properties:
+The extension itself can be configured by specifying the following system properties:
 
-| property | default value | comment |
+| Property | Default Value | Comment |
 |----------|---------------|---------|
-| `com.sap.otel.extension.cloud-logging.label` | `cloud-logging` | The label of the managed service binding to bind too. |
-| `com.sap.otel.extension.cloud-logging.tag` | `Cloud Logging` | The tag of any service binding managed or user-provided to bind too. |
+| `com.sap.otel.extension.cloud-logging.label` | `cloud-logging` | The label of the managed service binding to bind to. |
+| `com.sap.otel.extension.cloud-logging.tag` | `Cloud Logging` | The tag of any service binding (managed or user-provided) to bind to. |
 | `otel.javaagent.extension.sap.cf.resource.enabled` or `env(OTEL_JAVAAGENT_EXTENSION_SAP_CF_RESOURCE_ENABLED)` | `true` | Whether to add CF resource attributes to all events. |
 
 The extension will scan the environment variable `VCAP_SERVICES` for CF service bindings.

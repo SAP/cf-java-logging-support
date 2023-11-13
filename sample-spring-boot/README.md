@@ -1,7 +1,7 @@
 # Spring Boot Sample Application
 
 This sample application shows how cf-java-logging-support can be used in an application. 
-It features a small Spring Boot application to showcase various features provided by the library. The application provides a Rest API to trigger several actions.
+It features a small Spring Boot application to showcase various features provided by the library. The application provides a REST API to trigger several actions.
 See section [Features](#features) for details. 
 You can deploy the sample application just with the library implementation using the default [manifest.yml](manifest.yml).
 Alternatively, you can choose to add instrumentation with the OpenTelemetry Java Agent and the [Java Agent Extension](../cf-java-logging-support-opentelemetry-agent-extension) provided by this library. 

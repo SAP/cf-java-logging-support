@@ -21,7 +21,6 @@ public class CloudFoundryResourceCustomizer implements BiFunction<Resource, Conf
     }
 
     @Override
-
     public Resource apply(Resource resource, ConfigProperties configProperties) {
         boolean isEnabled = configProperties.getBoolean(OTEL_JAVAAGENT_EXTENSION_SAP_CF_RESOURCE_ENABLED, true);
         if (!isEnabled) {
