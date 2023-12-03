@@ -11,19 +11,6 @@
     <description>Supports the creation of structured log messages and the collection of request metrics for Java applications running on Cloud Foundry</description>
     <developers>
         <developer>
-            <id>akl</id>
-            <name>Andreas Klein</name>
-            <email>andreas.klein@sap.com</email>
-            <organization>SAP SE</organization>
-            <organizationUrl>https://github.com/SAP</organizationUrl>
-        </developer>
-        <developer>
-            <id>msaliminia</id>
-            <email>mehran.saliminia@sap.com</email>
-            <organization>SAP SE</organization>
-            <organizationUrl>https://github.com/SAP</organizationUrl>
-        </developer>
-        <developer>
             <id>WolfgangTheilmann</id>
             <name>Wolfgang Theilmann</name>
             <email>wolfgang.theilmann@sap.com</email>
@@ -37,20 +24,6 @@
             <organization>SAP SE</organization>
             <organizationUrl>https://github.com/SAP</organizationUrl>
         </developer>
-        <developer>
-           <id>rauizab</id>
-           <name>Raul Izquierdo Abad</name>
-           <email>raul.izquierdo.abad@sap.com</email>
-           <organization>SAP SE</organization>
-           <organizationUrl>https://github.com/SAP</organizationUrl>
-       </developer>
-        <developer>
-           <id>kiranponnuswamy</id>
-           <name>Kiran Ponnuswamy</name>
-           <email>kiran.ponnuswamy@sap.com</email>
-           <organization>SAP SE</organization>
-           <organizationUrl>https://github.com/SAP</organizationUrl>
-       </developer>
        <developer>
            <id>deyanzhelyazkov</id>
            <name>Deyan Zhelyazkov</name>
@@ -111,20 +84,6 @@
            <id>D070188</id>
            <name>Xiaozhong Zhang</name>
            <email>xiaozhong.zhang@sap.com</email>
-           <organization>SAP SE</organization>
-           <organizationUrl>https://github.com/SAP</organizationUrl>
-       </developer>
-       <developer>
-           <id>kiranponnuswamy</id>
-           <name>Kiran Ponnuswamy</name>
-           <email>kiran.ponnuswamy@sap.com</email>
-           <organization>SAP SE</organization>
-           <organizationUrl>https://github.com/SAP</organizationUrl>
-       </developer>
-       <developer>
-           <id>jomora</id>
-           <name>Jonas Molina Ramirez</name>
-           <email>jonas.molina.ramirez@sap.com</email>
            <organization>SAP SE</organization>
            <organizationUrl>https://github.com/SAP</organizationUrl>
        </developer>
