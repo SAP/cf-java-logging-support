@@ -18,6 +18,7 @@
 		<servlet.api.version>5.0.0</servlet.api.version>
 		<maven-dependency-plugin.version>3.5.0</maven-dependency-plugin.version>
 		<build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+		<maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
 		<jetty.version>11.0.14</jetty.version>
 	</properties>
 
@@ -176,11 +177,12 @@
 
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
+				<version>${maven-antrun-plugin.version}</version>
 				<executions>
 					<execution>
 						<phase>process-sources</phase>
 						<configuration>
-							<tasks>
+							<target>
 								<!-- replace javax.servlet with jakarta.servlet in generated-sources -->
 								<replace dir="target/generated-sources/java"
 									token="javax.servlet" value="jakarta.servlet">
@@ -191,7 +193,7 @@
 									token="javax.servlet" value="jakarta.servlet">
 									<include name="**/*.java" />
 								</replace>
-							</tasks>
+							</target>
 						</configuration>
 						<goals>
 							<goal>run</goal>
