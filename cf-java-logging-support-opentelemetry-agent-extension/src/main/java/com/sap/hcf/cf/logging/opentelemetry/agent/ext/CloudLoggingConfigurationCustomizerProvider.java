@@ -13,6 +13,8 @@ public class CloudLoggingConfigurationCustomizerProvider implements AutoConfigur
     public void customize(AutoConfigurationCustomizer autoConfiguration) {
         autoConfiguration
                 .addPropertiesSupplier(new CloudLoggingBindingPropertiesSupplier(cfEnv));
+
+        // ConfigurableLogRecordExporterProvider
     }
 
 }

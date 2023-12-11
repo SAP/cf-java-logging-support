@@ -1,0 +1,83 @@
+package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
+
+import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
+import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporterBuilder;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterProvider;
+import io.opentelemetry.sdk.common.export.RetryPolicy;
+import io.opentelemetry.sdk.logs.export.LogRecordExporter;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
+import io.pivotal.cfenv.core.CfEnv;
+import io.pivotal.cfenv.core.CfService;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class CloudLoggingSpanExporterProvider implements ConfigurableSpanExporterProvider {
+
+    private static final Logger LOG = Logger.getLogger(CloudLoggingSpanExporterProvider.class.getName());
+
+    private final Function<ConfigProperties, Stream<CfService>> servicesProvider;
+
+    public CloudLoggingSpanExporterProvider() {
+        this(config -> new CloudLoggingServicesProvider(config, new CfEnv()).get());
+    }
+
+    public CloudLoggingSpanExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider) {
+        this.servicesProvider = serviceProvider;
+    }
+
+    private static String getCompression(ConfigProperties config) {
+        String compression = config.getString("otel.exporter.cloud-logging.traces.compression");
+        return compression != null ? compression : config.getString("otel.exporter.cloud-logging.compression", "gzip");
+    }
+
+    private static Duration getTimeOut(ConfigProperties config) {
+        Duration timeout = config.getDuration("otel.exporter.cloud-logging.traces.timeout");
+        return timeout != null ? timeout : config.getDuration("otel.exporter.cloud-logging.timeout");
+    }
+
+    @Override
+    public String getName() {
+        return "cloud-logging";
+    }
+
+    @Override
+    public SpanExporter createExporter(ConfigProperties config) {
+        List<SpanExporter> exporters = servicesProvider.apply(config)
+                .map(svc -> createExporter(config, svc))
+                .filter(exp -> !(exp instanceof NoopSpanExporter))
+                .collect(Collectors.toList());
+        return SpanExporter.composite(exporters);
+    }
+
+    private SpanExporter createExporter(ConfigProperties config, CfService service) {
+        LOG.info("Creating span exporter for service binding " + service.getName() + " (" + service.getLabel() + ")");
+        CloudLoggingCredentials credentials = CloudLoggingCredentials.parseCredentials(service.getCredentials());
+        if (!credentials.validate()) {
+            return NoopSpanExporter.getInstance();
+        }
+
+        OtlpGrpcSpanExporterBuilder builder = OtlpGrpcSpanExporter.builder();
+        builder.setEndpoint(credentials.getEndpoint())
+                .setCompression(getCompression(config))
+                .setClientTls(credentials.getClientKey(), credentials.getClientCert())
+                .setTrustedCertificates(credentials.getServerCert())
+                .setRetryPolicy(RetryPolicy.getDefault());
+
+        Duration timeOut = getTimeOut(config);
+        if (timeOut != null) {
+            builder.setTimeout(timeOut);
+        }
+
+        LOG.info("Created span exporter for service binding " + service.getName() + " (" + service.getLabel() + ")");
+        return builder.build();
+    }
+}
