@@ -9,6 +9,8 @@ class CloudLoggingCredentials {
 
     private static final Logger LOG = Logger.getLogger(CloudLoggingCredentials.class.getName());
 
+    private static final Parser PARSER = new Parser();
+
     private static final String CRED_OTLP_ENDPOINT = "ingest-otlp-endpoint";
     private static final String CRED_OTLP_CLIENT_KEY = "ingest-otlp-key";
     private static final String CRED_OTLP_CLIENT_CERT = "ingest-otlp-cert";
@@ -24,13 +26,8 @@ class CloudLoggingCredentials {
     private CloudLoggingCredentials() {
     }
 
-    static CloudLoggingCredentials parseCredentials(CfCredentials cfCredentials) {
-        CloudLoggingCredentials parsed = new CloudLoggingCredentials();
-        parsed.endpoint = CLOUD_LOGGING_ENDPOINT_PREFIX + cfCredentials.getString(CRED_OTLP_ENDPOINT);
-        parsed.clientKey = getPEMBytes(cfCredentials, CRED_OTLP_CLIENT_KEY);
-        parsed.clientCert = getPEMBytes(cfCredentials, CRED_OTLP_CLIENT_CERT);
-        parsed.serverCert = getPEMBytes(cfCredentials, CRED_OTLP_SERVER_CERT);
-        return parsed;
+    static CloudLoggingCredentials.Parser parser() {
+        return PARSER;
     }
 
     private static byte[] getPEMBytes(CfCredentials credentials, String key) {
@@ -83,5 +80,17 @@ class CloudLoggingCredentials {
 
     public byte[] getServerCert() {
         return serverCert;
+    }
+
+    static class Parser {
+        CloudLoggingCredentials parse(CfCredentials cfCredentials) {
+            CloudLoggingCredentials parsed = new CloudLoggingCredentials();
+            String rawEndpoint = cfCredentials.getString(CRED_OTLP_ENDPOINT);
+            parsed.endpoint = isBlank(rawEndpoint) ? null : CLOUD_LOGGING_ENDPOINT_PREFIX + rawEndpoint;
+            parsed.clientKey = getPEMBytes(cfCredentials, CRED_OTLP_CLIENT_KEY);
+            parsed.clientCert = getPEMBytes(cfCredentials, CRED_OTLP_CLIENT_CERT);
+            parsed.serverCert = getPEMBytes(cfCredentials, CRED_OTLP_SERVER_CERT);
+            return parsed;
+        }
     }
 }

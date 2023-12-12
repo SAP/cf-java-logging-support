@@ -17,18 +17,31 @@ import java.util.stream.Stream;
 public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<String, String>> {
 
     private static final Logger LOG = Logger.getLogger(CloudLoggingBindingPropertiesSupplier.class.getName());
+    private static final String OTLP_ENDPOINT = "ingest-otlp-endpoint";
+    private static final String OTLP_CLIENT_KEY = "ingest-otlp-key";
+    private static final String OTLP_CLIENT_CERT = "ingest-otlp-cert";
+    private static final String OTLP_SERVER_CERT = "server-ca";
     private static final String CLOUD_LOGGING_LABEL = System.getProperty("com.sap.otel.extension.cloud-logging.label", "cloud-logging");
     private static final String CLOUD_LOGGING_TAG = System.getProperty("com.sap.otel.extension.cloud-logging.tag", "Cloud Logging");
     private static final String USER_PROVIDED_LABEL = "user-provided";
-    public static final String OTLP_ENDPOINT = "ingest-otlp-endpoint";
-    public static final String OTLP_CLIENT_KEY = "ingest-otlp-key";
-    public static final String OTLP_CLIENT_CERT = "ingest-otlp-cert";
-    public static final String OTLP_SERVER_CERT = "server-ca";
-
     private final CfEnv cfEnv;
 
     public CloudLoggingBindingPropertiesSupplier(CfEnv cfEnv) {
         this.cfEnv = cfEnv;
+    }
+
+    private static boolean isBlank(String text) {
+        return text == null || text.trim().isEmpty();
+    }
+
+    private static File writeFile(String prefix, String suffix, String content) throws IOException {
+        File file = File.createTempFile(prefix, suffix);
+        file.deleteOnExit();
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.append(content);
+            LOG.fine("Created temporary file " + file.getAbsolutePath());
+        }
+        return file;
     }
 
     /**
@@ -92,20 +105,6 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
             LOG.log(Level.WARNING, "Cannot create TLS certificate or key files", cause);
             return Collections.emptyMap();
         }
-    }
-
-    private static boolean isBlank(String text) {
-        return text == null || text.trim().isEmpty();
-    }
-
-    private static File writeFile(String prefix, String suffix, String content) throws IOException {
-        File file = File.createTempFile(prefix, suffix);
-        file.deleteOnExit();
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.append(content);
-            LOG.fine("Created temporary file " + file.getAbsolutePath());
-        }
-        return file;
     }
 
 }

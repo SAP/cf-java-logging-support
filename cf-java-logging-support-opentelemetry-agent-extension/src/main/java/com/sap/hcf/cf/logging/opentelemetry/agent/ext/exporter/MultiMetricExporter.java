@@ -24,12 +24,28 @@ class MultiMetricExporter implements MetricExporter {
     private final DefaultAggregationSelector defaultAggregationSelector;
     private final List<MetricExporter> metricExporters;
 
-    MultiMetricExporter(AggregationTemporalitySelector aggregationTemporalitySelector,
-                        DefaultAggregationSelector defaultAggregationSelector,
-                        List<MetricExporter> metricExporters) {
+    private MultiMetricExporter(AggregationTemporalitySelector aggregationTemporalitySelector,
+                                DefaultAggregationSelector defaultAggregationSelector,
+                                List<MetricExporter> metricExporters) {
         this.aggregationTemporalitySelector = aggregationTemporalitySelector;
         this.defaultAggregationSelector = defaultAggregationSelector;
         this.metricExporters = metricExporters;
+    }
+
+    static MetricExporter composite(List<MetricExporter> metricExporters, AggregationTemporalitySelector aggregationTemporalitySelector, DefaultAggregationSelector defaultAggregationSelector) {
+        if (metricExporters == null || metricExporters.isEmpty()) {
+            return NoopMetricExporter.getInstance();
+        }
+        if (metricExporters.size() == 1) {
+            return metricExporters.get(0);
+        }
+        if (aggregationTemporalitySelector == null) {
+            aggregationTemporalitySelector = metricExporters.get(0);
+        }
+        if (defaultAggregationSelector == null) {
+            defaultAggregationSelector = metricExporters.get(0);
+        }
+        return new MultiMetricExporter(aggregationTemporalitySelector, defaultAggregationSelector, metricExporters);
     }
 
     public CompletableResultCode export(Collection<MetricData> metrics) {

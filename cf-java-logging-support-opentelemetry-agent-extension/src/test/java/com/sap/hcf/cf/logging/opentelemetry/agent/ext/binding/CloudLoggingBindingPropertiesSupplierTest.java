@@ -10,10 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertTrue;
 
 public class CloudLoggingBindingPropertiesSupplierTest {
@@ -21,6 +18,13 @@ public class CloudLoggingBindingPropertiesSupplierTest {
     private static final String VALID_CREDENTIALS = "{\"ingest-otlp-endpoint\":\"test-endpoint\", \"ingest-otlp-key\":\"test-client-key\", \"ingest-otlp-cert\":\"test-client-cert\", \"server-ca\":\"test-server-cert\"}";
     private static final String USER_PROVIDED_VALID = "{\"label\":\"user-provided\", \"name\":\"test-name\", \"tags\":[\"Cloud Logging\"], \"credentials\":" + VALID_CREDENTIALS + "}";
     private static final String MANAGED_VALID = "{\"label\":\"cloud-logging\", \"name\":\"test-name\", \"tags\":[\"Cloud Logging\"], \"credentials\":" + VALID_CREDENTIALS + "}";
+
+    private static void assertFileContent(String expected, String filename) throws IOException {
+        String contents = Files.readAllLines(Paths.get(filename))
+                .stream()
+                .collect(Collectors.joining("\n"));
+        assertThat(contents, is(equalTo(expected)));
+    }
 
     @Test
     public void emptyWithoutBindings() {
@@ -113,12 +117,5 @@ public class CloudLoggingBindingPropertiesSupplierTest {
         CloudLoggingBindingPropertiesSupplier propertiesSupplier = new CloudLoggingBindingPropertiesSupplier(cfEnv);
         Map<String, String> properties = propertiesSupplier.get();
         assertTrue(properties.isEmpty());
-    }
-
-    private static void assertFileContent(String expected, String filename) throws IOException {
-        String contents = Files.readAllLines(Paths.get(filename))
-                .stream()
-                .collect(Collectors.joining("\n"));
-        assertThat(contents, is(equalTo(expected)));
     }
 }

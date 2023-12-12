@@ -12,13 +12,13 @@ import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector;
 import io.opentelemetry.sdk.metrics.export.DefaultAggregationSelector;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.internal.aggregator.AggregationUtil;
+import io.pivotal.cfenv.core.CfCredentials;
 import io.pivotal.cfenv.core.CfEnv;
 import io.pivotal.cfenv.core.CfService;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -31,13 +31,15 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
     private static final Logger LOG = Logger.getLogger(CloudLoggingMetricsExporterProvider.class.getName());
 
     private final Function<ConfigProperties, Stream<CfService>> servicesProvider;
+    private final CloudLoggingCredentials.Parser credentialParser;
 
     public CloudLoggingMetricsExporterProvider() {
-        this(config -> new CloudLoggingServicesProvider(config, new CfEnv()).get());
+        this(config -> new CloudLoggingServicesProvider(config, new CfEnv()).get(), CloudLoggingCredentials.parser());
     }
 
-    public CloudLoggingMetricsExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider) {
+    CloudLoggingMetricsExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider, CloudLoggingCredentials.Parser credentialParser) {
         this.servicesProvider = serviceProvider;
+        this.credentialParser = credentialParser;
     }
 
     private static String getCompression(ConfigProperties config) {
@@ -99,12 +101,13 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
                 .map(svc -> createExporter(config, svc))
                 .filter(exp -> !(exp instanceof NoopMetricExporter))
                 .collect(Collectors.toList());
-        return new MultiMetricExporter(getAggregationTemporalitySelector(config), getDefaultAggregationSelector(config), exporters);
+        return MultiMetricExporter.composite(exporters, getAggregationTemporalitySelector(config), getDefaultAggregationSelector(config));
     }
 
     private MetricExporter createExporter(ConfigProperties config, CfService service) {
         LOG.info("Creating metrics exporter for service binding " + service.getName() + " (" + service.getLabel() + ")");
-        CloudLoggingCredentials credentials = CloudLoggingCredentials.parseCredentials(service.getCredentials());
+        CfCredentials cfCredentials = service.getCredentials();
+        CloudLoggingCredentials credentials = credentialParser.parse(cfCredentials);
         if (!credentials.validate()) {
             return NoopMetricExporter.getInstance();
         }

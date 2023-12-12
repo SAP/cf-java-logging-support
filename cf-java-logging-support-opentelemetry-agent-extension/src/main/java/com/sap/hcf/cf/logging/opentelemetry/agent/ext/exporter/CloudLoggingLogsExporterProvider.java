@@ -11,7 +11,6 @@ import io.pivotal.cfenv.core.CfService;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -22,13 +21,15 @@ public class CloudLoggingLogsExporterProvider implements ConfigurableLogRecordEx
     private static final Logger LOG = Logger.getLogger(CloudLoggingLogsExporterProvider.class.getName());
 
     private final Function<ConfigProperties, Stream<CfService>> servicesProvider;
+    private final CloudLoggingCredentials.Parser credentialParser;
 
     public CloudLoggingLogsExporterProvider() {
-        this(config -> new CloudLoggingServicesProvider(config, new CfEnv()).get());
+        this(config -> new CloudLoggingServicesProvider(config, new CfEnv()).get(), CloudLoggingCredentials.parser());
     }
 
-    public CloudLoggingLogsExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider) {
+    CloudLoggingLogsExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider, CloudLoggingCredentials.Parser credentialParser) {
         this.servicesProvider = serviceProvider;
+        this.credentialParser = credentialParser;
     }
 
     private static String getCompression(ConfigProperties config) {
@@ -57,7 +58,7 @@ public class CloudLoggingLogsExporterProvider implements ConfigurableLogRecordEx
 
     private LogRecordExporter createExporter(ConfigProperties config, CfService service) {
         LOG.info("Creating logs exporter for service binding " + service.getName() + " (" + service.getLabel() + ")");
-        CloudLoggingCredentials credentials = CloudLoggingCredentials.parseCredentials(service.getCredentials());
+        CloudLoggingCredentials credentials = credentialParser.parse(service.getCredentials());
         if (!credentials.validate()) {
             return NoopLogRecordExporter.getInstance();
         }

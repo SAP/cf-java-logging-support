@@ -1,20 +1,17 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
-import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
-import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporterBuilder;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterProvider;
 import io.opentelemetry.sdk.common.export.RetryPolicy;
-import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import io.pivotal.cfenv.core.CfCredentials;
 import io.pivotal.cfenv.core.CfEnv;
 import io.pivotal.cfenv.core.CfService;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -25,13 +22,15 @@ public class CloudLoggingSpanExporterProvider implements ConfigurableSpanExporte
     private static final Logger LOG = Logger.getLogger(CloudLoggingSpanExporterProvider.class.getName());
 
     private final Function<ConfigProperties, Stream<CfService>> servicesProvider;
+    private final CloudLoggingCredentials.Parser credentialParser;
 
     public CloudLoggingSpanExporterProvider() {
-        this(config -> new CloudLoggingServicesProvider(config, new CfEnv()).get());
+        this(config -> new CloudLoggingServicesProvider(config, new CfEnv()).get(), CloudLoggingCredentials.parser());
     }
 
-    public CloudLoggingSpanExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider) {
+    CloudLoggingSpanExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider, CloudLoggingCredentials.Parser credentialParser) {
         this.servicesProvider = serviceProvider;
+        this.credentialParser = credentialParser;
     }
 
     private static String getCompression(ConfigProperties config) {
@@ -60,7 +59,8 @@ public class CloudLoggingSpanExporterProvider implements ConfigurableSpanExporte
 
     private SpanExporter createExporter(ConfigProperties config, CfService service) {
         LOG.info("Creating span exporter for service binding " + service.getName() + " (" + service.getLabel() + ")");
-        CloudLoggingCredentials credentials = CloudLoggingCredentials.parseCredentials(service.getCredentials());
+        CfCredentials cfCredentials = service.getCredentials();
+        CloudLoggingCredentials credentials = credentialParser.parse(cfCredentials);
         if (!credentials.validate()) {
             return NoopSpanExporter.getInstance();
         }
