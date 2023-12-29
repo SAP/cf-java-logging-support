@@ -45,8 +45,10 @@ public class CloudFoundryResourceCustomizerTest {
         applicationData.put("application_name", "test-application");
         applicationData.put("space_name", "test-space");
         applicationData.put("organization_name", "test-org");
-        applicationData.put("source_id", "test-source");
+        applicationData.put("application_id", "test-app-id");
         applicationData.put("instance_index", 42);
+        applicationData.put("process_id", "test-process-id");
+        applicationData.put("process_type", "test-process-type");
         when(cfEnv.getApp()).thenReturn(new CfApplication(applicationData));
 
         CloudFoundryResourceCustomizer customizer = new CloudFoundryResourceCustomizer(cfEnv);
@@ -55,7 +57,9 @@ public class CloudFoundryResourceCustomizerTest {
         assertEquals("test-application", resource.getAttribute(AttributeKey.stringKey("sap.cf.app_name")));
         assertEquals("test-space", resource.getAttribute(AttributeKey.stringKey("sap.cf.space_name")));
         assertEquals("test-org", resource.getAttribute(AttributeKey.stringKey("sap.cf.org_name")));
-        assertEquals("test-source", resource.getAttribute(AttributeKey.stringKey("sap.cf.source_id")));
+        assertEquals("test-app-id", resource.getAttribute(AttributeKey.stringKey("sap.cf.source_id")));
         assertEquals(42, resource.getAttribute(AttributeKey.longKey("sap.cf.instance_id")).longValue());
+        assertEquals("test-process-id", resource.getAttribute(AttributeKey.stringKey("sap.cf.process.id")));
+        assertEquals("test-process-type", resource.getAttribute(AttributeKey.stringKey("sap.cf.process.type")));
     }
 }

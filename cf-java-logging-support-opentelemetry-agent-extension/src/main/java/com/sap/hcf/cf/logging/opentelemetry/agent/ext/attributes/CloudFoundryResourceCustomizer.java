@@ -34,7 +34,7 @@ public class CloudFoundryResourceCustomizer implements BiFunction<Resource, Conf
         CfApplication cfApp = cfEnv.getApp();
         ResourceBuilder rb = Resource.builder();
         rb.put("service.name", cfApp.getApplicationName());
-        rb.put("sap.cf.source_id", getString(cfApp, "source_id"));
+        rb.put("sap.cf.source_id", cfApp.getApplicationId());
         rb.put("sap.cf.instance_id", cfApp.getInstanceIndex());
         rb.put("sap.cf.app_id", cfApp.getApplicationId());
         rb.put("sap.cf.app_name", cfApp.getApplicationName());
@@ -42,6 +42,8 @@ public class CloudFoundryResourceCustomizer implements BiFunction<Resource, Conf
         rb.put("sap.cf.space_name", cfApp.getSpaceName());
         rb.put("sap.cf.org_id", getString(cfApp, "organization_id"));
         rb.put("sap.cf.org_name", getString(cfApp, "organization_name"));
+        rb.put("sap.cf.process.id", getString(cfApp, "process_id"));
+        rb.put("sap.cf.process.type", getString(cfApp, "process_type"));
         return rb.build();
     }
 
