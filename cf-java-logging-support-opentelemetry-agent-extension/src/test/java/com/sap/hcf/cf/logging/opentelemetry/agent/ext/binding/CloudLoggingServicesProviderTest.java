@@ -1,5 +1,6 @@
-package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
+package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudLoggingServicesProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.pivotal.cfenv.core.CfEnv;
 import io.pivotal.cfenv.core.CfService;

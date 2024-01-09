@@ -1,5 +1,7 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.pivotal.cfenv.core.CfEnv;
 import io.pivotal.cfenv.core.CfService;
 
@@ -21,13 +23,16 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
     private static final String OTLP_CLIENT_KEY = "ingest-otlp-key";
     private static final String OTLP_CLIENT_CERT = "ingest-otlp-cert";
     private static final String OTLP_SERVER_CERT = "server-ca";
-    private static final String CLOUD_LOGGING_LABEL = System.getProperty("com.sap.otel.extension.cloud-logging.label", "cloud-logging");
-    private static final String CLOUD_LOGGING_TAG = System.getProperty("com.sap.otel.extension.cloud-logging.tag", "Cloud Logging");
-    private static final String USER_PROVIDED_LABEL = "user-provided";
-    private final CfEnv cfEnv;
+
+    private final CloudLoggingServicesProvider cloudLoggingServicesProvider;
 
     public CloudLoggingBindingPropertiesSupplier(CfEnv cfEnv) {
-        this.cfEnv = cfEnv;
+        Map<String, String> defaults = new HashMap<>();
+        defaults.put("com.sap.otel.extension.cloud-logging.label", "cloud-logging");
+        defaults.put("com.sap.otel.extension.cloud-logging.tag", "Cloud Logging");
+        defaults.put("otel.javaagent.extension.sap.cf.binding.user-provided.label", "user-provided");
+        ConfigProperties configProperties = DefaultConfigProperties.create(defaults);
+        this.cloudLoggingServicesProvider = new CloudLoggingServicesProvider(configProperties, cfEnv);
     }
 
     private static boolean isBlank(String text) {
@@ -54,10 +59,7 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
      */
     @Override
     public Map<String, String> get() {
-        Stream<CfService> userProvided = cfEnv.findServicesByLabel(USER_PROVIDED_LABEL).stream();
-        Stream<CfService> managed = cfEnv.findServicesByLabel(CLOUD_LOGGING_LABEL).stream();
-        return Stream.concat(userProvided, managed)
-                .filter(svc -> svc.existsByTagIgnoreCase(CLOUD_LOGGING_TAG))
+        return cloudLoggingServicesProvider.get()
                 .findFirst()
                 .map(this::createEndpointConfiguration).orElseGet(Collections::emptyMap);
     }

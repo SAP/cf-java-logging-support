@@ -1,5 +1,6 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudLoggingServicesProvider;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;

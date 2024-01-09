@@ -1,4 +1,4 @@
-package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
+package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.pivotal.cfenv.core.CfEnv;
@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-class CloudLoggingServicesProvider implements Supplier<Stream<CfService>> {
+public class CloudLoggingServicesProvider implements Supplier<Stream<CfService>> {
 
     private static final String DEFAULT_USER_PROVIDED_LABEL = "user-provided";
     private static final String DEFAULT_CLOUD_LOGGING_LABEL = "cloud-logging";
