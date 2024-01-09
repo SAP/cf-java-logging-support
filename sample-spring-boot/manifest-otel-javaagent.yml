@@ -15,7 +15,7 @@ applications:
       LOG_REFERER: false
       JBP_CONFIG_COMPONENTS: "jres: ['com.sap.xs.java.buildpack.jre.SAPMachineJRE']"
       JBP_CONFIG_SAP_MACHINE_JRE: '{ use_offline_repository: false, version: 17.+ }'
-      JBP_CONFIG_JAVA_OPTS: '[from_environment: false, java_opts: ''-javaagent:BOOT-INF/lib/opentelemetry-javaagent-1.31.0.jar -Dotel.javaagent.extensions=BOOT-INF/lib/cf-java-logging-support-opentelemetry-agent-extension-3.8.0.jar -Dotel.logs.exporter=otlp -Dotel.instrumentation.logback-appender.experimental.capture-mdc-attributes=* -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true -Dotel.instrumentation.logback-appender.experimental.capture-code-attributes=true -Dotel.instrumentation.logback-appender.experimental-log-attributes=true -Dotel.experimental.resource.disabled-keys=process.command_line,process.command_args,process.executable.path'']'
+      JBP_CONFIG_JAVA_OPTS: '[from_environment: false, java_opts: ''-javaagent:BOOT-INF/lib/opentelemetry-javaagent-1.31.0.jar -Dotel.javaagent.extensions=BOOT-INF/lib/cf-java-logging-support-opentelemetry-agent-extension-3.8.0.jar -Dotel.logs.exporter=cloud-logging,otlp -Dotel.instrumentation.logback-appender.experimental.capture-mdc-attributes=* -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true -Dotel.instrumentation.logback-appender.experimental.capture-code-attributes=true -Dotel.instrumentation.logback-appender.experimental-log-attributes=true -Dotel.experimental.resource.disabled-keys=process.command_line,process.command_args,process.executable.path'']'
     services:
       - cls
 
