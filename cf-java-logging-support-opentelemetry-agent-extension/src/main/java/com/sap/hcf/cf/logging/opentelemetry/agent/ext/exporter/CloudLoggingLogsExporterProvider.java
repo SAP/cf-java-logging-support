@@ -7,7 +7,6 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.logs.ConfigurableLogRecordExporterProvider;
 import io.opentelemetry.sdk.common.export.RetryPolicy;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
-import io.pivotal.cfenv.core.CfEnv;
 import io.pivotal.cfenv.core.CfService;
 
 import java.time.Duration;
@@ -25,7 +24,7 @@ public class CloudLoggingLogsExporterProvider implements ConfigurableLogRecordEx
     private final CloudLoggingCredentials.Parser credentialParser;
 
     public CloudLoggingLogsExporterProvider() {
-        this(config -> new CloudLoggingServicesProvider(config, new CfEnv()).get(), CloudLoggingCredentials.parser());
+        this(config -> new CloudLoggingServicesProvider(config).get(), CloudLoggingCredentials.parser());
     }
 
     CloudLoggingLogsExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider, CloudLoggingCredentials.Parser credentialParser) {

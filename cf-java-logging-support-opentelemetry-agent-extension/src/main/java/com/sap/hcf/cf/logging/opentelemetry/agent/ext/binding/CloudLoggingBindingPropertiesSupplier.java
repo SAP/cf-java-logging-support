@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<String, String>> {
 
@@ -26,13 +25,20 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
 
     private final CloudLoggingServicesProvider cloudLoggingServicesProvider;
 
-    public CloudLoggingBindingPropertiesSupplier(CfEnv cfEnv) {
+    public CloudLoggingBindingPropertiesSupplier() {
+        this(new CloudLoggingServicesProvider(getDefaultProperties(), new CloudFoundryServicesAdapter(new CfEnv())));
+    }
+
+    CloudLoggingBindingPropertiesSupplier(CloudLoggingServicesProvider cloudLoggingServicesProvider) {
+        this.cloudLoggingServicesProvider = cloudLoggingServicesProvider;
+    }
+
+    private static ConfigProperties getDefaultProperties() {
         Map<String, String> defaults = new HashMap<>();
         defaults.put("com.sap.otel.extension.cloud-logging.label", "cloud-logging");
         defaults.put("com.sap.otel.extension.cloud-logging.tag", "Cloud Logging");
         defaults.put("otel.javaagent.extension.sap.cf.binding.user-provided.label", "user-provided");
-        ConfigProperties configProperties = DefaultConfigProperties.create(defaults);
-        this.cloudLoggingServicesProvider = new CloudLoggingServicesProvider(configProperties, cfEnv);
+        return DefaultConfigProperties.create(defaults);
     }
 
     private static boolean isBlank(String text) {

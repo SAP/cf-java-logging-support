@@ -6,8 +6,11 @@ import io.pivotal.cfenv.core.CfService;
 
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 
 public class CloudLoggingServicesProvider implements Supplier<Stream<CfService>> {
 
@@ -17,15 +20,14 @@ public class CloudLoggingServicesProvider implements Supplier<Stream<CfService>>
 
     private final List<CfService> services;
 
-    public CloudLoggingServicesProvider(ConfigProperties config, CfEnv cfEnv) {
-        String userProvidedLabel = getUserProvidedLabel(config);
-        String cloudLoggingLabel = getCloudLoggingLabel(config);
-        String cloudLoggingTag = getCloudLoggingTag(config);
-        List<CfService> userProvided = cfEnv.findServicesByLabel(userProvidedLabel);
-        List<CfService> managed = cfEnv.findServicesByLabel(cloudLoggingLabel);
-        this.services = Stream.concat(userProvided.stream(), managed.stream())
-                .filter(svc -> svc.existsByTagIgnoreCase(cloudLoggingTag))
-                .collect(Collectors.toList());
+    public CloudLoggingServicesProvider(ConfigProperties config) {
+        this(config, new CloudFoundryServicesAdapter(new CfEnv()));
+    }
+
+    CloudLoggingServicesProvider(ConfigProperties config, CloudFoundryServicesAdapter adapter) {
+        List<String> serviceLabels = asList(getUserProvidedLabel(config), getCloudLoggingLabel(config));
+        List<String> serviceTags = singletonList(getCloudLoggingTag(config));
+        this.services = adapter.stream(serviceLabels, serviceTags).collect(toList());
     }
 
     private String getUserProvidedLabel(ConfigProperties config) {

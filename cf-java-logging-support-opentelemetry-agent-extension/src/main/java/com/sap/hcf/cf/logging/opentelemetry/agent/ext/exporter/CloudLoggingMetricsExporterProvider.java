@@ -14,7 +14,6 @@ import io.opentelemetry.sdk.metrics.export.DefaultAggregationSelector;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.internal.aggregator.AggregationUtil;
 import io.pivotal.cfenv.core.CfCredentials;
-import io.pivotal.cfenv.core.CfEnv;
 import io.pivotal.cfenv.core.CfService;
 
 import java.time.Duration;
@@ -35,7 +34,7 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
     private final CloudLoggingCredentials.Parser credentialParser;
 
     public CloudLoggingMetricsExporterProvider() {
-        this(config -> new CloudLoggingServicesProvider(config, new CfEnv()).get(), CloudLoggingCredentials.parser());
+        this(config -> new CloudLoggingServicesProvider(config).get(), CloudLoggingCredentials.parser());
     }
 
     CloudLoggingMetricsExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider, CloudLoggingCredentials.Parser credentialParser) {

@@ -1,1 +1,2 @@
 com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter.CloudLoggingMetricsExporterProvider
+com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter.DynatraceMetricsExporterProvider

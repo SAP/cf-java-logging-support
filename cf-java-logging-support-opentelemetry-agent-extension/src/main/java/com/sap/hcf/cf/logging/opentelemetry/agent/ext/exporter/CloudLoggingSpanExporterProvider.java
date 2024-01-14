@@ -8,7 +8,6 @@ import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterPro
 import io.opentelemetry.sdk.common.export.RetryPolicy;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.pivotal.cfenv.core.CfCredentials;
-import io.pivotal.cfenv.core.CfEnv;
 import io.pivotal.cfenv.core.CfService;
 
 import java.time.Duration;
@@ -26,7 +25,7 @@ public class CloudLoggingSpanExporterProvider implements ConfigurableSpanExporte
     private final CloudLoggingCredentials.Parser credentialParser;
 
     public CloudLoggingSpanExporterProvider() {
-        this(config -> new CloudLoggingServicesProvider(config, new CfEnv()).get(), CloudLoggingCredentials.parser());
+        this(config -> new CloudLoggingServicesProvider(config).get(), CloudLoggingCredentials.parser());
     }
 
     CloudLoggingSpanExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider, CloudLoggingCredentials.Parser credentialParser) {
