@@ -1,13 +1,14 @@
 # OpenTelemetry Java Agent Extension for SAP Cloud Logging
 
 This module provides an extension for the [OpenTelemetry Java Agent](https://opentelemetry.io/docs/instrumentation/java/automatic/).
-The extension scans the service bindings of an application for [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging).
-If such a binding is found, the OpenTelemetry Java Agent is configured to ship observability data to that service.
+The extension scans the service bindings of an application for [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging) and [Dynatrace](https://docs.dynatrace.com/docs/setup-and-configuration/setup-on-container-platforms/cloud-foundry/deploy-oneagent-on-sap-cloud-platform-for-application-only-monitoring).
+If such a binding is found, the OpenTelemetry Java Agent is configured to ship observability data to those services.
 Thus, this extension provides a convenient auto-instrumentation for Java applications running on SAP BTP.
 
 The extension provides the following main features:
 
 * additional exporters for logs, metrics and traces for [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging)
+* additional exporter for metrics for [Dynatrace](https://docs.dynatrace.com/docs/setup-and-configuration/setup-on-container-platforms/cloud-foundry/deploy-oneagent-on-sap-cloud-platform-for-application-only-monitoring)
 * auto-configuration of the generic OpenTelemetry connection to [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging)
 * adding resource attributes describing the CF application
 
@@ -40,17 +41,17 @@ See the [example manifest](../sample-spring-boot/manifest-otel-javaagent.yml), h
 
 Once the agent is attached to the JVM with the extension in place, there are two ways, which can be used to send data to [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging):
 
-1. Use the `cloud-logging` exporters explicitly as provided by the extension.
+1. Use the `cloud-logging` and/or `dynatrace` exporters explicitly as provided by the extension.
 This can be achieved via system properties or environment variables:
 ```sh
 -Dotel.logs.exporter=cloud-logging \
--Dotel.metrics.exporter=cloud-logging \
+-Dotel.metrics.exporter=cloud-logging,dynatrace \
 -Dotel.traces.exporter=cloud-logging
 
 #or
 
 export OTEL_LOGS_EXPORTER=cloud-logging
-export OTEL_METRICS_EXPORTER=cloud-logging
+export OTEL_METRICS_EXPORTER=cloud-logging,dynatrace
 export OTEL_TRACES_EXPORTER=cloud-logging
 java #...
 ```
@@ -59,7 +60,7 @@ java #...
 
 ```sh
 -Dotel.logs.exporter=otlp \
--Dotel.metrics.exporter=otlp # default value \
+-Dotel.metrics.exporter=otlp \ # default value 
 -Dotel.traces.exporter=otlp # default value
 
 #or
@@ -75,8 +76,8 @@ That means, without any configuration the agent with the extension will forward 
 The difference between `cloud-logging` and `otlp` exporters are explained in an own [section](#implementation-differences-between-cloud-logging-and-otlp-exporter).
 The benefit of the `cloud-logging` exporter is, that it can be combined with a different configuration of the `otlp` exporter.
 
-For the instrumentation to send observability data to [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging), the application needs to be bound to a corresponding service instance.
-The service instance can be either managed or [user-provided](#using-user-provided-service-instances).
+For the instrumentation to send observability data to [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging) or [Dynatrace](https://docs.dynatrace.com/docs/setup-and-configuration/setup-on-container-platforms/cloud-foundry/deploy-oneagent-on-sap-cloud-platform-for-application-only-monitoring), the application needs to be bound to a corresponding service instances.
+The service instances can be either managed or [user-provided](#using-user-provided-service-instances).
 
 ## Configuration
 
@@ -103,6 +104,9 @@ The extension itself can be configured by specifying the following system proper
 |----------|---------------|---------|
 | `otel.javaagent.extension.sap.cf.binding.cloud-logging.label` or `com.sap.otel.extension.cloud-logging.label` | `cloud-logging` | The label of the managed service binding to bind to. |
 | `otel.javaagent.extension.sap.cf.binding.cloud-logging.tag` or `com.sap.otel.extension.cloud-logging.tag` | `Cloud Logging` | The tag of any service binding (managed or user-provided) to bind to. |
+| `otel.javaagent.extension.sap.cf.binding.dynatrace.label` | `dynatrace` | The label of the managed service binding to bind to. |
+| `otel.javaagent.extension.sap.cf.binding.dynatrace.tag` | `dynatrace` | The tag of any service binding (managed or user-provided) to bind to. |
+| `otel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name` | | The name of the field containing the Dynatrace API token within the service binding credentials. This is required to send metrics to Dynatrace. |
 | `otel.javaagent.extension.sap.cf.binding.user-provided.label` | `user-provided` | The label of a user-provided service binding to bind to. Note, this label is defined by the Cloud Foundry instance. |
 | `otel.javaagent.extension.sap.cf.resource.enabled` | `true` | Whether to add CF resource attributes to all events. |
 
@@ -110,9 +114,9 @@ The extension itself can be configured by specifying the following system proper
 Each `otel.javaagent.extension.sap.*` property can also be provided as environment variable `OTEL_JAVAAGENT_EXTENSION_SAP_*`.
 
 The extension will scan the environment variable `VCAP_SERVICES` for CF service bindings.
-User-provided bindings will take precedence over managed bindings of the configured label ("cloud-logging" by default).
-All matching bindings are filtered for the configured tag ("Cloud Logging" by default).
-The first binding will be taken for configuration for the OpenTelemetry exporter.
+User-provided bindings will take precedence over managed bindings of the configured label ("cloud-logging" or "dynatrace" by default).
+All matching bindings are filtered for the configured tag ("Cloud Logging" od "dynatrace" by default).
+The first Cloud Logging binding will be taken for configuration for the standard OpenTelemetry (otlp) exporter.
 Preferring user-provided services over managed service instances allows better control of the binding properties, e.g. syslog drains.
 
 ### Recommended Agent Configuration
@@ -140,14 +144,16 @@ The [OpenTelemetry Java Instrumentation project](https://github.com/open-telemet
 
 ## Using User-Provided Service Instances
 
+### SAP Cloud Logging
+
 The extension provides support not only for managed service instance of [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging) but also for user-provided service instances.
 This helps to fine-tune the configuration, e.g. leave out or reconfigure the syslog drain.
 Furthermore, this helps on sharing service instances across CF orgs or landscapes.
 
-The extension requires four fields in the user-provided service credentials and needs to be tagged with the `com.sap.otel.extension.cloud-logging.tag` (default: `Cloud Logging`) documented in section [Configuration](#configuration).
+The extension requires four fields in the user-provided service credentials and needs to be tagged with the `otel.javaagent.extension.sap.cf.binding.cloud-logging.tag` (default: `Cloud Logging`) documented in section [Configuration](#configuration).
 
 | Field name | Contents |
-|------------|---------|
+|------------|----------|
 | `ingest-otlp-endpoint` | The OTLP endpoint including port. It will be prefixed with `https://`. |
 | `ingest-otlp-key` | The mTLS client key in PCKS#8 format. Line breaks as `\n`. |
 | `ingest-otlp-cert`| The mTLS client certificate in PEM format matching the client key. Line breaks as `\n`. |
@@ -171,6 +177,31 @@ Using this file, you can create the required user-provided service:
 Note, that you can easily feed arbitrary credentials to the extension.
 It does not need to be [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging).
 You can even change the tag using the configuration parameters of the extension.
+
+### Dynatrace
+
+SAP BTP internally offers a managed Dynatrace service, that is recognized by the extension.
+Externally, user-provided service instances need to be created.
+The [Dynatrace documentation](https://docs.dynatrace.com/docs/setup-and-configuration/setup-on-container-platforms/cloud-foundry/deploy-oneagent-on-sap-cloud-platform-for-application-only-monitoring) explains, how to generate the necessary access url and tokens.
+The extension requires two fields in the user-provided service credentials and needs to be tagged with the `otel.javaagent.extension.sap.cf.binding.dynatrace.tag` (default: `dynatrace`) documented in section [Configuration](#configuration).
+
+| Field name | Contents |
+|------------|----------|
+| `apiurl` | The Dynatrace API endpoint, e.g. `https://apm.example.com/e/<some-uuid>/api`. This url will be appended with `/v2/otlp/v1/metrics` to create the full endpoint url. |
+| `<your_token_field>` | The API token to be used with the above endpoint. Ensure, that it has the required permissions to ingest data over the endpoint. |
+
+Do not forget to configure the name chosen for `<your_token_field>` via the respective configuration property:
+
+```sh
+java #... \
+-Dotel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name=<your_token_field> \
+# ...
+
+# or
+
+OTEL_JAVAAGENT_EXTENSION_SAP_CF_BINDING_DYNATRACE_METRICS_TOKEN-NAME=<your_token_field>
+java #...
+```
 
 ## Implementation Differences between Cloud-Logging and OTLP Exporter
 
