@@ -92,7 +92,7 @@ public class DynatraceMetricsExporterProviderTest {
         when(servicesProvider.apply(config)).thenReturn(dynatraceService);
         MetricExporter exporter = exporterProvider.createExporter(config);
         assertThat(exporter, is(notNullValue()));
-        assertThat(exporter.toString(), both(containsString("OtlpGrpcMetricExporter")).and(containsString("https://example.dt/api/v2/otlp/v1/metrics,")));
+        assertThat(exporter.toString(), both(containsString("OtlpHttpMetricExporter")).and(containsString("https://example.dt/api/v2/otlp/v1/metrics,")));
     }
 
 }

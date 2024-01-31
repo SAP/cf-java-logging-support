@@ -1,6 +1,8 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.DynatraceServiceProvider;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -101,10 +103,11 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
             return NoopMetricExporter.getInstance();
         }
 
-        OtlpGrpcMetricExporterBuilder builder = OtlpGrpcMetricExporter.builder();
+        OtlpHttpMetricExporterBuilder builder = OtlpHttpMetricExporter.builder();
+        System.out.println(apiToken);
         builder.setEndpoint(apiUrl + DT_APIURL_METRICS_SUFFIX)
                 .setCompression(getCompression(config))
-                .addHeader("Authorization", "ApiToken " + apiToken)
+                .addHeader("Authorization", "Api-Token " + apiToken)
                 .setRetryPolicy(RetryPolicy.getDefault())
                 .setAggregationTemporalitySelector(AggregationTemporalitySelector.alwaysCumulative())
                 .setDefaultAggregationSelector(getDefaultAggregationSelector(config));
