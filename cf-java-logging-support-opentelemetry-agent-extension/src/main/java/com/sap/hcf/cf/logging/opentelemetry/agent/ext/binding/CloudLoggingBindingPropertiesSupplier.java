@@ -105,8 +105,8 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
             properties.put("otel.exporter.otlp.client.certificate", clientCertFile.getAbsolutePath());
             properties.put("otel.exporter.otlp.certificate", serverCertFile.getAbsolutePath());
 
-            properties.put("otel.exporter.protocol", "grpc");
-            properties.put("otel.exporter.compression", "gzip");
+            properties.put("otel.exporter.otlp.protocol", "grpc");
+            properties.put("otel.exporter.otlp.compression", "gzip");
 
             return properties;
         } catch (IOException cause) {
