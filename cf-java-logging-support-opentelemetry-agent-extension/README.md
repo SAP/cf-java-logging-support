@@ -1,4 +1,4 @@
-# OpenTelemetry Java Agent Extension for SAP Cloud Logging
+# OpenTelemetry Java Agent Extension for SAP BTP Observability
 
 This module provides an extension for the [OpenTelemetry Java Agent](https://opentelemetry.io/docs/instrumentation/java/automatic/).
 The extension scans the service bindings of an application for [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging) and [Dynatrace](https://docs.dynatrace.com/docs/setup-and-configuration/setup-on-container-platforms/cloud-foundry/deploy-oneagent-on-sap-cloud-platform-for-application-only-monitoring).
