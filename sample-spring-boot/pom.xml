@@ -14,10 +14,7 @@
 	</parent>
 
 	<properties>
-		<java.version>11</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
 		<spring.boot.version>2.7.9</spring.boot.version>
 		<keytool.plugin.version>1.5</keytool.plugin.version>
 		<keystore.token.store_password>0bzhBRNUXBR5
