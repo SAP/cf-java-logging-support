@@ -1,9 +1,8 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.sap.hcp.cf.logging.common.LogContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * <p>

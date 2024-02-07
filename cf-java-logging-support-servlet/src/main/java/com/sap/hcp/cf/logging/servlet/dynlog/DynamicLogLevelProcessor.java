@@ -1,15 +1,14 @@
 package com.sap.hcp.cf.logging.servlet.dynlog;
 
-import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
-import java.util.List;
-
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.sap.hcp.cf.logging.common.helper.DynamicLogLevelHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.sap.hcp.cf.logging.common.helper.DynamicLogLevelHelper;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class provides a mechanism that reads a token from an

@@ -1,6 +1,6 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import javax.servlet.Filter;
+import jakarta.servlet.Filter;
 
 /**
  * The {@link StaticLevelRequestLoggingFilter} is an example of a customized

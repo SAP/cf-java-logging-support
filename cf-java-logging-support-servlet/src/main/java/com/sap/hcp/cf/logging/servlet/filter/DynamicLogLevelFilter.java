@@ -1,19 +1,17 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.sap.hcp.cf.logging.servlet.dynlog.DynLogEnvironment;
+import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelConfiguration;
+import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelProcessor;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.ConcurrentInitializer;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sap.hcp.cf.logging.servlet.dynlog.DynLogEnvironment;
-import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelConfiguration;
-import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelProcessor;
+import java.util.Optional;
 
 /**
  * <p>

@@ -1,23 +1,21 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import static com.sap.hcp.cf.logging.servlet.filter.HttpHeaderUtilities.getHeaderValue;
-
-import java.util.Collections;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-
 import com.sap.hcp.cf.logging.common.Defaults;
 import com.sap.hcp.cf.logging.common.Fields;
 import com.sap.hcp.cf.logging.common.LongValue;
 import com.sap.hcp.cf.logging.common.Markers;
 import com.sap.hcp.cf.logging.common.request.HttpHeaders;
 import com.sap.hcp.cf.logging.common.request.RequestRecord;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
+import java.util.Collections;
+import java.util.Map;
+
+import static com.sap.hcp.cf.logging.servlet.filter.HttpHeaderUtilities.getHeaderValue;
 
 public class RequestLogger {
 

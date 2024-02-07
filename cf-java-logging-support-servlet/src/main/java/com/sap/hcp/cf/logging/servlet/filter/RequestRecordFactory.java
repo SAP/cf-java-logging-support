@@ -1,10 +1,5 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import static com.sap.hcp.cf.logging.common.request.RequestRecordBuilder.requestRecord;
-import static com.sap.hcp.cf.logging.servlet.filter.HttpHeaderUtilities.getHeaderValue;
-
-import javax.servlet.http.HttpServletRequest;
-
 import com.sap.hcp.cf.logging.common.Defaults;
 import com.sap.hcp.cf.logging.common.Fields;
 import com.sap.hcp.cf.logging.common.LogOptionalFieldsSettings;
@@ -12,6 +7,10 @@ import com.sap.hcp.cf.logging.common.request.HttpHeader;
 import com.sap.hcp.cf.logging.common.request.HttpHeaders;
 import com.sap.hcp.cf.logging.common.request.RequestRecord;
 import com.sap.hcp.cf.logging.common.request.RequestRecordBuilder;
+import jakarta.servlet.http.HttpServletRequest;
+
+import static com.sap.hcp.cf.logging.common.request.RequestRecordBuilder.requestRecord;
+import static com.sap.hcp.cf.logging.servlet.filter.HttpHeaderUtilities.getHeaderValue;
 
 public class RequestRecordFactory {
 

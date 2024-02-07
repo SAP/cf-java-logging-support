@@ -12,7 +12,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.servlet.DispatcherType;
+import jakarta.servlet.DispatcherType;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;

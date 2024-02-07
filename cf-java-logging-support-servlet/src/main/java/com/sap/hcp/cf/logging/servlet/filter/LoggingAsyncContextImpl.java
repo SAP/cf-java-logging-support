@@ -1,18 +1,11 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
+import jakarta.servlet.*;
+import org.slf4j.MDC;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-
-import javax.servlet.AsyncContext;
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
-import org.slf4j.MDC;
 
 public class LoggingAsyncContextImpl implements AsyncContext {
 

@@ -1,9 +1,9 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import java.io.IOException;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletInputStream;
 
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
+import java.io.IOException;
 
 /**
  *

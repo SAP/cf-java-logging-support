@@ -1,8 +1,7 @@
 package com.sap.hcp.cf.logging.servlet.dynlog;
 
-import javax.servlet.ServletException;
-
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import jakarta.servlet.ServletException;
 
 public class DynamicLogLevelException extends ServletException {
 

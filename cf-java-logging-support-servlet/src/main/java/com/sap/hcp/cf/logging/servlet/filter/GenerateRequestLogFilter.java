@@ -1,17 +1,15 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import java.io.IOException;
-
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.MDC;
-
 import com.sap.hcp.cf.logging.common.LogOptionalFieldsSettings;
 import com.sap.hcp.cf.logging.common.request.RequestRecord;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.MDC;
+
+import java.io.IOException;
 
 /**
  * The {@link GenerateRequestLogFilter} writes a log message for each incoming

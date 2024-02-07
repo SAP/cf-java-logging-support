@@ -1,5 +1,9 @@
 package com.sap.hcp.cf.logging.servlet.dynlog;
 
+import com.sap.hcp.cf.logging.common.helper.Environment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -7,11 +11,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.sap.hcp.cf.logging.common.helper.Environment;
 
 public class PublicKeyReader {
 

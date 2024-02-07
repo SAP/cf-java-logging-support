@@ -1,11 +1,10 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
+import jakarta.servlet.Filter;
+import org.slf4j.MDC;
+
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
-
-import javax.servlet.Filter;
-
-import org.slf4j.MDC;
 
 /**
  * <p>

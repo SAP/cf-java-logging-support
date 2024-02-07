@@ -131,7 +131,6 @@
         <module>cf-java-logging-support-logback</module>
         <module>cf-java-logging-support-log4j2</module>
         <module>cf-java-logging-support-servlet</module>
-        <module>cf-java-logging-support-servlet-jakarta</module>
         <module>cf-java-logging-support-opentelemetry-agent-extension</module>
         <module>sample-spring-boot</module>
     </modules>

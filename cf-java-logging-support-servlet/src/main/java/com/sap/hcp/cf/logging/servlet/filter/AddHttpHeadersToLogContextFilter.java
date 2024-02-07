@@ -1,7 +1,10 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import static java.util.Collections.unmodifiableList;
-import static java.util.stream.Collectors.toList;
+import com.sap.hcp.cf.logging.common.LogContext;
+import com.sap.hcp.cf.logging.common.request.HttpHeader;
+import com.sap.hcp.cf.logging.common.request.HttpHeaders;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,12 +12,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.sap.hcp.cf.logging.common.LogContext;
-import com.sap.hcp.cf.logging.common.request.HttpHeader;
-import com.sap.hcp.cf.logging.common.request.HttpHeaders;
+import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Extracts the HTTP headers from the request and adds them to the logging
