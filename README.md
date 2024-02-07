@@ -177,8 +177,7 @@ Here are the minimal configurations you'd need:
 
 ``` xml
 <Configuration
-   status="warn" strict="true"
-   packages="com.sap.hcp.cf.log4j2.converter,com.sap.hcp.cf.log4j2.layout">
+   status="warn" strict="true">
 	<Appenders>
         <Console name="STDOUT-JSON" target="SYSTEM_OUT" follow="true">
             <JsonPatternLayout charset="utf-8"/>

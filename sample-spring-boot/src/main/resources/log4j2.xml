@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<Configuration status="warn" strict="true"
-	packages="com.sap.hcp.cf.log4j2">
+<Configuration status="warn" strict="true">
 
 	<DynamicLevelPrefixLoggerFilter />
 
