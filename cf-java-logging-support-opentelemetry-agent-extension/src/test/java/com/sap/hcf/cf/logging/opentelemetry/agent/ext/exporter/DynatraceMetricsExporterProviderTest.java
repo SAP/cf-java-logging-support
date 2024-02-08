@@ -4,46 +4,46 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.metrics.ConfigurableMetricExporterProvider;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.pivotal.cfenv.core.CfService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static java.util.Map.entry;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mock.Strictness.LENIENT;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DynatraceMetricsExporterProviderTest {
 
     @Mock
     private Function<ConfigProperties, CfService> servicesProvider;
 
-    @Mock
+    @Mock(strictness = LENIENT)
     private ConfigProperties config;
 
     @InjectMocks
     private DynatraceMetricsExporterProvider exporterProvider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        when(config.getString("otel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name")).thenReturn("ingest-token");
+        when(config.getString("otel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name")).thenReturn(
+                "ingest-token");
         when(config.getString(any(), any())).thenAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -55,18 +55,19 @@ public class DynatraceMetricsExporterProviderTest {
 
     @Test
     public void canLoadViaSPI() {
-        ServiceLoader<ConfigurableMetricExporterProvider> loader = ServiceLoader.load(ConfigurableMetricExporterProvider.class);
+        ServiceLoader<ConfigurableMetricExporterProvider> loader =
+                ServiceLoader.load(ConfigurableMetricExporterProvider.class);
         Stream<ConfigurableMetricExporterProvider> providers = StreamSupport.stream(loader.spliterator(), false);
-        assertTrue(DynatraceMetricsExporterProviderTest.class.getName() + " not loaded via SPI",
-                providers.anyMatch(p -> p instanceof DynatraceMetricsExporterProvider));
+        assertThat(providers).describedAs(DynatraceMetricsExporterProvider.class.getName() + " not loaded via SPI")
+                             .anySatisfy(p -> assertThat(p).isInstanceOf(DynatraceMetricsExporterProvider.class));
     }
 
     @Test
     public void registersNoopExporterWithoutBindings() {
         when(servicesProvider.apply(config)).thenReturn(null);
         MetricExporter exporter = exporterProvider.createExporter(config);
-        assertThat(exporter, is(notNullValue()));
-        assertThat(exporter.toString(), containsString("Noop"));
+        assertThat(exporter).isNotNull();
+        assertThat(exporter.toString()).containsSubsequence("Noop");
     }
 
     @Test
@@ -74,25 +75,21 @@ public class DynatraceMetricsExporterProviderTest {
         CfService genericCfService = new CfService(Collections.emptyMap());
         Mockito.when(servicesProvider.apply(config)).thenReturn(genericCfService);
         MetricExporter exporter = exporterProvider.createExporter(config);
-        assertThat(exporter, is(notNullValue()));
-        assertThat(exporter.toString(), containsString("Noop"));
+        assertThat(exporter).isNotNull();
+        assertThat(exporter.toString()).containsSubsequence("Noop");
     }
 
     @Test
     public void registersExportersWithValidBindings() throws IOException {
-        Map<String, Object> credentials = new HashMap<String, Object>() {{
-            put("apiurl", "https://example.dt/api");
-            put("ingest-token", "secret");
-        }};
-        CfService dynatraceService = new CfService(new HashMap<String, Object>() {{
-            put("name", "test-dt");
-            put("label", "dynatrace");
-            put("credentials", credentials);
-        }});
+        Map<String, Object> credentials =
+                Map.ofEntries(entry("apiurl", "https://example.dt/api"), entry("ingest-token", "secret"));
+        CfService dynatraceService = new CfService(Map.ofEntries(entry("name", "test-dt"), entry("label", "dynatrace"),
+                                                                 entry("credentials", credentials)));
         when(servicesProvider.apply(config)).thenReturn(dynatraceService);
         MetricExporter exporter = exporterProvider.createExporter(config);
-        assertThat(exporter, is(notNullValue()));
-        assertThat(exporter.toString(), both(containsString("OtlpHttpMetricExporter")).and(containsString("https://example.dt/api/v2/otlp/v1/metrics,")));
+        assertThat(exporter).isNotNull();
+        assertThat(exporter.toString()).containsSubsequence("OtlpHttpMetricExporter")
+                                       .containsSubsequence("https://example.dt/api/v2/otlp/v1/metrics,");
     }
 
 }

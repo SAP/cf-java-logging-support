@@ -17,7 +17,6 @@ class CloudLoggingCredentials {
     private static final String CRED_OTLP_SERVER_CERT = "server-ca";
     private static final String CLOUD_LOGGING_ENDPOINT_PREFIX = "https://";
 
-
     private String endpoint;
     private byte[] clientKey;
     private byte[] clientCert;
@@ -45,22 +44,26 @@ class CloudLoggingCredentials {
 
     public boolean validate() {
         if (isBlank(endpoint)) {
-            LOG.warning("Credential \"" + CRED_OTLP_ENDPOINT + "\" not found. Skipping cloud-logging exporter configuration");
+            LOG.warning(
+                    "Credential \"" + CRED_OTLP_ENDPOINT + "\" not found. Skipping cloud-logging exporter configuration");
             return false;
         }
 
         if (isNullOrEmpty(clientKey)) {
-            LOG.warning("Credential \"" + CRED_OTLP_CLIENT_KEY + "\" not found. Skipping cloud-logging exporter configuration");
+            LOG.warning(
+                    "Credential \"" + CRED_OTLP_CLIENT_KEY + "\" not found. Skipping cloud-logging exporter configuration");
             return false;
         }
 
         if (isNullOrEmpty(clientCert)) {
-            LOG.warning("Credential \"" + CRED_OTLP_CLIENT_CERT + "\" not found. Skipping cloud-logging exporter configuration");
+            LOG.warning(
+                    "Credential \"" + CRED_OTLP_CLIENT_CERT + "\" not found. Skipping cloud-logging exporter configuration");
             return false;
         }
 
         if (isNullOrEmpty(serverCert)) {
-            LOG.warning("Credential \"" + CRED_OTLP_SERVER_CERT + "\" not found. Skipping cloud-logging exporter configuration");
+            LOG.warning(
+                    "Credential \"" + CRED_OTLP_SERVER_CERT + "\" not found. Skipping cloud-logging exporter configuration");
             return false;
         }
         return true;

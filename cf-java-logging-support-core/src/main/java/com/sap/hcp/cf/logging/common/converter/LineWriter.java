@@ -1,12 +1,12 @@
 package com.sap.hcp.cf.logging.common.converter;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
 
 public class LineWriter extends Writer {
 
@@ -14,16 +14,15 @@ public class LineWriter extends Writer {
 
     private List<String> lines = new LinkedList<String>();
 
+    public LineWriter() {
+    }
+
     public List<String> getLines() {
         return lines;
     }
 
-    public LineWriter() {
-    }
-
     /**
-     * We have decided for our use-case to ignore offset and length and always
-     * write the whole String.
+     * We have decided for our use-case to ignore offset and length and always write the whole String.
      */
     @Override
     public void write(String str, int off, int len) {
@@ -33,8 +32,7 @@ public class LineWriter extends Writer {
     }
 
     /**
-     * We have decided for our use-case to ignore offset and length and always
-     * write the whole char array
+     * We have decided for our use-case to ignore offset and length and always write the whole char array
      */
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {

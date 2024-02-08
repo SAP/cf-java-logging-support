@@ -1,5 +1,17 @@
 package com.sap.hcp.cf.logging.common.request;
 
+import com.sap.hcp.cf.logging.common.AbstractTest;
+import com.sap.hcp.cf.logging.common.DoubleValue;
+import com.sap.hcp.cf.logging.common.Fields;
+import com.sap.hcp.cf.logging.common.Markers;
+import com.sap.hcp.cf.logging.common.request.RequestRecord.Direction;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
+import java.io.IOException;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.core.Is.is;
@@ -7,28 +19,13 @@ import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 
-import java.io.IOException;
-
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-
-import com.fasterxml.jackson.jr.ob.JSONObjectException;
-import com.sap.hcp.cf.logging.common.AbstractTest;
-import com.sap.hcp.cf.logging.common.DoubleValue;
-import com.sap.hcp.cf.logging.common.Fields;
-import com.sap.hcp.cf.logging.common.Markers;
-import com.sap.hcp.cf.logging.common.request.RequestRecord.Direction;
-
 public class RequestRecordTest extends AbstractTest {
 
     private final Logger logger = LoggerFactory.getLogger(RequestRecordTest.class);
     private RequestRecord rrec;
 
-
     @Test
-    public void testNonDefaults() throws JSONObjectException, IOException {
+    public void testNonDefaults() throws IOException {
         String layer = "testNonDefaults";
         String NON_DEFAULT = "NON_DEFAULT";
         rrec = new RequestRecord(layer);
@@ -63,7 +60,7 @@ public class RequestRecordTest extends AbstractTest {
     }
 
     @Test
-    public void testContext() throws JSONObjectException, IOException {
+    public void testContext() throws IOException {
         MDC.clear();
         String layer = "testContext";
         String reqId = "1-2-3-4";
@@ -78,7 +75,7 @@ public class RequestRecordTest extends AbstractTest {
     }
 
     @Test
-    public void testResponseTimeIn() throws JSONObjectException, IOException {
+    public void testResponseTimeIn() throws IOException {
         MDC.clear();
         String layer = "testResponseTimeIn";
         rrec = new RequestRecord(layer);
@@ -90,16 +87,15 @@ public class RequestRecordTest extends AbstractTest {
 
         assertThat(getField(Fields.LAYER), is(layer));
         assertThat(getField(Fields.DIRECTION), is(Direction.IN.toString()));
-        assertThat(Double.valueOf(getField(Fields.RESPONSE_TIME_MS)).longValue(), lessThanOrEqualTo(Double.valueOf(end -
-                                                                                                                   start)
-                                                                                                          .longValue()));
+        assertThat(Double.valueOf(getField(Fields.RESPONSE_TIME_MS)).longValue(),
+                   lessThanOrEqualTo(Double.valueOf(end - start).longValue()));
         assertThat(getField(Fields.RESPONSE_SENT_AT), not(nullValue()));
         assertThat(getField(Fields.REQUEST_RECEIVED_AT), not(nullValue()));
         assertThat(getField(Fields.WRITTEN_TS), is(notNullValue()));
     }
 
     @Test
-    public void testResponseTimeOut() throws JSONObjectException, IOException {
+    public void testResponseTimeOut() throws IOException {
         MDC.clear();
         String layer = "testResponseTimeOut";
         rrec = new RequestRecord(layer, Direction.OUT);
@@ -111,9 +107,8 @@ public class RequestRecordTest extends AbstractTest {
 
         assertThat(getField(Fields.LAYER), is(layer));
         assertThat(getField(Fields.DIRECTION), is(Direction.OUT.toString()));
-        assertThat(Double.valueOf(getField(Fields.RESPONSE_TIME_MS)).longValue(), lessThanOrEqualTo(Double.valueOf(end -
-                                                                                                                   start)
-                                                                                                          .longValue()));
+        assertThat(Double.valueOf(getField(Fields.RESPONSE_TIME_MS)).longValue(),
+                   lessThanOrEqualTo(Double.valueOf(end - start).longValue()));
         assertThat(getField(Fields.RESPONSE_RECEIVED_AT), not(nullValue()));
         assertThat(getField(Fields.REQUEST_SENT_AT), not(nullValue()));
         assertThat(getField(Fields.WRITTEN_TS), is(notNullValue()));

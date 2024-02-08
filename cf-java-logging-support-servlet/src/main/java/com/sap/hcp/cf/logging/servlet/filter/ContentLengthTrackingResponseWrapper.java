@@ -8,10 +8,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
- * A simple response wrapper implementation that tries to determine the amount
- * of data written to the client by wrapping the output stream or the print
- * writer.
- *
+ * A simple response wrapper implementation that tries to determine the amount of data written to the client by wrapping
+ * the output stream or the print writer.
  */
 public class ContentLengthTrackingResponseWrapper extends HttpServletResponseWrapper {
 

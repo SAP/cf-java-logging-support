@@ -26,8 +26,9 @@ public class DynLogEnvironment implements DynamicLogLevelConfiguration {
             LOGGER.info("The header key used to retrieve the dynamic log level token has been set to {}", header);
         } else {
             dynLogHeaderKey = "SAP-LOG-LEVEL";
-            LOGGER.info("The header key used to retrieve the dynamic log level token has been set to the default value: {}",
-                        dynLogHeaderKey);
+            LOGGER.info(
+                    "The header key used to retrieve the dynamic log level token has been set to the default value: {}",
+                    dynLogHeaderKey);
         }
 
         RSAPublicKey tempKey = null;

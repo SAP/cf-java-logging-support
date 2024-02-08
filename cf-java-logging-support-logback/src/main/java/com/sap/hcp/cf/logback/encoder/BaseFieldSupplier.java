@@ -1,17 +1,16 @@
 package com.sap.hcp.cf.logback.encoder;
 
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxy;
 import com.sap.hcp.cf.logback.converter.api.LogbackContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.Defaults;
 import com.sap.hcp.cf.logging.common.Fields;
 import com.sap.hcp.cf.logging.common.Markers;
-
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.apache.commons.lang3.StringUtils;
+
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BaseFieldSupplier implements LogbackContextFieldSupplier {
 

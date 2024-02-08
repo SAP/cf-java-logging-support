@@ -1,34 +1,23 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.any;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
-
-import java.util.stream.Stream;
-
+import com.sap.hcp.cf.logging.common.request.HttpHeader;
+import com.sap.hcp.cf.logging.common.request.HttpHeaders;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.MDC;
 
-import com.sap.hcp.cf.logging.common.request.HttpHeader;
-import com.sap.hcp.cf.logging.common.request.HttpHeaders;
+import java.util.stream.Stream;
 
-@RunWith(MockitoJUnitRunner.class)
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class AddHttpHeadersToLogContextFilterTest {
 
     @Mock
@@ -40,7 +29,7 @@ public class AddHttpHeadersToLogContextFilterTest {
 
     private ContextMapExtractor mdcExtractor;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         MDC.clear();
         mdcExtractor = new ContextMapExtractor();
@@ -54,17 +43,17 @@ public class AddHttpHeadersToLogContextFilterTest {
 
         new AddHttpHeadersToLogContextFilter(myHeader).doFilter(request, response, chain);
 
-        assertThat(mdcExtractor.getField("my-field"), is(equalTo("my-value")));
+        assertThat(mdcExtractor.getField("my-field")).isEqualTo("my-value");
     }
 
     @Test
     public void ignoresNotPropagatedHttpHeader() throws Exception {
-        when(request.getHeader("my-header")).thenReturn("my-value");
         HttpTestHeader myHeader = new HttpTestHeader("my-header", "my-field", null, false);
 
         new AddHttpHeadersToLogContextFilter(myHeader).doFilter(request, response, chain);
 
-        assertThat(mdcExtractor.getContextMap(), is(nullValue()));
+        assertThat(mdcExtractor.getContextMap()).isNullOrEmpty();
+        verifyNoInteractions(request);
     }
 
     @Test
@@ -74,19 +63,18 @@ public class AddHttpHeadersToLogContextFilterTest {
 
         new AddHttpHeadersToLogContextFilter(myHeader).doFilter(request, response, chain);
 
-        assertThat(mdcExtractor.getContextMap(), is(nullValue()));
+        assertThat(mdcExtractor.getContextMap()).isNullOrEmpty();
     }
 
-    
     @Test
     public void ignoresMissingHeaderValues() throws Exception {
         HttpTestHeader myHeader = new HttpTestHeader("my-header", "my-field", null, true);
 
         new AddHttpHeadersToLogContextFilter(myHeader).doFilter(request, response, chain);
 
-        assertThat(mdcExtractor.getContextMap(), is(nullValue()));
+        assertThat(mdcExtractor.getContextMap()).isNullOrEmpty();
     }
- 
+
     @Test
     public void removesFieldAfterFiltering() throws Exception {
         when(request.getHeader("my-header")).thenReturn("my-value");
@@ -94,21 +82,22 @@ public class AddHttpHeadersToLogContextFilterTest {
 
         new AddHttpHeadersToLogContextFilter(myHeader).doFilter(request, response, chain);
 
-        assertThat(MDC.getCopyOfContextMap(), either(not(hasEntry(any(String.class), any(String.class)))).or(is(nullValue())));
+        assertThat(MDC.getCopyOfContextMap()).isNullOrEmpty();
     }
-    
+
     @Test
     public void addsDefaultFields() throws Exception {
-        streamDefaultHeaders().map(HttpHeader::getName).forEach(n -> when(request.getHeader(n)).thenReturn(n + "-test_value"));
+        streamDefaultHeaders().map(HttpHeader::getName)
+                              .forEach(n -> when(request.getHeader(n)).thenReturn(n + "-test_value"));
 
         new AddHttpHeadersToLogContextFilter().doFilter(request, response, chain);
 
         String[] fields = streamDefaultHeaders().map(HttpHeader::getField).toArray(String[]::new);
-        assertThat(mdcExtractor.getContextMap().keySet(), containsInAnyOrder(fields));
+        assertThat(mdcExtractor.getContextMap()).containsKeys(fields);
     }
 
     private Stream<HttpHeaders> streamDefaultHeaders() {
         return HttpHeaders.propagated().stream();
     }
-    
+
 }

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="warn" strict="true"
-	packages="com.sap.hcp.cf.log4j2.converter,com.sap.hcp.cf.log4j2">
-	<DynamicLevelPrefixLoggerFilter />
-	<Appenders>
-		<Console name="Console" target="SYSTEM_OUT">
-			<PatternLayout
-				pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />			
-		</Console>
-	</Appenders>
-	<Loggers>
-		<Root level="info">
-			<AppenderRef ref="Console" />
-		</Root>
-	</Loggers>
+               packages="com.sap.hcp.cf.log4j2.converter,com.sap.hcp.cf.log4j2">
+    <DynamicLevelPrefixLoggerFilter/>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
 </Configuration>      

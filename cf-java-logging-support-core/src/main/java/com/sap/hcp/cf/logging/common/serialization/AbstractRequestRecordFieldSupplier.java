@@ -1,6 +1,7 @@
 package com.sap.hcp.cf.logging.common.serialization;
 
-import static java.util.stream.Collectors.toMap;
+import com.fasterxml.jackson.jr.ob.JSON;
+import com.sap.hcp.cf.logging.common.request.RequestRecord;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -8,8 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.jr.ob.JSON;
-import com.sap.hcp.cf.logging.common.request.RequestRecord;
+import static java.util.stream.Collectors.toMap;
 
 public abstract class AbstractRequestRecordFieldSupplier<T> implements EventContextFieldSupplier<T> {
 

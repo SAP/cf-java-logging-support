@@ -1,27 +1,10 @@
 package com.sap.hcp.cf.logback.encoder;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.ThrowableProxy;
-import com.sap.hcp.cf.logging.common.converter.LineWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-
+import ch.qos.logback.core.encoder.Encoder;
+import ch.qos.logback.core.encoder.EncoderBase;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.jr.ob.JSON;
 import com.fasterxml.jackson.jr.ob.JSON.Builder;
@@ -31,29 +14,36 @@ import com.fasterxml.jackson.jr.ob.comp.ComposerBase;
 import com.fasterxml.jackson.jr.ob.comp.ObjectComposer;
 import com.sap.hcp.cf.logback.converter.api.LogbackContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.Fields;
+import com.sap.hcp.cf.logging.common.converter.LineWriter;
 import com.sap.hcp.cf.logging.common.converter.StacktraceLines;
 import com.sap.hcp.cf.logging.common.serialization.ContextFieldConverter;
 import com.sap.hcp.cf.logging.common.serialization.ContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.serialization.JsonSerializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.classic.spi.StackTraceElementProxy;
-import ch.qos.logback.core.encoder.Encoder;
-import ch.qos.logback.core.encoder.EncoderBase;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
- * An {@link Encoder} implementation that encodes an {@link ILoggingEvent} as a
- * JSON object.
+ * An {@link Encoder} implementation that encodes an {@link ILoggingEvent} as a JSON object.
  * <p>
- * Under the hood, it's using Jackson to serialize the logging event into JSON.
- * The encoder can be confiugred in the logback.xml:<blockquote>
- * 
+ * Under the hood, it's using Jackson to serialize the logging event into JSON. The encoder can be confiugred in the
+ * logback.xml:<blockquote>
+ *
  * <pre>
  * &lt;appender name="STDOUT-JSON" class="ch.qos.logback.core.ConsoleAppender"&gt;
  *    &lt;encoder class="com.sap.hcp.cf.logback.encoder.JsonEncoder"/&gt;
  * &lt;/appender&gt;
  * </pre>
- * 
+ *
  * </blockquote> The encoder can be customized by several xml elements. See the
  * Javadoc on the setter methods of this class.
  */
@@ -71,7 +61,6 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
     private JSON json;
     private ContextFieldConverter contextFieldConverter;
 
-
     public JsonEncoder() {
         logbackContextFieldSuppliers.add(new BaseFieldSupplier());
         logbackContextFieldSuppliers.add(new EventContextFieldSupplier());
@@ -80,19 +69,17 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
 
     /**
      * <p>
-     * Adds a field to the "#cf" object in the generated output. If the log
-     * event contains this field, it will be put into this nested object. It
-     * will not appear on top level in the generated JSON output, unless it is
-     * also added as retained field. See
-     * {@link #addRetainFieldMdcKeyName(String)}.
+     * Adds a field to the "#cf" object in the generated output. If the log event contains this field, it will be put
+     * into this nested object. It will not appear on top level in the generated JSON output, unless it is also added as
+     * retained field. See {@link #addRetainFieldMdcKeyName(String)}.
      * </p>
      * <p>
-     * This method is called by Joran for the xml tag
-     * {@code <customFieldMdcKeyName>} in the logback.xml configuration file.
+     * This method is called by Joran for the xml tag {@code <customFieldMdcKeyName>} in the logback.xml configuration
+     * file.
      * </p>
-     * 
+     *
      * @param name
-     *            the field name (key) to add as custom field
+     *         the field name (key) to add as custom field
      */
     public void addCustomFieldMdcKeyName(String name) {
         customFieldMdcKeyNames.add(name);
@@ -100,18 +87,17 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
 
     /**
      * <p>
-     * Retains a copy of a custom field added by
-     * {@link #addCustomFieldMdcKeyName(String)} at top level in the generated
-     * JSON output. This is useful when sending logs to different backend
-     * systems, that expect custom fields at different structures.
+     * Retains a copy of a custom field added by {@link #addCustomFieldMdcKeyName(String)} at top level in the generated
+     * JSON output. This is useful when sending logs to different backend systems, that expect custom fields at
+     * different structures.
      * </p>
      * <p>
-     * This method is called by Joran for the xml tag
-     * {@code <retainFieldMdcKeyName>} in the logback.xml configuration file.
+     * This method is called by Joran for the xml tag {@code <retainFieldMdcKeyName>} in the logback.xml configuration
+     * file.
      * </p>
-     * 
+     *
      * @param name
-     *            the field name (key) to add as custom field
+     *         the field name (key) to add as custom field
      */
     public void addRetainFieldMdcKeyName(String name) {
         retainFieldMdcKeyNames.add(name);
@@ -119,18 +105,16 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
 
     /**
      * <p>
-     * Use the given charset for message creation. Defaults to utf8. Note, that
-     * Jackson is using utf8 by default independently from this configuration.
-     * You need to change the JSON build with {@link #setJsonBuilder(String)} to
+     * Use the given charset for message creation. Defaults to utf8. Note, that Jackson is using utf8 by default
+     * independently from this configuration. You need to change the JSON build with {@link #setJsonBuilder(String)} to
      * change the Jackson encoding.
      * </p>
      * <p>
-     * This method is called by Joran for the xml tag {@code <charset>} in the
-     * logback.xml configuration file.
+     * This method is called by Joran for the xml tag {@code <charset>} in the logback.xml configuration file.
      * </p>
-     * 
+     *
      * @param name
-     *            the name of the charset to use
+     *         the name of the charset to use
      */
     public void setCharset(String name) {
         try {
@@ -142,20 +126,18 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
 
     /**
      * <p>
-     * Limit stacktraces to this number of characters. This is to prevent
-     * message sizes above the platform limit. The default value is 55*1024. It
-     * should result in messages below 64k in size. The size should be adjusted
-     * to fit the limit and the used fields of the messages. Stacktraces, that
-     * exceed the size will be shortened in the middle. Top and bottom most
-     * lines will be retained.
+     * Limit stacktraces to this number of characters. This is to prevent message sizes above the platform limit. The
+     * default value is 55*1024. It should result in messages below 64k in size. The size should be adjusted to fit the
+     * limit and the used fields of the messages. Stacktraces, that exceed the size will be shortened in the middle. Top
+     * and bottom most lines will be retained.
      * </p>
      * <p>
-     * This method is called by Joran for the xml tag
-     * {@code <maxStacktraceSize>} in the logback.xml configuration file.
+     * This method is called by Joran for the xml tag {@code <maxStacktraceSize>} in the logback.xml configuration
+     * file.
      * </p>
-     * 
+     *
      * @param maxStacktraceSize
-     *            the maximum number of characters to be allowed for stacktraces
+     *         the maximum number of characters to be allowed for stacktraces
      */
     public void setMaxStacktraceSize(int maxStacktraceSize) {
         this.maxStacktraceSize = maxStacktraceSize;
@@ -163,17 +145,16 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
 
     /**
      * <p>
-     * Send default values. Fields with empty or default values, e.g. "-" for
-     * strings will not be added to the log message. This behaviour can be
-     * changed to always emit all fields.
+     * Send default values. Fields with empty or default values, e.g. "-" for strings will not be added to the log
+     * message. This behaviour can be changed to always emit all fields.
      * </p>
      * <p>
-     * This method is called by Joran for the xml tag
-     * {@code <sendDefaultValues>} in the logback.xml configuration file.
+     * This method is called by Joran for the xml tag {@code <sendDefaultValues>} in the logback.xml configuration
+     * file.
      * </p>
-     * 
+     *
      * @param sendDefaultValues
-     *            the maximum number of characters to be allowed for stacktraces
+     *         the maximum number of characters to be allowed for stacktraces
      */
     public void setSendDefaultValues(boolean sendDefaultValues) {
         this.sendDefaultValues = sendDefaultValues;
@@ -181,16 +162,15 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
 
     /**
      * <p>
-     * Overwrites the default JsonBuilder with the given class. This can be used
-     * to modify the created JSON, e.g. with custom escaping or encoding.
+     * Overwrites the default JsonBuilder with the given class. This can be used to modify the created JSON, e.g. with
+     * custom escaping or encoding.
      * </p>
      * <p>
-     * This method is called by Joran for the xml tag {@code <jsonBuilder>} in
-     * the logback.xml configuration file.
+     * This method is called by Joran for the xml tag {@code <jsonBuilder>} in the logback.xml configuration file.
      * </p>
-     * 
+     *
      * @param className
-     *            the maximum number of characters to be allowed for stacktraces
+     *         the maximum number of characters to be allowed for stacktraces
      */
     public void setJsonBuilder(String className) {
         try {
@@ -201,12 +181,9 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
         }
     }
 
-    private <T> T createInstance(String className, Class<T> interfaceClass) throws InstantiationException,
-                                                                            IllegalAccessException,
-                                                                            IllegalArgumentException,
-                                                                            InvocationTargetException,
-                                                                            NoSuchMethodException, SecurityException,
-                                                                            ClassNotFoundException {
+    private <T> T createInstance(String className, Class<T> interfaceClass)
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+                   NoSuchMethodException, SecurityException, ClassNotFoundException {
         ClassLoader classLoader = this.getClass().getClassLoader();
         Class<? extends T> clazz = classLoader.loadClass(className).asSubclass(interfaceClass);
         return clazz.getDeclaredConstructor().newInstance();
@@ -214,19 +191,17 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
 
     /**
      * <p>
-     * Use this class to extract context fields from the logback Logevents. The
-     * provided classes are applied in order. Later instances can overwrite
-     * earlier generated fields. LogbackContextFieldSuppliers are executed after
+     * Use this class to extract context fields from the logback Logevents. The provided classes are applied in order.
+     * Later instances can overwrite earlier generated fields. LogbackContextFieldSuppliers are executed after
      * ContextFieldSuppliers.
      * </p>
      * <p>
-     * This method is called by Joran for the xml tag
-     * {@code <logbackContextFieldSupplier>} in the logback.xml configuration
-     * file.
+     * This method is called by Joran for the xml tag {@code <logbackContextFieldSupplier>} in the logback.xml
+     * configuration file.
      * </p>
-     * 
+     *
      * @param className
-     *            the maximum number of characters to be allowed for stacktraces
+     *         the maximum number of characters to be allowed for stacktraces
      */
     public void addLogbackContextFieldSupplier(String className) {
         try {
@@ -240,18 +215,17 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
 
     /**
      * <p>
-     * Use this class to to provide additional context fields, e.g. from the
-     * environment. The provided classes are applied in order. Later instances
-     * can overwrite earlier generated fields. LogbackContextFieldSuppliers are
+     * Use this class to to provide additional context fields, e.g. from the environment. The provided classes are
+     * applied in order. Later instances can overwrite earlier generated fields. LogbackContextFieldSuppliers are
      * executed after ContextFieldSuppliers.
      * </p>
      * <p>
-     * This method is called by Joran for the xml tag
-     * {@code <contextFieldSupplier>} in the logback.xml configuration file.
+     * This method is called by Joran for the xml tag {@code <contextFieldSupplier>} in the logback.xml configuration
+     * file.
      * </p>
-     * 
+     *
      * @param className
-     *            the maximum number of characters to be allowed for stacktraces
+     *         the maximum number of characters to be allowed for stacktraces
      */
     public void addContextFieldSupplier(String className) {
         try {
@@ -266,8 +240,8 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
     @Override
     public void start() {
         this.json = new JSON(jsonBuilder);
-        this.contextFieldConverter = new ContextFieldConverter(sendDefaultValues, customFieldMdcKeyNames,
-                                                               retainFieldMdcKeyNames);
+        this.contextFieldConverter =
+                new ContextFieldConverter(sendDefaultValues, customFieldMdcKeyNames, retainFieldMdcKeyNames);
         super.start();
     }
 
@@ -303,8 +277,8 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
         }
     }
 
-    private <P extends ComposerBase> void addMarkers(ObjectComposer<P> oc, ILoggingEvent event) throws IOException,
-                                                                                                JsonProcessingException {
+    private <P extends ComposerBase> void addMarkers(ObjectComposer<P> oc, ILoggingEvent event)
+            throws IOException, JsonProcessingException {
         if (sendDefaultValues || event.getMarker() != null) {
             ArrayComposer<ObjectComposer<P>> ac = oc.startArrayField(Fields.CATEGORIES);
             addMarker(ac, event.getMarker());
@@ -332,8 +306,8 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
         return contextFields;
     }
 
-    private <P extends ComposerBase> void addStacktrace(ObjectComposer<P> oc, ILoggingEvent event) throws IOException,
-                                                                                                   JsonProcessingException {
+    private <P extends ComposerBase> void addStacktrace(ObjectComposer<P> oc, ILoggingEvent event)
+            throws IOException, JsonProcessingException {
         IThrowableProxy proxy = event.getThrowableProxy();
         if (proxy != null && ThrowableProxy.class.isAssignableFrom(proxy.getClass())) {
             Throwable throwable = ((ThrowableProxy) proxy).getThrowable();

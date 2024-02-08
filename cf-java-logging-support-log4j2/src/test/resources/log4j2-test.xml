@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="warn" strict="true">
-	<Appenders>
-     <Console name="STDOUT-JSON" target="SYSTEM_OUT" follow="true">
- 				<JsonPatternLayout charset="utf-8">
- 					<customField mdcKeyName="custom-field" retainOriginal="false" />
- 					<customField mdcKeyName="test-field" />
- 					<customField mdcKeyName="retained-field" retainOriginal="true" />
- 				</JsonPatternLayout>
-     </Console>
-	</Appenders>
-  <Loggers>
-     <Root level="${LOG_ROOT_LEVEL:-WARN}">
-        <AppenderRef ref="STDOUT-JSON" />
-     </Root>
-     <Logger name="com.sap.hcp.cf" level="INFO"/>
-  </Loggers>
+    <Appenders>
+        <Console name="STDOUT-JSON" target="SYSTEM_OUT" follow="true">
+            <JsonPatternLayout charset="utf-8">
+                <customField mdcKeyName="custom-field" retainOriginal="false"/>
+                <customField mdcKeyName="test-field"/>
+                <customField mdcKeyName="retained-field" retainOriginal="true"/>
+            </JsonPatternLayout>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="${LOG_ROOT_LEVEL:-WARN}">
+            <AppenderRef ref="STDOUT-JSON"/>
+        </Root>
+        <Logger name="com.sap.hcp.cf" level="INFO"/>
+    </Loggers>
 </Configuration>      

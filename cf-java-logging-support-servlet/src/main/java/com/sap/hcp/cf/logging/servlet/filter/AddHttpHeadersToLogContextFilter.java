@@ -16,9 +16,8 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Extracts the HTTP headers from the request and adds them to the logging
- * context. It defaults to {@link HttpHeaders#propagated()}. Custom headers can
- * be used.
+ * Extracts the HTTP headers from the request and adds them to the logging context. It defaults to
+ * {@link HttpHeaders#propagated()}. Custom headers can be used.
  */
 public class AddHttpHeadersToLogContextFilter extends AbstractLoggingFilter {
 
@@ -26,8 +25,8 @@ public class AddHttpHeadersToLogContextFilter extends AbstractLoggingFilter {
     private List<String> fields;
 
     /**
-     * The default constructor uses {@link HttpHeaders#propagated()} to define
-     * the HTTP headers, that are added to the logging context.
+     * The default constructor uses {@link HttpHeaders#propagated()} to define the HTTP headers, that are added to the
+     * logging context.
      */
     public AddHttpHeadersToLogContextFilter() {
         this(HttpHeaders.propagated());
@@ -38,23 +37,20 @@ public class AddHttpHeadersToLogContextFilter extends AbstractLoggingFilter {
     }
 
     /**
-     * Use this constructor to add your own HTTP headers to the default list.
-     * You need to implement {@link HttpHeader}. Note, that
-     * {@link HttpHeader#isPropagated} needs to be true. All other headers will
-     * be ignored. Usage to add your own header would be:
-     * {@code new AddHttpHeadersToLogContextFilter(HttpHeaders.propagated, yourHeader)}
-     * 
+     * Use this constructor to add your own HTTP headers to the default list. You need to implement {@link HttpHeader}.
+     * Note, that {@link HttpHeader#isPropagated} needs to be true. All other headers will be ignored. Usage to add your
+     * own header would be: {@code new AddHttpHeadersToLogContextFilter(HttpHeaders.propagated, yourHeader)}
+     *
      * @param list
-     *            a list of {@link HttpHeader}, can be default
-     *            {@link HttpHeaders#propagated()}
+     *         a list of {@link HttpHeader}, can be default {@link HttpHeaders#propagated()}
      * @param custom
-     *            a single {@link HttpHeader} to add to the list
+     *         a single {@link HttpHeader} to add to the list
      */
     public AddHttpHeadersToLogContextFilter(List<? extends HttpHeader> list, HttpHeader... custom) {
         Stream<HttpHeader> allHeaders = Stream.concat(list.stream(), Arrays.stream(custom));
         this.headers = unmodifiableList(allHeaders.filter(HttpHeader::isPropagated).collect(toList()));
-        this.fields = unmodifiableList(headers.stream().map(HttpHeader::getField).filter(Objects::nonNull).collect(
-                                                                                                                   toList()));
+        this.fields =
+                unmodifiableList(headers.stream().map(HttpHeader::getField).filter(Objects::nonNull).collect(toList()));
     }
 
     @Override

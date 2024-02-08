@@ -1,9 +1,9 @@
 package com.sap.hcp.cf.logging.common.converter;
 
+import com.fasterxml.jackson.jr.ob.JSON;
+
 import java.util.List;
 import java.util.Map;
-
-import com.fasterxml.jackson.jr.ob.JSON;
 
 public final class UnmarshallUtilities {
 

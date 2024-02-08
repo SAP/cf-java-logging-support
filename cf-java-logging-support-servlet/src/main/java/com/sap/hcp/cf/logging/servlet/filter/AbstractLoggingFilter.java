@@ -9,8 +9,8 @@ import java.io.IOException;
 public abstract class AbstractLoggingFilter implements Filter {
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-                                                                                              ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
             doFilterRequest((HttpServletRequest) request, (HttpServletResponse) response, chain);
         } else {
@@ -19,24 +19,22 @@ public abstract class AbstractLoggingFilter implements Filter {
     }
 
     /**
-     * Provides a default implementation for handling servlet requests already
-     * cast to {@link HttpServletRequest} and {@link HttpServletResponse}.
-     * Custom implementations of {@link AbstractLoggingFilter} should overwrite
+     * Provides a default implementation for handling servlet requests already cast to {@link HttpServletRequest} and
+     * {@link HttpServletResponse}. Custom implementations of {@link AbstractLoggingFilter} should overwrite
      * {@link #beforeFilter(HttpServletRequest, HttpServletResponse)} and/or
      * {@link #cleanup(HttpServletRequest, HttpServletResponse)}.
-     * 
+     *
      * @param request
-     *            cast as {@link HttpServletRequest}
+     *         cast as {@link HttpServletRequest}
      * @param response
-     *            cast as {@link HttpServletResponse}
+     *         cast as {@link HttpServletResponse}
      * @param chain
-     *            the {@link FilterChain} to continue request handling
+     *         the {@link FilterChain} to continue request handling
      * @throws IOException
      * @throws ServletException
      */
     protected void doFilterRequest(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-                                                                                                                throws IOException,
-                                                                                                                ServletException {
+            throws IOException, ServletException {
         try {
             beforeFilter(request, response);
             chain.doFilter(request, response);
@@ -47,10 +45,9 @@ public abstract class AbstractLoggingFilter implements Filter {
     }
 
     /**
-     * Processes the request/response before it is passed along the filter
-     * chain. Even if {@link #beforeFilter} fails, {@link #cleanup} will be
-     * executed.
-     * 
+     * Processes the request/response before it is passed along the filter chain. Even if {@link #beforeFilter} fails,
+     * {@link #cleanup} will be executed.
+     *
      * @param request
      * @param response
      */
@@ -58,12 +55,10 @@ public abstract class AbstractLoggingFilter implements Filter {
     }
 
     /**
-     * Cleanup after the request/response was handled by the filter chain. This
-     * is executed even in cases of failures during handling or
-     * {@link #beforeFilter}. Use this method to reset or clean-up state, e.g.
-     * MDC. Be aware, that there may be partially initalized state from
-     * {@link #beforeFilter}.
-     * 
+     * Cleanup after the request/response was handled by the filter chain. This is executed even in cases of failures
+     * during handling or {@link #beforeFilter}. Use this method to reset or clean-up state, e.g. MDC. Be aware, that
+     * there may be partially initalized state from {@link #beforeFilter}.
+     *
      * @param request
      * @param response
      */
@@ -71,8 +66,7 @@ public abstract class AbstractLoggingFilter implements Filter {
     }
 
     /**
-     * This is an empty implementation for filters, that do not require
-     * initialization.
+     * This is an empty implementation for filters, that do not require initialization.
      */
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -80,8 +74,7 @@ public abstract class AbstractLoggingFilter implements Filter {
     }
 
     /**
-     * this is an empty implementation for tolters, that do not require clean-up
-     * of state.
+     * this is an empty implementation for tolters, that do not require clean-up of state.
      */
     @Override
     public void destroy() {

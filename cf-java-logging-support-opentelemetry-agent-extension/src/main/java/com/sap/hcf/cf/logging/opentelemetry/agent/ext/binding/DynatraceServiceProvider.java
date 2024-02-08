@@ -29,7 +29,8 @@ public class DynatraceServiceProvider implements Supplier<CfService> {
     }
 
     private String getUserProvidedLabel(ConfigProperties config) {
-        return config.getString("otel.javaagent.extension.sap.cf.binding.user-provided.label", DEFAULT_USER_PROVIDED_LABEL);
+        return config.getString("otel.javaagent.extension.sap.cf.binding.user-provided.label",
+                                DEFAULT_USER_PROVIDED_LABEL);
     }
 
     private String getDynatraceLabel(ConfigProperties config) {

@@ -1,32 +1,23 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
-import java.util.UUID;
-
+import com.sap.hcp.cf.logging.common.request.HttpHeader;
+import com.sap.hcp.cf.logging.common.request.HttpHeaders;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.MDC;
 
-import com.sap.hcp.cf.logging.common.request.HttpHeader;
-import com.sap.hcp.cf.logging.common.request.HttpHeaders;
+import java.util.UUID;
 
-@RunWith(MockitoJUnitRunner.class)
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class CorrelationIdFilterTest {
 
     private static final String KNOWN_CORRELATION_ID = UUID.randomUUID().toString();
@@ -42,7 +33,7 @@ public class CorrelationIdFilterTest {
 
     private ContextMapExtractor mdcExtractor;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         MDC.clear();
         mdcExtractor = new ContextMapExtractor();
@@ -59,7 +50,7 @@ public class CorrelationIdFilterTest {
 
         new CorrelationIdFilter().doFilter(request, response, chain);
 
-        assertThat(getExtractedCorrelationId(), is(equalTo(KNOWN_CORRELATION_ID)));
+        assertThat(getExtractedCorrelationId()).isEqualTo(KNOWN_CORRELATION_ID);
     }
 
     @Test
@@ -67,15 +58,14 @@ public class CorrelationIdFilterTest {
 
         new CorrelationIdFilter().doFilter(request, response, chain);
 
-        assertThat(getExtractedCorrelationId(), is(not(nullValue())));
-        assertThat(getExtractedCorrelationId(), is(not(equalTo(KNOWN_CORRELATION_ID))));
+        assertThat(getExtractedCorrelationId()).isNotBlank().isNotEqualTo(KNOWN_CORRELATION_ID);
     }
 
     @Test
     public void removesCorrelationIdAfterFiltering() throws Exception {
         new CorrelationIdFilter().doFilter(request, response, chain);
 
-        assertThat(MDC.get(HttpHeaders.CORRELATION_ID.getField()), is(nullValue()));
+        assertThat(MDC.get(HttpHeaders.CORRELATION_ID.getField())).isNull();
     }
 
     @Test
@@ -111,39 +101,41 @@ public class CorrelationIdFilterTest {
 
     @Test
     public void usesCustomCorrelationIdHeader() throws Exception {
-        HttpHeader myCorrelationIdHeader = new HttpTestHeader("my-correlationId-header", "my-correlationId-field", null,
-                                                              false);
-        HttpHeader myTraceparentHeader = new HttpTestHeader("my-traceparent-header", "my-traceparent-field", null,
-                                                            false);
+        HttpHeader myCorrelationIdHeader =
+                new HttpTestHeader("my-correlationId-header", "my-correlationId-field", null, false);
+        HttpHeader myTraceparentHeader =
+                new HttpTestHeader("my-traceparent-header", "my-traceparent-field", null, false);
         when(request.getHeader("my-correlationId-header")).thenReturn(KNOWN_CORRELATION_ID);
-        when(request.getHeader("my-traceparent-header")).thenReturn(KNOWN_TRACEPARENT);
 
         new CorrelationIdFilter(myCorrelationIdHeader, myTraceparentHeader).doFilter(request, response, chain);
 
-        assertThat(mdcExtractor.getField("my-correlationId-field"), is(equalTo(KNOWN_CORRELATION_ID)));
+        assertThat(mdcExtractor.getField("my-correlationId-field")).isEqualTo(KNOWN_CORRELATION_ID);
         verify(response).setHeader("my-correlationId-header", KNOWN_CORRELATION_ID);
     }
 
     @Test
     public void usesCustomTraceparentHeader() throws Exception {
-        HttpHeader myCorrelationIdHeader = new HttpTestHeader("my-correlationId-header", "my-correlationId-field", null,
-                                                              false);
-        HttpHeader myTraceparentHeader = new HttpTestHeader("my-traceparent-header", "my-traceparent-field", null,
-                                                            false);
+        HttpHeader myCorrelationIdHeader =
+                new HttpTestHeader("my-correlationId-header", "my-correlationId-field", null, false);
+        HttpHeader myTraceparentHeader =
+                new HttpTestHeader("my-traceparent-header", "my-traceparent-field", null, false);
+        when(request.getHeader("my-correlationId-header")).thenReturn(null);
         when(request.getHeader("my-traceparent-header")).thenReturn(KNOWN_TRACEPARENT);
 
         new CorrelationIdFilter(myCorrelationIdHeader, myTraceparentHeader).doFilter(request, response, chain);
 
-        assertThat(mdcExtractor.getField("my-correlationId-field"), is(equalTo(KNOWN_TRACE_ID)));
+        assertThat(mdcExtractor.getField("my-correlationId-field")).isEqualTo(KNOWN_TRACE_ID);
         verify(response).setHeader("my-correlationId-header", KNOWN_TRACE_ID);
     }
 
     @Test
     public void usesTraceparentIfCorrelationIdHeaderNotPresent() throws Exception {
+        when(request.getHeader(HttpHeaders.CORRELATION_ID.getName())).thenReturn(null);
+        when(request.getHeader(HttpHeaders.X_VCAP_REQUEST_ID.getName())).thenReturn(null);
         when(request.getHeader(HttpHeaders.W3C_TRACEPARENT.getName())).thenReturn(KNOWN_TRACEPARENT);
 
         new CorrelationIdFilter().doFilter(request, response, chain);
 
-        assertThat(getExtractedCorrelationId(), is(equalTo(KNOWN_TRACE_ID)));
+        assertThat(getExtractedCorrelationId()).isEqualTo(KNOWN_TRACE_ID);
     }
 }

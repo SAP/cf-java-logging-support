@@ -1,83 +1,90 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<artifactId>cf-java-logging-support-servlet</artifactId>
-	<packaging>jar</packaging>
+    <artifactId>cf-java-logging-support-servlet</artifactId>
+    <packaging>jar</packaging>
 
-	<name>cf-java-logging-support-servlet</name>
-	<parent>
-		<groupId>com.sap.hcp.cf.logging</groupId>
-		<artifactId>cf-java-logging-support-parent</artifactId>
-		<version>3.8.2</version>
-		<relativePath>../pom.xml</relativePath>
-	</parent>
+    <name>cf-java-logging-support-servlet</name>
+    <parent>
+        <groupId>com.sap.hcp.cf.logging</groupId>
+        <artifactId>cf-java-logging-support-parent</artifactId>
+        <version>3.8.2</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-	<properties>
-		<servlet.api.version>5.0.0</servlet.api.version>
-		<maven-dependency-plugin.version>3.5.0</maven-dependency-plugin.version>
-		<build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
-		<maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
-		<jetty.version>11.0.14</jetty.version>
-	</properties>
+    <properties>
+        <servlet.api.version>5.0.0</servlet.api.version>
+        <maven-dependency-plugin.version>3.5.0</maven-dependency-plugin.version>
+        <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+        <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
+        <jetty.version>11.0.14</jetty.version>
+    </properties>
 
-	<dependencies>
-		<!-- servlet api -->
-		<dependency>
-			<groupId>jakarta.servlet</groupId>
-			<artifactId>jakarta.servlet-api</artifactId>
-			<version>${servlet.api.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.sap.hcp.cf.logging</groupId>
-			<artifactId>cf-java-logging-support-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<!-- we need our logback implementation for testing! -->
-		<dependency>
-			<groupId>com.sap.hcp.cf.logging</groupId>
-			<artifactId>cf-java-logging-support-logback</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>${logback.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<!-- Library for token signing/verification -->
-		<dependency>
-			<groupId>com.auth0</groupId>
-			<artifactId>java-jwt</artifactId>
-			<version>${java-jwt.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson-databind.version}</version>
-		</dependency>
+    <dependencies>
+        <!-- servlet api -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>${servlet.api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sap.hcp.cf.logging</groupId>
+            <artifactId>cf-java-logging-support-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- we need our logback implementation for testing! -->
+        <dependency>
+            <groupId>com.sap.hcp.cf.logging</groupId>
+            <artifactId>cf-java-logging-support-logback</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Library for token signing/verification -->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>${java-jwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-databind.version}</version>
+        </dependency>
 
-		<!-- testing -->
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
-			<version>${jetty.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlet</artifactId>
-			<version>${jetty.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>${httpclient.version}</version>
-			<scope>test</scope>
-		</dependency>
+        <!-- testing -->
+        <dependency>
+            <groupId>com.sap.hcp.cf.logging</groupId>
+            <artifactId>cf-java-logging-support-core</artifactId>
+            <type>test-jar</type>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>${jetty.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlet</artifactId>
+            <version>${jetty.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
+            <scope>test</scope>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 </project>

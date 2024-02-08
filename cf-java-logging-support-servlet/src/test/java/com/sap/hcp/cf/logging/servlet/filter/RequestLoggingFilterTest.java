@@ -1,14 +1,24 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
-import static org.hamcrest.text.IsEmptyString.isEmptyOrNullString;
-import static org.mockito.Matchers.anyMapOf;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.sap.hcp.cf.logging.common.Defaults;
+import com.sap.hcp.cf.logging.common.Fields;
+import com.sap.hcp.cf.logging.common.LogOptionalFieldsSettings;
+import com.sap.hcp.cf.logging.common.helper.ConsoleExtension;
+import com.sap.hcp.cf.logging.common.helper.ConsoleExtension.ConsoleOutput;
+import com.sap.hcp.cf.logging.common.request.HttpHeader;
+import com.sap.hcp.cf.logging.common.request.HttpHeaders;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
+import org.slf4j.MDC;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,31 +27,13 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletInputStream;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import static com.sap.hcp.cf.logging.common.helper.ConsoleAssertions.assertLastEventFields;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.matches;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.slf4j.MDC;
-
-import com.fasterxml.jackson.jr.ob.JSON;
-import com.fasterxml.jackson.jr.ob.JSONObjectException;
-import com.sap.hcp.cf.logging.common.Defaults;
-import com.sap.hcp.cf.logging.common.Fields;
-import com.sap.hcp.cf.logging.common.LogOptionalFieldsSettings;
-import com.sap.hcp.cf.logging.common.request.HttpHeader;
-import com.sap.hcp.cf.logging.common.request.HttpHeaders;
-
+@ExtendWith({ MockitoExtension.class, ConsoleExtension.class })
 public class RequestLoggingFilterTest {
 
     private static final String REQUEST_ID = "1234-56-7890-xxx";
@@ -54,17 +46,11 @@ public class RequestLoggingFilterTest {
     private static final String REMOTE_HOST = "acme.org";
     private static final String REFERER = "my.fancy.com";
 
-    @Rule
-    public SystemOutRule systemOut = new SystemOutRule();
+    private final HttpServletRequest mockReq = mock(HttpServletRequest.class);
+    private final HttpServletResponse mockResp = mock(HttpServletResponse.class);
+    private final PrintWriter mockWriter = mock(PrintWriter.class);
 
-    @Rule
-    public SystemErrRule systemErr = new SystemErrRule();
-
-    private HttpServletRequest mockReq = mock(HttpServletRequest.class);
-    private HttpServletResponse mockResp = mock(HttpServletResponse.class);
-    private PrintWriter mockWriter = mock(PrintWriter.class);
-
-    @Before
+    @BeforeEach
     public void initMocks() throws IOException {
         Mockito.reset(mockReq, mockResp, mockWriter);
         when(mockResp.getWriter()).thenReturn(mockWriter);
@@ -79,73 +65,75 @@ public class RequestLoggingFilterTest {
                 contextMap.putAll((Map<? extends String, ? extends String>) arguments[1]);
                 return null;
             }
-        }).when(mockReq).setAttribute(eq(MDC.class.getName()), anyMapOf(String.class, String.class));
+        }).when(mockReq).setAttribute(matches(MDC.class.getName()), anyMap());
 
         when(mockReq.getAttribute(MDC.class.getName())).thenReturn(contextMap);
     }
 
     @Test
-    public void testSimple() throws IOException, ServletException {
+    public void testSimple(ConsoleOutput console) throws IOException, ServletException {
         FilterChain mockFilterChain = mock(FilterChain.class);
 
         new RequestLoggingFilter().doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.REQUEST), is(nullValue()));
-        assertThat(getField(Fields.CORRELATION_ID), not(isEmptyOrNullString()));
-        assertThat(getField(Fields.REQUEST_ID), is(nullValue()));
-        assertThat(getField(Fields.REMOTE_HOST), is(nullValue()));
-        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
-        assertThat(getField(Fields.CONTAINER_ID), is(nullValue()));
-        assertThat(getField(Fields.REQUEST_SIZE_B), is("-1"));
+
+        assertLastEventFields(console).containsEntry(Fields.REQUEST_SIZE_B, -1)
+                                      .hasEntrySatisfying(Fields.CORRELATION_ID,
+                                                          v -> Assertions.assertThat(v.toString()).isNotBlank())
+                                      .doesNotContainKey(Fields.REQUEST).doesNotContainKey(Fields.REQUEST_ID)
+                                      .doesNotContainKey(Fields.REMOTE_HOST).doesNotContainKey(Fields.COMPONENT_ID)
+                                      .doesNotContainKey(Fields.CONTAINER_ID);
     }
 
     @Test
-    public void testInputStream() throws IOException, ServletException {
+    public void testInputStream(ConsoleOutput console) throws IOException, ServletException {
         ServletInputStream mockStream = mock(ServletInputStream.class);
 
         when(mockReq.getInputStream()).thenReturn(mockStream);
         when(mockStream.read()).thenReturn(1);
         FilterChain mockFilterChain = new FilterChain() {
             @Override
-            public void doFilter(ServletRequest request, ServletResponse response) throws IOException,
-                                                                                   ServletException {
+            public void doFilter(ServletRequest request, ServletResponse response)
+                    throws IOException, ServletException {
                 request.getInputStream().read();
             }
         };
         new RequestLoggingFilter().doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.REQUEST), is(nullValue()));
-        assertThat(getField(Fields.CORRELATION_ID), not(isEmptyOrNullString()));
-        assertThat(getField(Fields.REQUEST_ID), is(nullValue()));
-        assertThat(getField(Fields.REMOTE_HOST), is(nullValue()));
-        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
-        assertThat(getField(Fields.CONTAINER_ID), is(nullValue()));
-        assertThat(getField(Fields.REQUEST_SIZE_B), is("1"));
+
+        assertLastEventFields(console).containsEntry(Fields.REQUEST_SIZE_B, 1).hasEntrySatisfying(Fields.CORRELATION_ID,
+                                                                                                  v -> Assertions.assertThat(
+                                                                                                                         v.toString())
+                                                                                                                 .isNotBlank())
+                                      .doesNotContainKey(Fields.REQUEST).doesNotContainKey(Fields.REQUEST_ID)
+                                      .doesNotContainKey(Fields.REMOTE_HOST).doesNotContainKey(Fields.COMPONENT_ID)
+                                      .doesNotContainKey(Fields.CONTAINER_ID);
     }
 
     @Test
-    public void testReader() throws IOException, ServletException {
+    public void testReader(ConsoleOutput console) throws IOException, ServletException {
         BufferedReader reader = new BufferedReader(new StringReader("TEST"));
 
         when(mockReq.getReader()).thenReturn(reader);
         FilterChain mockFilterChain = new FilterChain() {
             @Override
-            public void doFilter(ServletRequest request, ServletResponse response) throws IOException,
-                                                                                   ServletException {
+            public void doFilter(ServletRequest request, ServletResponse response)
+                    throws IOException, ServletException {
                 request.getReader().read();
             }
         };
+
         new RequestLoggingFilter().doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.REQUEST), is(nullValue()));
-        assertThat(getField(Fields.CORRELATION_ID), not(isEmptyOrNullString()));
-        assertThat(getField(Fields.REQUEST_ID), is(nullValue()));
-        assertThat(getField(Fields.REMOTE_HOST), is(nullValue()));
-        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
-        assertThat(getField(Fields.CONTAINER_ID), is(nullValue()));
-        assertThat(getField(Fields.REQUEST_SIZE_B), is("4"));
-        assertThat(getField(Fields.TENANT_ID), is(nullValue()));
+
+        assertLastEventFields(console).containsEntry(Fields.REQUEST_SIZE_B, 4).hasEntrySatisfying(Fields.CORRELATION_ID,
+                                                                                                  v -> Assertions.assertThat(
+                                                                                                                         v.toString())
+                                                                                                                 .isNotBlank())
+                                      .doesNotContainKey(Fields.REQUEST).doesNotContainKey(Fields.REQUEST_ID)
+                                      .doesNotContainKey(Fields.REMOTE_HOST).doesNotContainKey(Fields.COMPONENT_ID)
+                                      .doesNotContainKey(Fields.CONTAINER_ID);
     }
 
     @Test
-    public void testWithActivatedOptionalFields() throws IOException, ServletException {
+    public void testWithActivatedOptionalFields(ConsoleOutput console) throws IOException, ServletException {
         when(mockReq.getRequestURI()).thenReturn(REQUEST);
         when(mockReq.getQueryString()).thenReturn(QUERY_STRING);
         when(mockReq.getRemoteHost()).thenReturn(REMOTE_HOST);
@@ -159,15 +147,15 @@ public class RequestLoggingFilterTest {
         when(mockOptionalFieldsSettings.isLogRefererField()).thenReturn(true);
         RequestRecordFactory requestRecordFactory = new RequestRecordFactory(mockOptionalFieldsSettings);
         Filter requestLoggingFilter = new RequestLoggingFilter(requestRecordFactory);
+
         requestLoggingFilter.doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.REQUEST), is(FULL_REQUEST));
-        assertThat(getField(Fields.CORRELATION_ID), is(REQUEST_ID));
-        assertThat(getField(Fields.REQUEST_ID), is(REQUEST_ID));
-        assertThat(getField(Fields.REMOTE_HOST), is(REMOTE_HOST));
-        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
-        assertThat(getField(Fields.CONTAINER_ID), is(nullValue()));
-        assertThat(getField(Fields.REFERER), is(REFERER));
-        assertThat(getField(Fields.TENANT_ID), is(nullValue()));
+
+        assertLastEventFields(console).containsEntry(Fields.REQUEST, FULL_REQUEST)
+                                      .containsEntry(Fields.CORRELATION_ID, REQUEST_ID)
+                                      .containsEntry(Fields.REQUEST_ID, REQUEST_ID)
+                                      .containsEntry(Fields.REMOTE_HOST, REMOTE_HOST)
+                                      .containsEntry(Fields.REFERER, REFERER).doesNotContainKey(Fields.COMPONENT_ID)
+                                      .doesNotContainKey(Fields.CONTAINER_ID).doesNotContainKey(Fields.TENANT_ID);
     }
 
     private void mockGetHeader(HttpHeader header, String value) {
@@ -175,7 +163,7 @@ public class RequestLoggingFilterTest {
     }
 
     @Test
-    public void testWithSuppressedOptionalFields() throws IOException, ServletException {
+    public void testWithSuppressedOptionalFields(ConsoleOutput console) throws IOException, ServletException {
         when(mockReq.getRequestURI()).thenReturn(REQUEST);
         when(mockReq.getQueryString()).thenReturn(QUERY_STRING);
         when(mockReq.getRemoteHost()).thenReturn(REMOTE_HOST);
@@ -189,48 +177,55 @@ public class RequestLoggingFilterTest {
         when(mockLogOptionalFieldsSettings.isLogRefererField()).thenReturn(false);
         RequestRecordFactory requestRecordFactory = new RequestRecordFactory(mockLogOptionalFieldsSettings);
         Filter requestLoggingFilter = new RequestLoggingFilter(requestRecordFactory);
+
         requestLoggingFilter.doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.REQUEST), is(FULL_REQUEST));
-        assertThat(getField(Fields.CORRELATION_ID), is(REQUEST_ID));
-        assertThat(getField(Fields.REQUEST_ID), is(REQUEST_ID));
-        assertThat(getField(Fields.REMOTE_IP), is(nullValue()));
-        assertThat(getField(Fields.REMOTE_HOST), is(Defaults.REDACTED));
-        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
-        assertThat(getField(Fields.CONTAINER_ID), is(nullValue()));
-        assertThat(getField(Fields.TENANT_ID), is(nullValue()));
+
+        assertLastEventFields(console).containsEntry(Fields.REQUEST, FULL_REQUEST)
+                                      .containsEntry(Fields.CORRELATION_ID, REQUEST_ID)
+                                      .containsEntry(Fields.REQUEST_ID, REQUEST_ID)
+                                      .containsEntry(Fields.REMOTE_HOST, Defaults.REDACTED)
+                                      .containsEntry(Fields.REFERER, Defaults.REDACTED)
+                                      .doesNotContainKey(Fields.COMPONENT_ID).doesNotContainKey(Fields.CONTAINER_ID)
+                                      .doesNotContainKey(Fields.TENANT_ID).doesNotContainKey(Fields.REMOTE_IP);
     }
 
     @Test
-    public void testExplicitCorrelationId() throws IOException, ServletException {
+    public void testExplicitCorrelationId(ConsoleOutput console) throws IOException, ServletException {
         mockGetHeader(HttpHeaders.CORRELATION_ID, CORRELATION_ID);
         mockGetHeader(HttpHeaders.X_VCAP_REQUEST_ID, REQUEST_ID);
         FilterChain mockFilterChain = mock(FilterChain.class);
+
         new RequestLoggingFilter().doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.CORRELATION_ID), is(CORRELATION_ID));
-        assertThat(getField(Fields.CORRELATION_ID), not(REQUEST_ID));
-        assertThat(getField(Fields.REQUEST_ID), is(REQUEST_ID));
-        assertThat(getField(Fields.TENANT_ID), is(nullValue()));
+
+        assertLastEventFields(console).containsEntry(Fields.REQUEST_ID, REQUEST_ID)
+                                      .containsEntry(Fields.CORRELATION_ID, CORRELATION_ID)
+                                      .doesNotContainEntry(Fields.CORRELATION_ID, REQUEST_ID)
+                                      .doesNotContainKey(Fields.TENANT_ID);
     }
 
     @Test
-    public void testExplicitW3cTraceparent() throws IOException, ServletException {
+    public void testExplicitW3cTraceparent(ConsoleOutput console) throws IOException, ServletException {
         mockGetHeader(HttpHeaders.W3C_TRACEPARENT, W3C_TRACEPARENT);
         FilterChain mockFilterChain = mock(FilterChain.class);
+
         new RequestLoggingFilter().doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.W3C_TRACEPARENT), is(W3C_TRACEPARENT));
+
+        assertLastEventFields(console).containsEntry(Fields.W3C_TRACEPARENT, W3C_TRACEPARENT);
     }
 
     @Test
-    public void testExplicitTenantId() throws IOException, ServletException {
+    public void testExplicitTenantId(ConsoleOutput console) throws IOException, ServletException {
         mockGetHeader(HttpHeaders.TENANT_ID, TENANT_ID);
         mockGetHeader(HttpHeaders.X_VCAP_REQUEST_ID, REQUEST_ID);
         FilterChain mockFilterChain = mock(FilterChain.class);
+
         new RequestLoggingFilter().doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.TENANT_ID), is(TENANT_ID));
+
+        assertLastEventFields(console).containsEntry(Fields.TENANT_ID, TENANT_ID);
     }
 
     @Test
-    public void testProxyHeadersLogged() throws Exception {
+    public void testProxyHeadersLogged(ConsoleOutput console) throws Exception {
         LogOptionalFieldsSettings settings = mock(LogOptionalFieldsSettings.class);
         when(settings.isLogSensitiveConnectionData()).thenReturn(true).getMock();
         mockGetHeader(HttpHeaders.X_CUSTOM_HOST, "custom.example.com");
@@ -239,30 +234,34 @@ public class RequestLoggingFilterTest {
         mockGetHeader(HttpHeaders.X_FORWARDED_PROTO, "https");
         FilterChain mockFilterChain = mock(FilterChain.class);
         RequestLoggingFilter filter = new RequestLoggingFilter(new RequestRecordFactory(settings));
+
         filter.doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.X_CUSTOM_HOST), is("custom.example.com"));
-        assertThat(getField(Fields.X_FORWARDED_FOR), is("1.2.3.4,5.6.7.8"));
-        assertThat(getField(Fields.X_FORWARDED_HOST), is("requested.example.com"));
-        assertThat(getField(Fields.X_FORWARDED_PROTO), is("https"));
+
+        assertLastEventFields(console).containsEntry(Fields.X_CUSTOM_HOST, "custom.example.com")
+                                      .containsEntry(Fields.X_FORWARDED_FOR, "1.2.3.4,5.6.7.8")
+                                      .containsEntry(Fields.X_FORWARDED_HOST, "requested.example.com")
+                                      .containsEntry(Fields.X_FORWARDED_PROTO, "https");
     }
 
     @Test
-    public void testProxyHeadersRedactedByDefault() throws Exception {
+    public void testProxyHeadersRedactedByDefault(ConsoleOutput console) throws Exception {
         mockGetHeader(HttpHeaders.X_CUSTOM_HOST, "custom.example.com");
         mockGetHeader(HttpHeaders.X_FORWARDED_FOR, "1.2.3.4,5.6.7.8");
         mockGetHeader(HttpHeaders.X_FORWARDED_HOST, "requested.example.com");
         mockGetHeader(HttpHeaders.X_FORWARDED_PROTO, "https");
         FilterChain mockFilterChain = mock(FilterChain.class);
         RequestLoggingFilter filter = new RequestLoggingFilter();
+
         filter.doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.X_CUSTOM_HOST), is("redacted"));
-        assertThat(getField(Fields.X_FORWARDED_FOR), is("redacted"));
-        assertThat(getField(Fields.X_FORWARDED_HOST), is("redacted"));
-        assertThat(getField(Fields.X_FORWARDED_PROTO), is("redacted"));
+
+        assertLastEventFields(console).containsEntry(Fields.X_CUSTOM_HOST, Defaults.REDACTED)
+                                      .containsEntry(Fields.X_FORWARDED_FOR, Defaults.REDACTED)
+                                      .containsEntry(Fields.X_FORWARDED_HOST, Defaults.REDACTED)
+                                      .containsEntry(Fields.X_FORWARDED_PROTO, Defaults.REDACTED);
     }
 
     @Test
-    public void testSslHeadersLogged() throws Exception {
+    public void testSslHeadersLogged(ConsoleOutput console) throws Exception {
         LogOptionalFieldsSettings settings = mock(LogOptionalFieldsSettings.class);
         when(settings.isLogSslHeaders()).thenReturn(true).getMock();
         mockGetHeader(HttpHeaders.X_SSL_CLIENT, "1");
@@ -275,19 +274,21 @@ public class RequestLoggingFilterTest {
         mockGetHeader(HttpHeaders.X_SSL_CLIENT_SESSION_ID, "session-id");
         FilterChain mockFilterChain = mock(FilterChain.class);
         RequestLoggingFilter filter = new RequestLoggingFilter(new RequestRecordFactory(settings));
+
         filter.doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.X_SSL_CLIENT), is("1"));
-        assertThat(getField(Fields.X_SSL_CLIENT_VERIFY), is("2"));
-        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_DN), is("subject/dn"));
-        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_CN), is("subject/cn"));
-        assertThat(getField(Fields.X_SSL_CLIENT_ISSUER_DN), is("issuer/dn"));
-        assertThat(getField(Fields.X_SSL_CLIENT_NOTBEFORE), is("start"));
-        assertThat(getField(Fields.X_SSL_CLIENT_NOTAFTER), is("end"));
-        assertThat(getField(Fields.X_SSL_CLIENT_SESSION_ID), is("session-id"));
+
+        assertLastEventFields(console).containsEntry(Fields.X_SSL_CLIENT, "1")
+                                      .containsEntry(Fields.X_SSL_CLIENT_VERIFY, "2")
+                                      .containsEntry(Fields.X_SSL_CLIENT_SUBJECT_DN, "subject/dn")
+                                      .containsEntry(Fields.X_SSL_CLIENT_SUBJECT_CN, "subject/cn")
+                                      .containsEntry(Fields.X_SSL_CLIENT_ISSUER_DN, "issuer/dn")
+                                      .containsEntry(Fields.X_SSL_CLIENT_NOTBEFORE, "start")
+                                      .containsEntry(Fields.X_SSL_CLIENT_NOTAFTER, "end")
+                                      .containsEntry(Fields.X_SSL_CLIENT_SESSION_ID, "session-id");
     }
 
     @Test
-    public void testSslHeadersNotLoggedByDefault() throws Exception {
+    public void testSslHeadersNotLoggedByDefault(ConsoleOutput console) throws Exception {
         LogOptionalFieldsSettings settings = mock(LogOptionalFieldsSettings.class);
         mockGetHeader(HttpHeaders.X_SSL_CLIENT, "1");
         mockGetHeader(HttpHeaders.X_SSL_CLIENT_VERIFY, "2");
@@ -299,19 +300,21 @@ public class RequestLoggingFilterTest {
         mockGetHeader(HttpHeaders.X_SSL_CLIENT_SESSION_ID, "session-id");
         FilterChain mockFilterChain = mock(FilterChain.class);
         RequestLoggingFilter filter = new RequestLoggingFilter(new RequestRecordFactory(settings));
+
         filter.doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.X_SSL_CLIENT), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_VERIFY), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_DN), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_CN), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_ISSUER_DN), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_NOTBEFORE), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_NOTAFTER), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_SESSION_ID), is(nullValue()));
+
+        assertLastEventFields(console).doesNotContainKey(Fields.X_SSL_CLIENT)
+                                      .doesNotContainKey(Fields.X_SSL_CLIENT_VERIFY)
+                                      .doesNotContainKey(Fields.X_SSL_CLIENT_SUBJECT_DN)
+                                      .doesNotContainKey(Fields.X_SSL_CLIENT_SUBJECT_CN)
+                                      .doesNotContainKey(Fields.X_SSL_CLIENT_ISSUER_DN)
+                                      .doesNotContainKey(Fields.X_SSL_CLIENT_NOTBEFORE)
+                                      .doesNotContainKey(Fields.X_SSL_CLIENT_NOTAFTER)
+                                      .doesNotContainKey(Fields.X_SSL_CLIENT_SESSION_ID);
     }
 
     @Test
-    public void testSslHeadersAbsentOrUnknownValues() throws Exception {
+    public void testSslHeadersAbsentOrUnknownValues(ConsoleOutput console) throws Exception {
         LogOptionalFieldsSettings settings = mock(LogOptionalFieldsSettings.class);
         when(settings.isLogSslHeaders()).thenReturn(true).getMock();
         mockGetHeader(HttpHeaders.X_SSL_CLIENT, "0");
@@ -323,24 +326,16 @@ public class RequestLoggingFilterTest {
         mockGetHeader(HttpHeaders.X_SSL_CLIENT_NOTAFTER, null);
         FilterChain mockFilterChain = mock(FilterChain.class);
         RequestLoggingFilter filter = new RequestLoggingFilter(new RequestRecordFactory(settings));
+
         filter.doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.X_SSL_CLIENT), is("0"));
-        assertThat(getField(Fields.X_SSL_CLIENT_VERIFY), is("0"));
-        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_DN), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_CN), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_ISSUER_DN), is(""));
-        assertThat(getField(Fields.X_SSL_CLIENT_NOTBEFORE), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_NOTAFTER), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_SESSION_ID), is(nullValue()));
-    }
 
-    protected String getField(String fieldName) throws JSONObjectException, IOException {
-        Object fieldValue = JSON.std.mapFrom(getLastLine()).get(fieldName);
-        return fieldValue == null ? null : fieldValue.toString();
-    }
-
-    private String getLastLine() {
-        String[] lines = systemOut.toString().split("\n");
-        return lines[lines.length - 1];
+        assertLastEventFields(console).containsEntry(Fields.X_SSL_CLIENT, "0")
+                                      .containsEntry(Fields.X_SSL_CLIENT_VERIFY, "0")
+                                      .doesNotContainKey(Fields.X_SSL_CLIENT_SUBJECT_DN)
+                                      .doesNotContainKey(Fields.X_SSL_CLIENT_SUBJECT_CN)
+                                      .containsEntry(Fields.X_SSL_CLIENT_ISSUER_DN, "")
+                                      .doesNotContainKey(Fields.X_SSL_CLIENT_NOTBEFORE)
+                                      .doesNotContainKey(Fields.X_SSL_CLIENT_NOTAFTER)
+                                      .doesNotContainKey(Fields.X_SSL_CLIENT_SESSION_ID);
     }
 }

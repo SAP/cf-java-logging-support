@@ -1,15 +1,14 @@
 package com.sap.hcp.cf.log4j2.layout.supppliers;
 
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.core.LogEvent;
-
 import com.sap.hcp.cf.log4j2.converter.api.Log4jContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.Defaults;
 import com.sap.hcp.cf.logging.common.Fields;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.core.LogEvent;
+
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BaseFieldSupplier implements Log4jContextFieldSupplier {
 

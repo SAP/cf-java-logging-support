@@ -11,7 +11,9 @@ public interface DynamicLogLevelConfiguration {
 
     default String getDynLogHeaderKey() {
         return "SAP-LOG-LEVEL";
-    };
+    }
+
+    ;
 
     default String getDynLogHeaderValue(HttpServletRequest httpRequest) {
         return httpRequest.getHeader(getDynLogHeaderKey());

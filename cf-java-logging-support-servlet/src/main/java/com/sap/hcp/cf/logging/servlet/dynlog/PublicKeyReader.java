@@ -19,8 +19,8 @@ public class PublicKeyReader {
     private PublicKeyReader() {
     }
 
-    public static RSAPublicKey readPublicKey(Environment environment) throws IOException, NoSuchAlgorithmException,
-                                                                      InvalidKeySpecException {
+    public static RSAPublicKey readPublicKey(Environment environment)
+            throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 
         String pemKey = environment.getVariable("DYN_LOG_LEVEL_KEY");
 

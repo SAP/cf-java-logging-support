@@ -56,18 +56,16 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
     }
 
     /**
-     * Scans service bindings, both managed and user-provided for Cloud Logging.
-     * Managed services require the label "cloud-logging" to be considered.
-     * Services will be selected by the tag "Cloud Logging".
-     * User-provided services will be preferred over managed service instances.
+     * Scans service bindings, both managed and user-provided for Cloud Logging. Managed services require the label
+     * "cloud-logging" to be considered. Services will be selected by the tag "Cloud Logging". User-provided services
+     * will be preferred over managed service instances.
      *
      * @return The pre-configured connection properties for the OpenTelemetry SDK.
      */
     @Override
     public Map<String, String> get() {
-        return cloudLoggingServicesProvider.get()
-                .findFirst()
-                .map(this::createEndpointConfiguration).orElseGet(Collections::emptyMap);
+        return cloudLoggingServicesProvider.get().findFirst().map(this::createEndpointConfiguration)
+                                           .orElseGet(Collections::emptyMap);
     }
 
     private Map<String, String> createEndpointConfiguration(CfService svc) {

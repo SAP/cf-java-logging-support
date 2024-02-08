@@ -1,9 +1,5 @@
 package com.sap.hcp.cf.logging.common.serialization;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.jr.ob.comp.ArrayComposer;
 import com.fasterxml.jackson.jr.ob.comp.ComposerBase;
@@ -12,6 +8,10 @@ import com.sap.hcp.cf.logging.common.Defaults;
 import com.sap.hcp.cf.logging.common.Fields;
 import com.sap.hcp.cf.logging.common.LogContext;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 public class ContextFieldConverter {
 
     private final boolean sendDefaultValues;
@@ -19,15 +19,15 @@ public class ContextFieldConverter {
     private final List<String> retainFieldMdcKeyNames;
 
     public ContextFieldConverter(boolean sendDefaultValues, List<String> customFieldMdcKeyNames,
-                                List<String> retainFieldMdcKeyNames) {
+                                 List<String> retainFieldMdcKeyNames) {
         this.sendDefaultValues = sendDefaultValues;
         this.customFieldMdcKeyNames = customFieldMdcKeyNames;
         this.retainFieldMdcKeyNames = retainFieldMdcKeyNames;
     }
 
     public <P extends ComposerBase> void addContextFields(ObjectComposer<P> oc, Map<String, Object> contextFields) {
-        contextFields.keySet().stream().filter(this::isContextField).forEach(n -> addContextField(oc, n, contextFields
-                                                                                                                      .get(n)));
+        contextFields.keySet().stream().filter(this::isContextField)
+                     .forEach(n -> addContextField(oc, n, contextFields.get(n)));
         ;
     }
 
@@ -54,8 +54,8 @@ public class ContextFieldConverter {
         }
     }
 
-    private <P extends ComposerBase> void put(ObjectComposer<P> oc, String name, Object value) throws IOException,
-                                                                                               JsonProcessingException {
+    private <P extends ComposerBase> void put(ObjectComposer<P> oc, String name, Object value)
+            throws IOException, JsonProcessingException {
         if (value instanceof String) {
             oc.put(name, (String) value);
         } else if (value instanceof Long) {
@@ -79,8 +79,7 @@ public class ContextFieldConverter {
     }
 
     public <P extends ComposerBase> void addCustomFields(ObjectComposer<P> oc, Map<String, Object> contextFields)
-                                                                                                                  throws IOException,
-                                                                                                                  JsonProcessingException {
+            throws IOException, JsonProcessingException {
         ArrayComposer<ObjectComposer<ObjectComposer<P>>> customFieldComposer = null;
         for (int i = 0; i < customFieldMdcKeyNames.size(); i++) {
             String key = customFieldMdcKeyNames.get(i);

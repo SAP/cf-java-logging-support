@@ -1,10 +1,10 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import java.util.Map;
-
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.slf4j.MDC;
+
+import java.util.Map;
 
 public class ContextMapExtractor implements Answer<Void> {
 

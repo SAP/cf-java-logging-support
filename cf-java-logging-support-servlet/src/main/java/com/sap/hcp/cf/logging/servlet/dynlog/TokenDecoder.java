@@ -18,8 +18,8 @@ public class TokenDecoder {
     }
 
     /**
-     * This method validates if a token has a valid signature as well as a valid
-     * timestamp and returns the decoded token
+     * This method validates if a token has a valid signature as well as a valid timestamp and returns the decoded
+     * token
      *
      * @throws DynamicLogLevelException
      */
@@ -33,7 +33,8 @@ public class TokenDecoder {
             if (exp != null && iat != null && now.after(iat) && now.before(exp)) {
                 return jwt;
             } else {
-                throw new DynamicLogLevelException("Token provided to dynamically change the log-level on thread-level is outdated");
+                throw new DynamicLogLevelException(
+                        "Token provided to dynamically change the log-level on thread-level is outdated");
             }
         } catch (JWTVerificationException e) {
             // Exception is not attached to avoid logging of JWT token

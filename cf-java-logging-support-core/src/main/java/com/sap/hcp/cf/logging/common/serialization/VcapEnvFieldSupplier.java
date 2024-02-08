@@ -1,11 +1,11 @@
 package com.sap.hcp.cf.logging.common.serialization;
 
+import com.sap.hcp.cf.logging.common.LogContext;
+import com.sap.hcp.cf.logging.common.VcapEnvReader;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.sap.hcp.cf.logging.common.LogContext;
-import com.sap.hcp.cf.logging.common.VcapEnvReader;
 
 public class VcapEnvFieldSupplier implements ContextFieldSupplier {
 

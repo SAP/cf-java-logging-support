@@ -1,18 +1,13 @@
 package com.sap.hcp.cf.logging.common.request;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import com.sap.hcp.cf.logging.common.Defaults;
 import com.sap.hcp.cf.logging.common.Fields;
 import com.sap.hcp.cf.logging.common.LogContext;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 public class HttpHeadersTest {
 
@@ -83,8 +78,9 @@ public class HttpHeadersTest {
     @Test
     public void defaultFieldValueIsNullForProgatedHeaders() throws Exception {
         for (HttpHeader header: HttpHeaders.propagated()) {
-            assertThat("Default of field <" + header.getField() + "> from header <" + header.getName() +
-                       "> should be null", header.getFieldValue(), is(nullValue()));
+            assertThat(
+                    "Default of field <" + header.getField() + "> from header <" + header.getName() + "> should be null",
+                    header.getFieldValue(), is(nullValue()));
         }
     }
 
@@ -113,9 +109,9 @@ public class HttpHeadersTest {
 
     @Test
     public void propagatesCorrectHeaders() throws Exception {
-        assertThat(HttpHeaders.propagated(), containsInAnyOrder(HttpHeaders.CORRELATION_ID, HttpHeaders.SAP_PASSPORT,
-                                                                HttpHeaders.TENANT_ID, HttpHeaders.W3C_TRACEPARENT,
-                                                                HttpHeaders.X_VCAP_REQUEST_ID));
+        assertThat(HttpHeaders.propagated(),
+                   containsInAnyOrder(HttpHeaders.CORRELATION_ID, HttpHeaders.SAP_PASSPORT, HttpHeaders.TENANT_ID,
+                                      HttpHeaders.W3C_TRACEPARENT, HttpHeaders.X_VCAP_REQUEST_ID));
     }
 
 }

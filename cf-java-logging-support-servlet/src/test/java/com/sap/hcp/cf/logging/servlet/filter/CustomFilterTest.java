@@ -1,121 +1,41 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.is;
-
-import java.util.EnumSet;
-
+import com.sap.hcp.cf.logging.common.Fields;
+import com.sap.hcp.cf.logging.common.helper.ConsoleExtension;
+import com.sap.hcp.cf.logging.common.helper.ConsoleExtension.ConsoleOutput;
+import com.sap.hcp.cf.logging.common.request.HttpHeaders;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.assertj.core.api.ListAssert;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.MDC;
 
-import com.sap.hcp.cf.logging.common.Fields;
-import com.sap.hcp.cf.logging.common.request.HttpHeaders;
+import java.util.EnumSet;
+import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+@ExtendWith(ConsoleExtension.class)
 public class CustomFilterTest {
 
-    @Rule
-    public SystemOutRule systemOutRule = new SystemOutRule();
-
-    @Test
-    public void setsFixedTenantId() throws Exception {
-        Server jetty = initJetty(constantTenantId("my_tenant"));
-        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-            jetty.start();
-            try (CloseableHttpResponse response = client.execute(createBasicGetRequest(jetty))) {
-                assertThat(response.getStatusLine().getStatusCode(), is(equalTo(200)));
-                assertThat(systemOutRule.findLineAsMapWith(Fields.MSG, LoggingTestServlet.LOG_MESSAGE), hasEntry(
-                                                                                                                 Fields.TENANT_ID,
-                                                                                                                 "my_tenant"));
-            }
-        } finally {
-            jetty.stop();
-        }
+    private static ListAssert<Map<String, Object>> assertTestLogMessage(ConsoleOutput console) {
+        return assertThat(console.getAllEvents()).filteredOn(
+                m -> LoggingTestServlet.LOG_MESSAGE.equals(m.get(Fields.MSG)));
     }
 
-    /**
-     * This test case addresses
-     * <a href="https://github.com/SAP/cf-java-logging-support/issues/111">
-     * Github issue #111</a>, by ensuring the elimination of a side-effect in
-     * {@link RequestRecordFactory}, which used to overwrite custom set log
-     * fields with values extracted from http headers.
-     * 
-     * @throws Exception
-     */
-    @Test
-    public void usesCustomTenantIdInRequestLog() throws Exception {
-        Filter filter = new CompositeFilter(constantTenantId("custom_tenant"), new GenerateRequestLogFilter());
-        Server jetty = initJetty(filter);
-        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-            jetty.start();
-            HttpGet request = createBasicGetRequest(jetty);
-            request.addHeader(HttpHeaders.TENANT_ID.getName(), "other_tenant");
-            try (CloseableHttpResponse response = client.execute(request)) {
-                assertThat(response.getStatusLine().getStatusCode(), is(equalTo(200)));
-                assertThat(systemOutRule.findLineAsMapWith(Fields.MSG, LoggingTestServlet.LOG_MESSAGE), hasEntry(
-                                                                                                                 Fields.TENANT_ID,
-                                                                                                                 "custom_tenant"));
-                assertThat(systemOutRule.findLineAsMapWith(Fields.LAYER, "[SERVLET]"), hasEntry(Fields.TENANT_ID,
-                                                                                                "custom_tenant"));
-            }
-        } finally {
-            jetty.stop();
-        }
-    }
-
-    @Test
-    public void canOverwriteGeneratedCorrelationId() throws Exception {
-        Filter filter = new CompositeFilter(new CorrelationIdFilter(), constantCorrelationId("my_correlation"),
-                                            new GenerateRequestLogFilter());
-        Server jetty = initJetty(filter);
-        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-            jetty.start();
-            try (CloseableHttpResponse response = client.execute(createBasicGetRequest(jetty))) {
-                assertThat(response.getStatusLine().getStatusCode(), is(equalTo(200)));
-                assertThat(systemOutRule.findLineAsMapWith(Fields.MSG, LoggingTestServlet.LOG_MESSAGE), hasEntry(
-                                                                                                                 Fields.CORRELATION_ID,
-                                                                                                                 "my_correlation"));
-                assertThat(systemOutRule.findLineAsMapWith(Fields.LAYER, "[SERVLET]"), hasEntry(Fields.CORRELATION_ID,
-                                                                                                "my_correlation"));
-            }
-        } finally {
-            jetty.stop();
-        }
-    }
-
-    private Server initJetty(Filter filter) {
-        Server jetty = new Server(0);
-        ServletContextHandler contextHandler = new ServletContextHandler(jetty, null);
-        EnumSet<DispatcherType> dispatches = EnumSet.of(DispatcherType.INCLUDE, DispatcherType.REQUEST,
-                                                        DispatcherType.ERROR, DispatcherType.FORWARD,
-                                                        DispatcherType.ASYNC);
-        contextHandler.addFilter(new FilterHolder(filter), "/*", dispatches);
-        contextHandler.addServlet(LoggingTestServlet.class, "/test");
-        return jetty;
-    }
-
-    private HttpGet createBasicGetRequest(Server jetty) {
-        return new HttpGet(getBaseUrl(jetty) + "/test");
-    }
-
-    private String getBaseUrl(Server server) {
-        int port = ((ServerConnector) server.getConnectors()[0]).getLocalPort();
-        return "http://localhost:" + port;
+    private static ListAssert<Map<String, Object>> assertRequestLog(ConsoleOutput console) {
+        return assertThat(console.getAllEvents()).filteredOn(m -> "[SERVLET]".equals(m.get(Fields.LAYER)));
     }
 
     private static Filter constantTenantId(String tenantId) {
@@ -138,6 +58,88 @@ public class CustomFilterTest {
                 MDC.remove(field);
             }
         };
+    }
+
+    @Test
+    public void setsFixedTenantId(ConsoleOutput console) throws Exception {
+        Server jetty = initJetty(constantTenantId("my_tenant"));
+        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+            jetty.start();
+            try (CloseableHttpResponse response = client.execute(createBasicGetRequest(jetty))) {
+                assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+                assertTestLogMessage(console).anySatisfy(
+                        t -> assertThat(t).containsEntry(Fields.TENANT_ID, "my_tenant"));
+            }
+        } finally {
+            jetty.stop();
+        }
+    }
+
+    /**
+     * This test case addresses
+     * <a href="https://github.com/SAP/cf-java-logging-support/issues/111">
+     * Github issue #111</a>, by ensuring the elimination of a side-effect in {@link RequestRecordFactory}, which used
+     * to overwrite custom set log fields with values extracted from http headers.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void usesCustomTenantIdInRequestLog(ConsoleOutput console) throws Exception {
+        Filter filter = new CompositeFilter(constantTenantId("custom_tenant"), new GenerateRequestLogFilter());
+        Server jetty = initJetty(filter);
+        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+            jetty.start();
+            HttpGet request = createBasicGetRequest(jetty);
+            request.addHeader(HttpHeaders.TENANT_ID.getName(), "other_tenant");
+            try (CloseableHttpResponse response = client.execute(request)) {
+                assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+                assertTestLogMessage(console).anySatisfy(
+                        t -> assertThat(t).containsEntry(Fields.TENANT_ID, "custom_tenant"));
+                assertRequestLog(console).anySatisfy(
+                        t -> assertThat(t).containsEntry(Fields.TENANT_ID, "custom_tenant"));
+            }
+        } finally {
+            jetty.stop();
+        }
+    }
+
+    @Test
+    public void canOverwriteGeneratedCorrelationId(ConsoleOutput console) throws Exception {
+        Filter filter = new CompositeFilter(new CorrelationIdFilter(), constantCorrelationId("my_correlation"),
+                                            new GenerateRequestLogFilter());
+        Server jetty = initJetty(filter);
+        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+            jetty.start();
+            try (CloseableHttpResponse response = client.execute(createBasicGetRequest(jetty))) {
+                assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+                assertTestLogMessage(console).anySatisfy(
+                        t -> assertThat(t).containsEntry(Fields.CORRELATION_ID, "my_correlation"));
+                assertRequestLog(console).anySatisfy(
+                        t -> assertThat(t).containsEntry(Fields.CORRELATION_ID, "my_correlation"));
+            }
+        } finally {
+            jetty.stop();
+        }
+    }
+
+    private Server initJetty(Filter filter) {
+        Server jetty = new Server(0);
+        ServletContextHandler contextHandler = new ServletContextHandler(jetty, null);
+        EnumSet<DispatcherType> dispatches =
+                EnumSet.of(DispatcherType.INCLUDE, DispatcherType.REQUEST, DispatcherType.ERROR, DispatcherType.FORWARD,
+                           DispatcherType.ASYNC);
+        contextHandler.addFilter(new FilterHolder(filter), "/*", dispatches);
+        contextHandler.addServlet(LoggingTestServlet.class, "/test");
+        return jetty;
+    }
+
+    private HttpGet createBasicGetRequest(Server jetty) {
+        return new HttpGet(getBaseUrl(jetty) + "/test");
+    }
+
+    private String getBaseUrl(Server server) {
+        int port = ((ServerConnector) server.getConnectors()[0]).getLocalPort();
+        return "http://localhost:" + port;
     }
 
 }

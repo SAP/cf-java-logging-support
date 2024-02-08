@@ -1,9 +1,9 @@
 package com.sap.hcp.cf.logging.common.serialization;
 
+import com.sap.hcp.cf.logging.common.customfields.CustomField;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.sap.hcp.cf.logging.common.customfields.CustomField;
 
 public abstract class AbstractContextFieldSupplier<T> implements EventContextFieldSupplier<T> {
 

@@ -10,18 +10,15 @@ import java.util.List;
 
 /**
  * <p>
- * The {@link CompositeFilter} allows to group several servlet {@link Filter}
- * into one. This is used to allow customizable filters and provide a backwards
- * compatible {@link RequestLoggingFilter}. The {@link FilterConfig} is
- * forwarded to all filters, that are grouped. This may lead to
- * incompatibilities between those shared configurations.
+ * The {@link CompositeFilter} allows to group several servlet {@link Filter} into one. This is used to allow
+ * customizable filters and provide a backwards compatible {@link RequestLoggingFilter}. The {@link FilterConfig} is
+ * forwarded to all filters, that are grouped. This may lead to incompatibilities between those shared configurations.
  * </p>
- * 
+ *
  * <p>
- * You can easily create a subclass of {@link CompositeFilter} and add all the
- * filters from com.sap.hcp.cf.logging.servlet.filter you wish. You can even
- * bring your own filters. Make sure, there are no incompatible
- * {@link FilterConfig} initializations.
+ * You can easily create a subclass of {@link CompositeFilter} and add all the filters from
+ * com.sap.hcp.cf.logging.servlet.filter you wish. You can even bring your own filters. Make sure, there are no
+ * incompatible {@link FilterConfig} initializations.
  * </p>
  */
 public class CompositeFilter implements Filter {
@@ -38,8 +35,8 @@ public class CompositeFilter implements Filter {
     }
 
     /**
-     * Forwards the {@link FilterConfig} to all grouped filters. Be care to use
-     * only filters, that are compatible to each other.
+     * Forwards the {@link FilterConfig} to all grouped filters. Be care to use only filters, that are compatible to
+     * each other.
      */
     @Override
     public void init(FilterConfig config) throws ServletException {
@@ -49,8 +46,8 @@ public class CompositeFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-                                                                                              ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         new InternalFilterChain(chain, this.filters).doFilter(request, response);
     }
 
@@ -73,8 +70,8 @@ public class CompositeFilter implements Filter {
         }
 
         @Override
-        public void doFilter(final ServletRequest request, final ServletResponse response) throws IOException,
-                                                                                           ServletException {
+        public void doFilter(final ServletRequest request, final ServletResponse response)
+                throws IOException, ServletException {
             if (current.hasNext()) {
                 current.next().doFilter(request, response, this);
             } else {

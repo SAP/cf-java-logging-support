@@ -8,21 +8,21 @@ import jakarta.servlet.http.HttpServletRequestWrapper;
 
 public class LoggingContextRequestWrapper extends HttpServletRequestWrapper {
 
-	private RequestLogger loggingVisitor;
+    private RequestLogger loggingVisitor;
 
-	public LoggingContextRequestWrapper(HttpServletRequest request, RequestLogger loggingVisitor) {
-		super(request);
-		this.loggingVisitor = loggingVisitor;
-	}
+    public LoggingContextRequestWrapper(HttpServletRequest request, RequestLogger loggingVisitor) {
+        super(request);
+        this.loggingVisitor = loggingVisitor;
+    }
 
-	@Override
-	public AsyncContext startAsync() throws IllegalStateException {
-		return new LoggingAsyncContextImpl(super.startAsync(), loggingVisitor);
-	}
+    @Override
+    public AsyncContext startAsync() throws IllegalStateException {
+        return new LoggingAsyncContextImpl(super.startAsync(), loggingVisitor);
+    }
 
-	@Override
-	public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse)
-			throws IllegalStateException {
-		return new LoggingAsyncContextImpl(super.startAsync(servletRequest, servletResponse), loggingVisitor);
-	}
+    @Override
+    public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse)
+            throws IllegalStateException {
+        return new LoggingAsyncContextImpl(super.startAsync(servletRequest, servletResponse), loggingVisitor);
+    }
 }

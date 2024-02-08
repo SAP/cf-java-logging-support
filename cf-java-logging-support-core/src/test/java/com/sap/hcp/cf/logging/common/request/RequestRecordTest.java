@@ -1,11 +1,14 @@
 package com.sap.hcp.cf.logging.common.request;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.core.IsNot.not;
-import static org.hamcrest.core.IsNull.nullValue;
+import com.fasterxml.jackson.jr.ob.JSON;
+import com.fasterxml.jackson.jr.ob.JSONObjectException;
+import com.sap.hcp.cf.logging.common.Defaults;
+import com.sap.hcp.cf.logging.common.DoubleValue;
+import com.sap.hcp.cf.logging.common.Fields;
+import com.sap.hcp.cf.logging.common.request.RequestRecord.Direction;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.time.Clock;
@@ -13,16 +16,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.MDC;
-
-import com.fasterxml.jackson.jr.ob.JSON;
-import com.fasterxml.jackson.jr.ob.JSONObjectException;
-import com.sap.hcp.cf.logging.common.Defaults;
-import com.sap.hcp.cf.logging.common.DoubleValue;
-import com.sap.hcp.cf.logging.common.Fields;
-import com.sap.hcp.cf.logging.common.request.RequestRecord.Direction;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.core.IsNull.nullValue;
 
 public class RequestRecordTest {
 
