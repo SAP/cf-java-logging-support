@@ -2,25 +2,26 @@
 
 <Configuration status="warn" strict="true">
 
-	<DynamicLevelPrefixLoggerFilter />
+    <DynamicLevelPrefixLoggerFilter/>
 
-	<Appenders>
-		<Console name="STDOUT-JSON" target="SYSTEM_OUT" follow="true">
-			<JsonPatternLayout charset="utf-8">
-				<contextFieldSupplier class="com.sap.hcp.cf.logging.sample.springboot.statistics.StatisticsContextFieldSupplier" />
-				<!-- Uncomment to send message count as nested custom field: -->
-				<!-- <customField mdcKeyName="message_count" /> -->
-			</JsonPatternLayout>
-		</Console>
-		<Console name="STDOUT" target="SYSTEM_OUT" follow="true">
-			<PatternLayout
-				pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} [%mdc] - %msg%n" />
-		</Console>
-	</Appenders>
-	<Loggers>
-		<Root level="${LOG_ROOT_LEVEL:-INFO}">
-			<AppenderRef ref="STDOUT-JSON" />
-		</Root>
-		<Logger name="com.sap.hcp.cf" level="${LOG_HCP_CF_LEVEL:-INFO}" />
-	</Loggers>
+    <Appenders>
+        <Console name="STDOUT-JSON" target="SYSTEM_OUT" follow="true">
+            <JsonPatternLayout charset="utf-8">
+                <contextFieldSupplier
+                        class="com.sap.hcp.cf.logging.sample.springboot.statistics.StatisticsContextFieldSupplier"/>
+                <!-- Uncomment to send message count as nested custom field: -->
+                <!-- <customField mdcKeyName="message_count" /> -->
+            </JsonPatternLayout>
+        </Console>
+        <Console name="STDOUT" target="SYSTEM_OUT" follow="true">
+            <PatternLayout
+                    pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} [%mdc] - %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="${LOG_ROOT_LEVEL:-INFO}">
+            <AppenderRef ref="STDOUT-JSON"/>
+        </Root>
+        <Logger name="com.sap.hcp.cf" level="${LOG_HCP_CF_LEVEL:-INFO}"/>
+    </Loggers>
 </Configuration>
