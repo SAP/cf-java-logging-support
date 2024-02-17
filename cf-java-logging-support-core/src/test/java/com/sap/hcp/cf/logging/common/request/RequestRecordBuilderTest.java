@@ -3,17 +3,17 @@ package com.sap.hcp.cf.logging.common.request;
 import com.fasterxml.jackson.jr.ob.JSON;
 import com.fasterxml.jackson.jr.ob.JSONObjectException;
 import com.sap.hcp.cf.logging.common.Defaults;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
 import static com.sap.hcp.cf.logging.common.request.RequestRecordBuilder.requestRecord;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RequestRecordBuilderTest {
 
     @Test
-    public void testAddingSingleActivatedOptionalTagToRequestRecord() throws JSONObjectException, IOException {
+    public void testAddingSingleActivatedOptionalTagToRequestRecord() throws IOException {
         boolean canBeLogged = true;
         String key = "TestKey";
         String tag = "TestTag";
@@ -24,7 +24,7 @@ public class RequestRecordBuilderTest {
     }
 
     @Test
-    public void testAddingSingleForbiddenOptionalTagToRequestRecord() throws JSONObjectException, IOException {
+    public void testAddingSingleForbiddenOptionalTagToRequestRecord() throws IOException {
         boolean canBeLogged = false;
         String key = "TestKey";
         String tag = "TestTag";
@@ -35,7 +35,7 @@ public class RequestRecordBuilderTest {
     }
 
     @Test
-    public void testAddingSingleForbiddenOptionalNullTagToRequestRecord() throws JSONObjectException, IOException {
+    public void testAddingSingleForbiddenOptionalNullTagToRequestRecord() throws IOException {
         boolean canBeLogged = false;
         String key = "TestKey";
         String tag = Defaults.UNKNOWN;
@@ -46,7 +46,7 @@ public class RequestRecordBuilderTest {
     }
 
     @Test
-    public void testAddingSingleActivatedOptionalNullTagToRequestRecord() throws JSONObjectException, IOException {
+    public void testAddingSingleActivatedOptionalNullTagToRequestRecord() throws IOException {
         boolean canBeLogged = true;
         String key = "TestKey";
         String tag = Defaults.UNKNOWN;
@@ -57,7 +57,7 @@ public class RequestRecordBuilderTest {
     }
 
     private String getFieldFromRequestRecord(RequestRecord requestRecord, String key)
-            throws JSONObjectException, IOException {
+            throws IOException {
         return JSON.std.mapFrom(requestRecord.toString()).get(key).toString();
     }
 }

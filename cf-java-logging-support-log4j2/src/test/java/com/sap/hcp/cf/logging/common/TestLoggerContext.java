@@ -16,7 +16,7 @@ import static com.sap.hcp.cf.logging.common.helper.ConsoleAssertions.assertLastE
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(ConsoleExtension.class)
-public class TestLoggerContext extends AbstractTest {
+public class TestLoggerContext {
 
     private static final String TEST_VALUE = "test-value";
 

@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class RequestRecordTest {
 
     private final Logger logger = LoggerFactory.getLogger(RequestRecordTest.class);
-    private RequestRecord rrec;
 
     private static AbstractDoubleAssert<?> assertLatency(Object v) {
         return assertThat(Double.valueOf(v.toString()));
@@ -38,8 +37,8 @@ public class RequestRecordTest {
     @Test
     public void testDefaults(ConsoleOutput console) throws IOException {
         String layer = "testDefaults";
-        rrec = new RequestRecord(layer);
-        logger.info(Markers.REQUEST_MARKER, rrec.toString());
+        RequestRecord requestRecord = new RequestRecord(layer);
+        logger.info(Markers.REQUEST_MARKER, requestRecord.toString());
 
         assertLastEventFields(console)//
                                       .containsEntry(Fields.DIRECTION, Direction.IN.toString())
@@ -63,18 +62,18 @@ public class RequestRecordTest {
     public void testNonDefaults(ConsoleOutput console) throws IOException {
         String layer = "testNonDefaults";
         String NON_DEFAULT = "NON_DEFAULT";
-        rrec = new RequestRecord(layer);
-        rrec.addValue(Fields.RESPONSE_TIME_MS, new DoubleValue(0.0));
-        rrec.addTag(Fields.REQUEST, NON_DEFAULT);
-        rrec.addTag(Fields.REMOTE_IP, NON_DEFAULT);
-        rrec.addTag(Fields.REMOTE_HOST, NON_DEFAULT);
-        rrec.addTag(Fields.PROTOCOL, NON_DEFAULT);
-        rrec.addTag(Fields.METHOD, NON_DEFAULT);
-        rrec.addTag(Fields.REMOTE_IP, NON_DEFAULT);
-        rrec.addTag(Fields.REMOTE_HOST, NON_DEFAULT);
-        rrec.addTag(Fields.RESPONSE_CONTENT_TYPE, NON_DEFAULT);
+        RequestRecord requestRecord = new RequestRecord(layer);
+        requestRecord.addValue(Fields.RESPONSE_TIME_MS, new DoubleValue(0.0));
+        requestRecord.addTag(Fields.REQUEST, NON_DEFAULT);
+        requestRecord.addTag(Fields.REMOTE_IP, NON_DEFAULT);
+        requestRecord.addTag(Fields.REMOTE_HOST, NON_DEFAULT);
+        requestRecord.addTag(Fields.PROTOCOL, NON_DEFAULT);
+        requestRecord.addTag(Fields.METHOD, NON_DEFAULT);
+        requestRecord.addTag(Fields.REMOTE_IP, NON_DEFAULT);
+        requestRecord.addTag(Fields.REMOTE_HOST, NON_DEFAULT);
+        requestRecord.addTag(Fields.RESPONSE_CONTENT_TYPE, NON_DEFAULT);
 
-        logger.info(Markers.REQUEST_MARKER, rrec.toString());
+        logger.info(Markers.REQUEST_MARKER, requestRecord.toString());
 
         assertLastEventFields(console)//
                                       .containsEntry(Fields.RESPONSE_TIME_MS, 0.0d).containsEntry(Fields.LAYER, layer)
@@ -96,10 +95,10 @@ public class RequestRecordTest {
         String layer = "testContext";
         String reqId = "1-2-3-4";
 
-        rrec = new RequestRecord(layer);
-        rrec.addContextTag(Fields.REQUEST_ID, reqId);
+        RequestRecord requestRecord = new RequestRecord(layer);
+        requestRecord.addContextTag(Fields.REQUEST_ID, reqId);
 
-        logger.info(Markers.REQUEST_MARKER, rrec.toString());
+        logger.info(Markers.REQUEST_MARKER, requestRecord.toString());
 
         assertLastEventFields(console).containsEntry(Fields.REQUEST_ID, reqId).containsKey(Fields.WRITTEN_TS);
     }
@@ -108,11 +107,11 @@ public class RequestRecordTest {
     public void testResponseTimeIn(ConsoleOutput console) throws IOException {
         MDC.clear();
         String layer = "testResponseTimeIn";
-        rrec = new RequestRecord(layer);
-        long start = rrec.start();
+        RequestRecord requestRecord = new RequestRecord(layer);
+        long start = requestRecord.start();
         doWait(150);
-        long end = rrec.stop() + 1; // add 1 to cover for decimals in time recording
-        logger.info(Markers.REQUEST_MARKER, rrec.toString());
+        long end = requestRecord.stop() + 1; // add 1 to cover for decimals in time recording
+        logger.info(Markers.REQUEST_MARKER, requestRecord.toString());
 
         assertLastEventFields(console) //
                                        .containsEntry(Fields.LAYER, layer)
@@ -127,12 +126,12 @@ public class RequestRecordTest {
     public void testResponseTimeOut(ConsoleOutput console) throws IOException {
         MDC.clear();
         String layer = "testResponseTimeOut";
-        rrec = new RequestRecord(layer, Direction.OUT);
-        long start = rrec.start();
+        RequestRecord requestRecord = new RequestRecord(layer, Direction.OUT);
+        long start = requestRecord.start();
         doWait(150);
-        long end = rrec.stop() + 1; // add 1 to cover for decimals in time recording
+        long end = requestRecord.stop() + 1; // add 1 to cover for decimals in time recording
 
-        logger.info(Markers.REQUEST_MARKER, rrec.toString());
+        logger.info(Markers.REQUEST_MARKER, requestRecord.toString());
 
         assertLastEventFields(console) //
                                        .containsEntry(Fields.LAYER, layer)
