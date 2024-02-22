@@ -14,6 +14,11 @@ public class ContextFieldSupplierElement {
         this.supplierClass = builder.clazz;
     }
 
+    @PluginBuilderFactory
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
     public String getSupplierClass() {
         return supplierClass;
     }
@@ -23,13 +28,7 @@ public class ContextFieldSupplierElement {
         return supplierClass;
     }
 
-    @PluginBuilderFactory
-    public static Builder newBuilder() {
-        return new Builder();
-    }
-
-    public static class Builder implements
-                                org.apache.logging.log4j.core.util.Builder<ContextFieldSupplierElement> {
+    public static class Builder implements org.apache.logging.log4j.core.util.Builder<ContextFieldSupplierElement> {
 
         @PluginBuilderAttribute("class")
         private String clazz;

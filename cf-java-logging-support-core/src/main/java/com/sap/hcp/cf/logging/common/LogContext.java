@@ -1,17 +1,13 @@
 package com.sap.hcp.cf.logging.common;
 
-import static com.sap.hcp.cf.logging.common.Fields.CORRELATION_ID;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+
+import java.util.*;
+import java.util.Map.Entry;
+
+import static com.sap.hcp.cf.logging.common.Fields.CORRELATION_ID;
 
 public class LogContext {
 
@@ -33,7 +29,7 @@ public class LogContext {
         }
     };
 
-	public static void loadContextFields(boolean override) {
+    public static void loadContextFields(boolean override) {
         /*
          * -- do bootstrap, either enforced or because map is empty
          */
@@ -112,14 +108,14 @@ public class LogContext {
         }
     }
 
-    private static class LoggerHolder {
-        static final Logger LOG = LoggerFactory.getLogger(LoggerHolder.class.getEnclosingClass());
-    }
-
     private static void generateAndSetCorrelationId() {
         String generatedCorrelationId = String.valueOf(UUID.randomUUID());
         setCorrelationId(generatedCorrelationId);
 
         LoggerHolder.LOG.info("generated new correlation id");
+    }
+
+    private static class LoggerHolder {
+        static final Logger LOG = LoggerFactory.getLogger(LoggerHolder.class.getEnclosingClass());
     }
 }

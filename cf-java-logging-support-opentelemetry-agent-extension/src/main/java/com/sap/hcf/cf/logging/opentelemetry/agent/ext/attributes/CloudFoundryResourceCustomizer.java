@@ -12,7 +12,8 @@ import java.util.logging.Logger;
 
 public class CloudFoundryResourceCustomizer implements BiFunction<Resource, ConfigProperties, Resource> {
 
-    private static final String OTEL_JAVAAGENT_EXTENSION_SAP_CF_RESOURCE_ENABLED = "otel.javaagent.extension.sap.cf.resource.enabled";
+    private static final String OTEL_JAVAAGENT_EXTENSION_SAP_CF_RESOURCE_ENABLED =
+            "otel.javaagent.extension.sap.cf.resource.enabled";
     private static final Logger LOG = Logger.getLogger(CloudFoundryResourceCustomizer.class.getName());
     private final CfEnv cfEnv;
 
@@ -48,11 +49,7 @@ public class CloudFoundryResourceCustomizer implements BiFunction<Resource, Conf
     }
 
     private String getString(CfApplication cfApp, String key) {
-        return Optional.ofNullable(cfApp)
-                .map(CfApplication::getMap)
-                .map(m -> m.get(key))
-                .filter(String.class::isInstance)
-                .map(String.class::cast)
-                .orElse("");
+        return Optional.ofNullable(cfApp).map(CfApplication::getMap).map(m -> m.get(key))
+                       .filter(String.class::isInstance).map(String.class::cast).orElse("");
     }
 }

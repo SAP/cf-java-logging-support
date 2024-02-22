@@ -4,13 +4,13 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.logs.ConfigurableLogRecordExporterProvider;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.pivotal.cfenv.core.CfService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
@@ -20,14 +20,11 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mock.Strictness.LENIENT;
+import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CloudLoggingLogsExporterProviderTest {
 
     @Mock
@@ -36,13 +33,13 @@ public class CloudLoggingLogsExporterProviderTest {
     @Mock
     private CloudLoggingCredentials.Parser credentialParser;
 
-    @Mock
+    @Mock(strictness = LENIENT)
     private ConfigProperties config;
 
     @InjectMocks
     private CloudLoggingLogsExporterProvider exporterProvider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(config.getString(any(), any())).thenAnswer(new Answer<Object>() {
             @Override
@@ -55,18 +52,19 @@ public class CloudLoggingLogsExporterProviderTest {
 
     @Test
     public void canLoadViaSPI() {
-        ServiceLoader<ConfigurableLogRecordExporterProvider> loader = ServiceLoader.load(ConfigurableLogRecordExporterProvider.class);
+        ServiceLoader<ConfigurableLogRecordExporterProvider> loader =
+                ServiceLoader.load(ConfigurableLogRecordExporterProvider.class);
         Stream<ConfigurableLogRecordExporterProvider> providers = StreamSupport.stream(loader.spliterator(), false);
-        assertTrue(CloudLoggingLogsExporterProvider.class.getName() + " not loaded via SPI",
-                providers.anyMatch(p -> p instanceof CloudLoggingLogsExporterProvider));
+        assertThat(providers).describedAs(CloudLoggingLogsExporterProvider.class.getName() + " not loaded via SPI")
+                             .anySatisfy(p -> assertThat(p).isInstanceOf(CloudLoggingLogsExporterProvider.class));
     }
 
     @Test
     public void registersNoopExporterWithoutBindings() {
         when(servicesProvider.apply(config)).thenReturn(Stream.empty());
         LogRecordExporter exporter = exporterProvider.createExporter(config);
-        assertThat(exporter, is(notNullValue()));
-        assertThat(exporter.toString(), containsString("Noop"));
+        assertThat(exporter).isNotNull();
+        assertThat(exporter.toString()).containsSubsequence("Noop");
     }
 
     @Test
@@ -77,8 +75,8 @@ public class CloudLoggingLogsExporterProviderTest {
         when(credentialParser.parse(any())).thenReturn(cloudLoggingCredentials);
         when(cloudLoggingCredentials.validate()).thenReturn(false);
         LogRecordExporter exporter = exporterProvider.createExporter(config);
-        assertThat(exporter, is(notNullValue()));
-        assertThat(exporter.toString(), containsString("Noop"));
+        assertThat(exporter).isNotNull();
+        assertThat(exporter.toString()).containsSubsequence("Noop");
     }
 
     @Test
@@ -96,8 +94,9 @@ public class CloudLoggingLogsExporterProviderTest {
         when(validCredentials.getServerCert()).thenReturn(PEMUtil.read("certificate.pem"));
         when(credentialParser.parse(any())).thenReturn(invalidCredentials).thenReturn(validCredentials);
         LogRecordExporter exporter = exporterProvider.createExporter(config);
-        assertThat(exporter, is(notNullValue()));
-        assertThat(exporter.toString(), both(containsString("OtlpGrpcLogRecordExporter")).and(containsString("https://otlp-example.sap")));
+        assertThat(exporter).isNotNull();
+        assertThat(exporter.toString()).containsSubsequence("OtlpGrpcLogRecordExporter")
+                                       .containsSubsequence("https://otlp-example.sap");
     }
 
 }

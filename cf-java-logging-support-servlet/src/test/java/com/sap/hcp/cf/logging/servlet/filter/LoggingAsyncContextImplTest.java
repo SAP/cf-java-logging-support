@@ -1,148 +1,129 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import static java.util.Collections.emptyMap;
-import static java.util.concurrent.Executors.newSingleThreadExecutor;
-import static org.hamcrest.Matchers.both;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.AsyncListener;
+import jakarta.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
+import org.slf4j.MDC;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.AsyncListener;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import static java.util.Collections.emptyMap;
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-import org.slf4j.MDC;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class LoggingAsyncContextImplTest {
 
-	@Mock
-	private AsyncContext wrappedContext;
+    private final ExecutorService executor = newSingleThreadExecutor();
+    @Mock
+    private AsyncContext wrappedContext;
+    @Mock
+    private RequestLogger requestLogger;
+    @Mock
+    private HttpServletRequest request;
+    @Captor
+    private ArgumentCaptor<AsyncListener> asyncListener;
 
-	@Mock
-	private RequestLogger requestLogger;
+    @InjectMocks
+    private LoggingAsyncContextImpl testedContext;
 
-	@Mock
-	private HttpServletRequest request;
+    @BeforeEach
+    public void initWrappedContext() {
+        when(wrappedContext.getRequest()).thenReturn(request);
+        verify(wrappedContext).addListener(asyncListener.capture());
+        doAnswer(new Answer<Void>() {
 
-	@Mock
-	private HttpServletResponse response;
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                Runnable runnable = (Runnable) invocation.getArguments()[0];
+                Future<?> future = executor.submit(runnable);
+                future.get();
+                return null;
+            }
+        }).when(wrappedContext).start(any());
+    }
 
-	private ExecutorService executor = newSingleThreadExecutor();
+    @Test
+    public void hasEmptyMDCWhenNoMapInRequest() throws Exception {
+        Map<String, String> contextMap = new HashMap<>();
+        testedContext.start(putAllContextMap(contextMap));
+        assertThat(contextMap).isEmpty();
+    }
 
-	@Captor
-	private ArgumentCaptor<AsyncListener> asyncListener;
+    private Runnable putAllContextMap(Map<String, String> contextMap) {
+        return new Runnable() {
 
-	@InjectMocks
-	private LoggingAsyncContextImpl testedContext;
+            @Override
+            public void run() {
+                contextMap.putAll(MDC.getCopyOfContextMap());
+            }
+        };
+    }
 
-	@Before
-	public void initWrappedContext() {
-		when(wrappedContext.getRequest()).thenReturn(request);
-		when(wrappedContext.getResponse()).thenReturn(response);
-		verify(wrappedContext).addListener(asyncListener.capture());
-		doAnswer(new Answer<Void>() {
+    @Test
+    public void importsMDCEntriesFromRequest() throws Exception {
+        Map<String, String> mdcAttributes = new HashMap<>();
+        mdcAttributes.put("this-key", "this-value");
+        mdcAttributes.put("that-key", "that-value");
+        when(request.getAttribute(MDC.class.getName())).thenReturn(mdcAttributes);
+        Map<String, String> contextMap = new HashMap<>();
+        testedContext.start(putAllContextMap(contextMap));
+        assertThat(contextMap).containsEntry("that-key", "that-value").containsEntry("this-key", "this-value");
+    }
 
-			@Override
-			public Void answer(InvocationOnMock invocation) throws Throwable {
-				Runnable runnable = (Runnable) invocation.getArguments()[0];
-				Future<?> future = executor.submit(runnable);
-				future.get();
-				return null;
-			}
-		}).when(wrappedContext).start(any(Runnable.class));
-	}
+    @Test
+    public void resetsMDCEntriesBetweenConsequtiveRuns() throws Exception {
+        Map<String, String> mdcAttributes = new HashMap<>();
+        mdcAttributes.put("this-key", "this-value");
+        mdcAttributes.put("that-key", "that-value");
+        when(request.getAttribute(MDC.class.getName())).thenReturn(mdcAttributes);
+        Map<String, String> firstContextMap = new HashMap<>();
+        testedContext.start(putAllContextMap(firstContextMap));
+        reset(request);
+        when(request.getAttribute(MDC.class.getName())).thenReturn(emptyMap());
+        Map<String, String> secondContextMap = new HashMap<>();
+        testedContext.start(putAllContextMap(secondContextMap));
 
-	@Test
-	public void hasEmptyMDCWhenNoMapInRequest() throws Exception {
-		Map<String, String> contextMap = new HashMap<>();
-		testedContext.start(putAllContextMap(contextMap));
-		assertThat(contextMap.entrySet(), is(empty()));
-	}
+        assertThat(firstContextMap).isNotEmpty();
+        assertThat(secondContextMap).isEmpty();
+    }
 
-	private Runnable putAllContextMap(Map<String, String> contextMap) {
-		return new Runnable() {
+    @Test
+    public void savesAndRestoresThreadMDC() throws Exception {
+        executor.submit(new Runnable() {
 
-			@Override
-			public void run() {
-				contextMap.putAll(MDC.getCopyOfContextMap());
-			}
-		};
-	}
+            @Override
+            public void run() {
+                MDC.put("initial-key", "initial-value");
+            }
+        }).get();
+        Map<String, String> requestContextMap = new HashMap<>();
+        testedContext.start(putAllContextMap(requestContextMap));
+        Map<String, String> finalContextMap = new HashMap<>();
+        executor.submit(new Runnable() {
 
-	@Test
-	public void importsMDCEntriesFromRequest() throws Exception {
-		Map<String, String> mdcAttributes = new HashMap<>();
-		mdcAttributes.put("this-key", "this-value");
-		mdcAttributes.put("that-key", "that-value");
-		when(request.getAttribute(MDC.class.getName())).thenReturn(mdcAttributes);
-		Map<String, String> contextMap = new HashMap<>();
-		testedContext.start(putAllContextMap(contextMap));
-		assertThat(contextMap, both(hasEntry("that-key", "that-value")).and(hasEntry("this-key", "this-value")));
-	}
+            @Override
+            public void run() {
+                finalContextMap.putAll(MDC.getCopyOfContextMap());
+            }
+        }).get();
 
-	@Test
-	public void resetsMDCEntriesBetweenConsequtiveRuns() throws Exception {
-		Map<String, String> mdcAttributes = new HashMap<>();
-		mdcAttributes.put("this-key", "this-value");
-		mdcAttributes.put("that-key", "that-value");
-		when(request.getAttribute(MDC.class.getName())).thenReturn(mdcAttributes);
-		Map<String, String> firstContextMap = new HashMap<>();
-		testedContext.start(putAllContextMap(firstContextMap));
-		reset(request);
-		when(request.getAttribute(MDC.class.getName())).thenReturn(emptyMap());
-		Map<String, String> secondContextMap = new HashMap<>();
-		testedContext.start(putAllContextMap(secondContextMap));
-
-		assertThat(firstContextMap.entrySet(), is(not(empty())));
-		assertThat(secondContextMap.entrySet(), is(empty()));
-	}
-
-	@Test
-	public void savesAndRestoresThreadMDC() throws Exception {
-		executor.submit(new Runnable() {
-
-			@Override
-			public void run() {
-				MDC.put("initial-key", "initial-value");
-			}
-		}).get();
-		Map<String, String> requestContextMap = new HashMap<>();
-		testedContext.start(putAllContextMap(requestContextMap));
-		Map<String, String> finalContextMap = new HashMap<>();
-		executor.submit(new Runnable() {
-
-			@Override
-			public void run() {
-				finalContextMap.putAll(MDC.getCopyOfContextMap());
-			}
-		}).get();
-
-		assertThat(requestContextMap.entrySet(), is(empty()));
-		assertThat(finalContextMap, hasEntry("initial-key", "initial-value"));
-	}
+        assertThat(requestContextMap).isEmpty();
+        assertThat(finalContextMap).containsEntry("initial-key", "initial-value");
+    }
 
 }

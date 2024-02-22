@@ -16,8 +16,7 @@ public class CloudLoggingConfigurationCustomizerProvider implements AutoConfigur
     @Override
     public void customize(AutoConfigurationCustomizer autoConfiguration) {
         LOG.info("Initializing SAP BTP Observability extension " + VERSION);
-        autoConfiguration
-                .addPropertiesSupplier(new CloudLoggingBindingPropertiesSupplier());
+        autoConfiguration.addPropertiesSupplier(new CloudLoggingBindingPropertiesSupplier());
 
         // ConfigurableLogRecordExporterProvider
     }

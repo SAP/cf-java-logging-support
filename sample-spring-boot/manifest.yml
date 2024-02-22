@@ -1,13 +1,13 @@
 ---
 applications:
-#
-# You may want/need to change these to avoid naming conflicts
-#
-- name: logging-sample-app
-  instances: 1
-  path: target/sample-app-spring-boot-3.8.2.jar
-  env:
-# Set LOG_*: true to activate logging of respective field
-    LOG_SENSITIVE_CONNECTION_DATA: false
-    LOG_REMOTE_USER: false
-    LOG_REFERER: false
+  #
+  # You may want/need to change these to avoid naming conflicts
+  #
+  - name: logging-sample-app
+    instances: 1
+    path: target/sample-app-spring-boot-3.8.2.jar
+    env:
+      # Set LOG_*: true to activate logging of respective field
+      LOG_SENSITIVE_CONNECTION_DATA: false
+      LOG_REMOTE_USER: false
+      LOG_REFERER: false

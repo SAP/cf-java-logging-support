@@ -32,7 +32,9 @@ class MultiMetricExporter implements MetricExporter {
         this.metricExporters = metricExporters;
     }
 
-    static MetricExporter composite(List<MetricExporter> metricExporters, AggregationTemporalitySelector aggregationTemporalitySelector, DefaultAggregationSelector defaultAggregationSelector) {
+    static MetricExporter composite(List<MetricExporter> metricExporters,
+                                    AggregationTemporalitySelector aggregationTemporalitySelector,
+                                    DefaultAggregationSelector defaultAggregationSelector) {
         if (metricExporters == null || metricExporters.isEmpty()) {
             return NoopMetricExporter.getInstance();
         }
@@ -50,7 +52,7 @@ class MultiMetricExporter implements MetricExporter {
 
     public CompletableResultCode export(Collection<MetricData> metrics) {
         List<CompletableResultCode> results = new ArrayList<>(metricExporters.size());
-        for (MetricExporter metricExporter : metricExporters) {
+        for (MetricExporter metricExporter: metricExporters) {
             CompletableResultCode exportResult;
             try {
                 exportResult = metricExporter.export(metrics);
@@ -65,7 +67,7 @@ class MultiMetricExporter implements MetricExporter {
 
     public CompletableResultCode flush() {
         List<CompletableResultCode> results = new ArrayList<>(this.metricExporters.size());
-        for (MetricExporter metricExporter : metricExporters) {
+        for (MetricExporter metricExporter: metricExporters) {
             CompletableResultCode flushResult;
             try {
                 flushResult = metricExporter.flush();
@@ -80,7 +82,7 @@ class MultiMetricExporter implements MetricExporter {
 
     public CompletableResultCode shutdown() {
         List<CompletableResultCode> results = new ArrayList<>(this.metricExporters.size());
-        for (MetricExporter metricExporter : metricExporters) {
+        for (MetricExporter metricExporter: metricExporters) {
             CompletableResultCode shutdownResult;
             try {
                 shutdownResult = metricExporter.shutdown();
@@ -94,10 +96,8 @@ class MultiMetricExporter implements MetricExporter {
     }
 
     public String toString() {
-        return "MultiMetricExporter"
-                + metricExporters.stream()
-                .map(Object::toString)
-                .collect(Collectors.joining(",", "{metricsExporters=", "}"));
+        return "MultiMetricExporter" + metricExporters.stream().map(Object::toString)
+                                                      .collect(Collectors.joining(",", "{metricsExporters=", "}"));
     }
 
     @Override

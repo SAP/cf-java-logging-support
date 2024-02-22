@@ -31,16 +31,19 @@ public class CloudLoggingServicesProvider implements Supplier<Stream<CfService>>
     }
 
     private String getUserProvidedLabel(ConfigProperties config) {
-        return config.getString("otel.javaagent.extension.sap.cf.binding.user-provided.label", DEFAULT_USER_PROVIDED_LABEL);
+        return config.getString("otel.javaagent.extension.sap.cf.binding.user-provided.label",
+                                DEFAULT_USER_PROVIDED_LABEL);
     }
 
     private String getCloudLoggingLabel(ConfigProperties config) {
-        String fromOwnProperties = System.getProperty("com.sap.otel.extension.cloud-logging.label", DEFAULT_CLOUD_LOGGING_LABEL);
+        String fromOwnProperties =
+                System.getProperty("com.sap.otel.extension.cloud-logging.label", DEFAULT_CLOUD_LOGGING_LABEL);
         return config.getString("otel.javaagent.extension.sap.cf.binding.cloud-logging.label", fromOwnProperties);
     }
 
     private String getCloudLoggingTag(ConfigProperties config) {
-        String fromOwnProperties = System.getProperty("com.sap.otel.extension.cloud-logging.tag", DEFAULT_CLOUD_LOGGING_TAG);
+        String fromOwnProperties =
+                System.getProperty("com.sap.otel.extension.cloud-logging.tag", DEFAULT_CLOUD_LOGGING_TAG);
         return config.getString("otel.javaagent.extension.sap.cf.binding.cloud-logging.tag", fromOwnProperties);
     }
 

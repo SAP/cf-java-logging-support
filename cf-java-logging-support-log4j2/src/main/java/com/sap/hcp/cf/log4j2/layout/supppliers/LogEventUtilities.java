@@ -1,9 +1,8 @@
 package com.sap.hcp.cf.log4j2.layout.supppliers;
 
+import com.sap.hcp.cf.logging.common.Markers;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.message.Message;
-
-import com.sap.hcp.cf.logging.common.Markers;
 
 public final class LogEventUtilities {
 

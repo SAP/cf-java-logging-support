@@ -6,7 +6,6 @@ import java.util.Locale;
 
 /**
  * A {@link Value} implementation representing a <i>double</i> value.
- *
  */
 public class DoubleValue implements Value {
 

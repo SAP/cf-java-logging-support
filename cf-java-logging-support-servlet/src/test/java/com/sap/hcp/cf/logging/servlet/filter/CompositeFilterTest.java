@@ -1,36 +1,31 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-
-import java.io.IOException;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import jakarta.servlet.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+import java.io.IOException;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mock.Strictness.LENIENT;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+
+@ExtendWith(MockitoExtension.class)
 public class CompositeFilterTest {
 
-    @Mock
+    @Mock(strictness = LENIENT)
     private Filter filter1;
-    @Mock
+    @Mock(strictness = LENIENT)
     private Filter filter2;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         Mockito.doAnswer(inv -> {
             doFilter(inv.getArguments());

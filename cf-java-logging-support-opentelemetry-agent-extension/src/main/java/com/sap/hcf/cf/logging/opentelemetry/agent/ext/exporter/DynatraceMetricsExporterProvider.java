@@ -50,16 +50,17 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
         String defaultHistogramAggregation =
                 config.getString("otel.exporter.dynatrace.metrics.default.histogram.aggregation");
         if (defaultHistogramAggregation == null) {
-            return DefaultAggregationSelector.getDefault().with(InstrumentType.HISTOGRAM, Aggregation.defaultAggregation());
+            return DefaultAggregationSelector.getDefault()
+                                             .with(InstrumentType.HISTOGRAM, Aggregation.defaultAggregation());
         }
         if (AggregationUtil.aggregationName(Aggregation.base2ExponentialBucketHistogram())
-                .equalsIgnoreCase(defaultHistogramAggregation)) {
-            return
-                    DefaultAggregationSelector.getDefault()
-                            .with(InstrumentType.HISTOGRAM, Aggregation.base2ExponentialBucketHistogram());
+                           .equalsIgnoreCase(defaultHistogramAggregation)) {
+            return DefaultAggregationSelector.getDefault().with(InstrumentType.HISTOGRAM,
+                                                                Aggregation.base2ExponentialBucketHistogram());
         } else if (AggregationUtil.aggregationName(explicitBucketHistogram())
-                .equalsIgnoreCase(defaultHistogramAggregation)) {
-            return DefaultAggregationSelector.getDefault().with(InstrumentType.HISTOGRAM, Aggregation.explicitBucketHistogram());
+                                  .equalsIgnoreCase(defaultHistogramAggregation)) {
+            return DefaultAggregationSelector.getDefault()
+                                             .with(InstrumentType.HISTOGRAM, Aggregation.explicitBucketHistogram());
         } else {
             throw new ConfigurationException(
                     "Unrecognized default histogram aggregation: " + defaultHistogramAggregation);
@@ -83,16 +84,19 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
             return NoopMetricExporter.getInstance();
         }
 
-        LOG.info("Creating metrics exporter for service binding " + cfService.getName() + " (" + cfService.getLabel() + ")");
+        LOG.info(
+                "Creating metrics exporter for service binding " + cfService.getName() + " (" + cfService.getLabel() + ")");
 
         String apiUrl = cfService.getCredentials().getString(CRED_DYNATRACE_APIURL);
         if (isBlank(apiUrl)) {
-            LOG.warning("Credential \"" + CRED_DYNATRACE_APIURL + "\" not found. Skipping dynatrace exporter configuration");
+            LOG.warning(
+                    "Credential \"" + CRED_DYNATRACE_APIURL + "\" not found. Skipping dynatrace exporter configuration");
             return NoopMetricExporter.getInstance();
         }
         String tokenName = config.getString("otel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name");
         if (isBlank(tokenName)) {
-            LOG.warning("Configuration \"otel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name\" not found. Skipping dynatrace exporter configuration");
+            LOG.warning(
+                    "Configuration \"otel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name\" not found. Skipping dynatrace exporter configuration");
             return NoopMetricExporter.getInstance();
         }
         String apiToken = cfService.getCredentials().getString(tokenName);
@@ -102,19 +106,18 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
         }
 
         OtlpHttpMetricExporterBuilder builder = OtlpHttpMetricExporter.builder();
-        builder.setEndpoint(apiUrl + DT_APIURL_METRICS_SUFFIX)
-                .setCompression(getCompression(config))
-                .addHeader("Authorization", "Api-Token " + apiToken)
-                .setRetryPolicy(RetryPolicy.getDefault())
-                .setAggregationTemporalitySelector(AggregationTemporalitySelector.alwaysCumulative())
-                .setDefaultAggregationSelector(getDefaultAggregationSelector(config));
+        builder.setEndpoint(apiUrl + DT_APIURL_METRICS_SUFFIX).setCompression(getCompression(config))
+               .addHeader("Authorization", "Api-Token " + apiToken).setRetryPolicy(RetryPolicy.getDefault())
+               .setAggregationTemporalitySelector(AggregationTemporalitySelector.alwaysCumulative())
+               .setDefaultAggregationSelector(getDefaultAggregationSelector(config));
 
         Duration timeOut = getTimeOut(config);
         if (timeOut != null) {
             builder.setTimeout(timeOut);
         }
 
-        LOG.info("Created metrics exporter for service binding " + cfService.getName() + " (" + cfService.getLabel() + ")");
+        LOG.info(
+                "Created metrics exporter for service binding " + cfService.getName() + " (" + cfService.getLabel() + ")");
         return builder.build();
     }
 

@@ -7,9 +7,8 @@ public class WrappedPrintWriter extends PrintWriter {
 
     private static String LS_PROPERTY = "line.separator";
     private static String NEWLINE = "\n";
-
-    private long contentLength = -1;
     private final Object lock;
+    private long contentLength = -1;
     private String lineSeparator;
 
     public WrappedPrintWriter(Writer out) {

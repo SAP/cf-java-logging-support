@@ -1,77 +1,68 @@
 package com.sap.hcp.cf.logging.common;
 
-import static com.sap.hcp.cf.logging.common.LogContext.getCorrelationId;
-import static com.sap.hcp.cf.logging.common.LogContext.initializeContext;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
-import static org.hamcrest.text.IsEmptyString.isEmptyOrNullString;
-import static org.junit.Assert.assertThat;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.util.UUID;
-
-import org.junit.Test;
+import com.sap.hcp.cf.logging.common.helper.ConsoleExtension;
+import com.sap.hcp.cf.logging.common.helper.ConsoleExtension.ConsoleOutput;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.MDC;
 
-public class TestLoggerContext extends AbstractTest {
+import java.util.UUID;
 
-	public static final String MDC_KEY = "correlation_id";
-	public static final String TEST_VALUE = "test-value";
+import static com.sap.hcp.cf.logging.common.LogContext.initializeContext;
+import static com.sap.hcp.cf.logging.common.helper.ConsoleAssertions.assertLastEventFields;
+import static com.sap.hcp.cf.logging.common.helper.ConsoleAssertions.assertLastEventMessage;
+import static org.assertj.core.api.Assertions.assertThat;
 
-	@Test
-	public void testGetFromContext() throws Exception {
-		setInMDC(TEST_VALUE);
-		assertThat(getCorrelationId(), is(TEST_VALUE));
-	}
+@ExtendWith(ConsoleExtension.class)
+public class TestLoggerContext {
 
-	@Test
-	public void testGenerateNewID() throws Exception {
-		initializeContext();
-		assertThat(getFromMDC(), not(isEmptyOrNullString()));
-	}
+    private static final String TEST_VALUE = "test-value";
 
-	@Test
-	public void testGenerateNewIDWhenPassingNull() throws Exception {
-		initializeContext(null);
-		assertThat(getFromMDC(), not(isEmptyOrNullString()));
-	}
+    @AfterEach
+    public void clearMdc() {
+        MDC.clear();
+    }
 
-	@Test
-	public void testDoesNotOverwriteSetID() throws Exception {
-		initializeContext(TEST_VALUE);
-		assertThat(getFromMDC(), is(TEST_VALUE));
-	}
+    @Test
+    public void testGetFromContext() throws Exception {
+        MDC.put(Fields.CORRELATION_ID, TEST_VALUE);
+        assertThat(LogContext.getCorrelationId()).isEqualTo(TEST_VALUE);
+    }
 
-	@Test
-	public void testCorrelationIdIsUUID() throws Exception {
-		initializeContext();
-		String generatedUUID = getFromMDC();
+    @Test
+    public void testGenerateNewID() throws Exception {
+        initializeContext();
+        assertThat(MDC.get(Fields.CORRELATION_ID)).isNotBlank();
+    }
 
-		UUID parsedUUID = UUID.fromString(generatedUUID);
-		assertThat(parsedUUID.toString(), is(generatedUUID));
-	}
+    @Test
+    public void testGenerateNewIDWhenPassingNull() throws Exception {
+        initializeContext(null);
+        assertThat(MDC.get(Fields.CORRELATION_ID)).isNotBlank();
+    }
 
-	@Test
-	public void testGenerateEmitsLogMessage() throws Exception {
-		System.setErr(new PrintStream(new ByteArrayOutputStream()));
+    @Test
+    public void testDoesNotOverwriteSetID() throws Exception {
+        initializeContext(TEST_VALUE);
+        assertThat(MDC.get(Fields.CORRELATION_ID)).isEqualTo(TEST_VALUE);
+    }
 
-		ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-		System.setOut(new PrintStream(outContent));
+    @Test
+    public void testCorrelationIdIsUUID() throws Exception {
+        initializeContext();
+        String generatedUUID = MDC.get(Fields.CORRELATION_ID);
 
-		initializeContext();
-		String logMessage = outContent.toString();
+        UUID parsedUUID = UUID.fromString(generatedUUID);
+        assertThat(generatedUUID).isEqualTo(parsedUUID.toString());
+    }
 
-		assertThat(logMessage, containsString("generated new correlation id"));
-		assertThat(logMessage, containsString(getFromMDC()));
-	}
+    @Test
+    public void testGenerateEmitsLogMessage(ConsoleOutput console) throws Exception {
+        initializeContext();
 
-	private String getFromMDC() {
-		return MDC.get(MDC_KEY);
-	}
+        assertLastEventMessage(console).containsSubsequence("generated new correlation id");
+        assertLastEventFields(console).containsEntry(Fields.CORRELATION_ID, MDC.get(Fields.CORRELATION_ID));
+    }
 
-	private void setInMDC(String expectedValue) {
-		MDC.put(MDC_KEY, expectedValue);
-	}
 }

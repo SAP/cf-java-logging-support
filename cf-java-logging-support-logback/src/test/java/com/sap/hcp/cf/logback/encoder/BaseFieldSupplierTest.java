@@ -4,36 +4,29 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxy;
 import com.sap.hcp.cf.logback.converter.api.LogbackContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.Fields;
-import org.apache.commons.math3.stat.inference.GTest;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Map;
 
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BaseFieldSupplierTest {
 
+    private final LogbackContextFieldSupplier baseFieldSupplier = new BaseFieldSupplier();
     @Mock
     private ILoggingEvent event;
-
-    private LogbackContextFieldSupplier baseFieldSupplier = new BaseFieldSupplier();
 
     @Test
     public void addsNoExceptionFieldsWithoutException() {
         Map<String, Object> fields = baseFieldSupplier.map(event);
 
-        assertThat(fields, not(hasKey(Fields.EXCEPTION_TYPE)));
-        assertThat(fields, not(hasKey(Fields.EXCEPTION_MESSAGE)));
+        assertThat(fields).doesNotContainKey(Fields.EXCEPTION_TYPE);
+        assertThat(fields).doesNotContainKey(Fields.EXCEPTION_MESSAGE);
     }
 
     @Test
@@ -43,7 +36,7 @@ public class BaseFieldSupplierTest {
 
         Map<String, Object> fields = baseFieldSupplier.map(event);
 
-        assertThat(fields, hasEntry(Fields.EXCEPTION_TYPE, RuntimeException.class.getName()));
-        assertThat(fields, hasEntry(Fields.EXCEPTION_MESSAGE, "exception message"));
+        assertThat(fields).containsEntry(Fields.EXCEPTION_TYPE, RuntimeException.class.getName());
+        assertThat(fields).containsEntry(Fields.EXCEPTION_MESSAGE, "exception message");
     }
 }

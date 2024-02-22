@@ -1,39 +1,25 @@
 package com.sap.hcp.cf.logging.common.request;
 
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.slf4j.MDC;
-
 import com.fasterxml.jackson.jr.ob.JSON;
 import com.fasterxml.jackson.jr.ob.JSONComposer;
 import com.fasterxml.jackson.jr.ob.comp.ObjectComposer;
-import com.sap.hcp.cf.logging.common.Defaults;
-import com.sap.hcp.cf.logging.common.DoubleValue;
-import com.sap.hcp.cf.logging.common.Fields;
-import com.sap.hcp.cf.logging.common.LogContext;
-import com.sap.hcp.cf.logging.common.LongValue;
-import com.sap.hcp.cf.logging.common.StringValue;
-import com.sap.hcp.cf.logging.common.Value;
+import com.sap.hcp.cf.logging.common.*;
+import org.slf4j.MDC;
+
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
- * A <i>request record</i> keeping track of all fields defined for a request
- * message
+ * A <i>request record</i> keeping track of all fields defined for a request message
  * <p>
- * Will "pretty-print" it's contents as a JSON object when serialized via
- * {@link #toString()}.
+ * Will "pretty-print" it's contents as a JSON object when serialized via {@link #toString()}.
  * <p>
- * Will also take core to set some "defaults" and compute values if not
- * specified by the user. In a minimal usage scenario, i.e. without calling
- * {@link #addValue(String, Value)} or {@link #addTag(String, String)}, the
- * output will contain the following fields:
+ * Will also take core to set some "defaults" and compute values if not specified by the user. In a minimal usage
+ * scenario, i.e. without calling {@link #addValue(String, Value)} or {@link #addTag(String, String)}, the output will
+ * contain the following fields:
  * <ul>
  * <li><code>response_status_code</code> set to <code>200</code></li>
  * <li><code>response_payload_bytes</code> set to <code>-1</code></li>
@@ -46,8 +32,6 @@ import com.sap.hcp.cf.logging.common.Value;
  * {@link RequestRecord#addContextTag(String, String)} Such context information
  * is kept in thread-local storage provided via {@link MDC}. As a consequence,
  * context information will stay until explicitly reset/cleared.
- *
- *
  */
 public class RequestRecord {
 
@@ -65,39 +49,30 @@ public class RequestRecord {
             put(Fields.RESPONSE_CONTENT_TYPE, Defaults.UNKNOWN);
         }
     };
-
-    public enum Direction {
-                           IN, OUT
-    }
-
-    private Instant start;
-    private Instant end;
-
-    private Direction direction = Direction.IN;
-
     private final Map<String, Value> fields = new HashMap<String, Value>();
     private final Set<String> ctxFields = new HashSet<String>();
-
+    private Instant start;
+    private Instant end;
+    private Direction direction = Direction.IN;
     /**
-     * Creates a new instance that is tagged with the specified layer key. <br>
-     * Implicitly sets defaults and the start time to "now" and direction to
-     * "IN".
-     * 
+     * Creates a new instance that is tagged with the specified layer key. <br> Implicitly sets defaults and the start
+     * time to "now" and direction to "IN".
+     *
      * @param layerKey
-     *            key to identify the layer that fills this instance
+     *         key to identify the layer that fills this instance
      */
     public RequestRecord(String layerKey) {
         this(layerKey, Direction.IN);
     }
 
     /**
-     * Creates a new instance that is tagged with the specified layer key. <br>
-     * Implicitly sets defaults and the start time to "now".
-     * 
+     * Creates a new instance that is tagged with the specified layer key. <br> Implicitly sets defaults and the start
+     * time to "now".
+     *
      * @param layerKey
-     *            key to identify the layer that fills this instance
+     *         key to identify the layer that fills this instance
      * @param direction
-     *            specifies the direction of the request
+     *         specifies the direction of the request
      */
     public RequestRecord(String layerKey, Direction direction) {
         addTag(Fields.LAYER, layerKey);
@@ -111,13 +86,12 @@ public class RequestRecord {
     }
 
     /**
-     * Add a non-null value for non-null key. <br>
-     * If either key or value is <code>null</code>, nothing will happen.
-     * 
+     * Add a non-null value for non-null key. <br> If either key or value is <code>null</code>, nothing will happen.
+     *
      * @param key
-     *            the key for which the value is stored
+     *         the key for which the value is stored
      * @param value
-     *            the value to be stored
+     *         the value to be stored
      * @return the former value stored for key (maybe <code>null</code>)
      */
     public Value addValue(String key, Value value) {
@@ -129,13 +103,12 @@ public class RequestRecord {
     }
 
     /**
-     * Add a non-null tag for non-null key. <br>
-     * If either key or value is <code>null</code>, nothing will happen.
-     * 
+     * Add a non-null tag for non-null key. <br> If either key or value is <code>null</code>, nothing will happen.
+     *
      * @param key
-     *            the key for which the tag will be stored
+     *         the key for which the tag will be stored
      * @param tag
-     *            the tag to be stored
+     *         the tag to be stored
      * @return the former tag stored for key (maybe <code>null</code>)
      */
     public String addTag(String key, String tag) {
@@ -148,15 +121,14 @@ public class RequestRecord {
     }
 
     /**
-     * Add a non-null tag for non-null key that should be "propagated" to
-     * context. This is useful if more than one instance is created within a
-     * thread (hierarchy) and subsequent instances are supposed to inherit tags
-     * from earlier instances.
-     * 
+     * Add a non-null tag for non-null key that should be "propagated" to context. This is useful if more than one
+     * instance is created within a thread (hierarchy) and subsequent instances are supposed to inherit tags from
+     * earlier instances.
+     *
      * @param key
-     *            the key for which the tag will be stored
+     *         the key for which the tag will be stored
      * @param tag
-     *            the tag to be stored
+     *         the tag to be stored
      * @return the former tag stored for key (maybe <code>null</code>)
      */
     public String addContextTag(String key, String tag) {
@@ -179,9 +151,8 @@ public class RequestRecord {
     /**
      * Assigns the current time as the start time of this instance.
      * <p>
-     * If newly assigned start time is later than current end time, end time
-     * will be set to current time as well.
-     * 
+     * If newly assigned start time is later than current end time, end time will be set to current time as well.
+     *
      * @return the assigned start time.
      */
     public long start() {
@@ -191,7 +162,7 @@ public class RequestRecord {
 
     /**
      * Assigns the current time as the end time of this instance.
-     * 
+     *
      * @return the assigned end time.
      */
     public long stop() {
@@ -279,6 +250,10 @@ public class RequestRecord {
         }
         addTag(tag, dateValue);
 
+    }
+
+    public enum Direction {
+        IN, OUT
     }
 
     static class ClockHolder {

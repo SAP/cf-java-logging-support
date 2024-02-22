@@ -23,11 +23,12 @@ public class StacktraceLines {
     }
 
     /**
-	 * Extracts the first n lines of the given stacktrace
-	 *
-	 * @param firstSize the number of lines to retain from start of the stacktrace
-	 * @return the first part of the stacktrace of the given size
-	 */
+     * Extracts the first n lines of the given stacktrace
+     *
+     * @param firstSize
+     *         the number of lines to retain from start of the stacktrace
+     * @return the first part of the stacktrace of the given size
+     */
     public List<String> getFirstLines(int firstSize) {
         int size = 0;
         int i = 0;
@@ -39,11 +40,12 @@ public class StacktraceLines {
     }
 
     /**
-	 * Extracts the last n lines of the given stacktrace
-	 *
-	 * @param lastSize the number of lines to retain at the and of the stacktrace
-	 * @return the last part of the stacktrace of the given size
-	 */
+     * Extracts the last n lines of the given stacktrace
+     *
+     * @param lastSize
+     *         the number of lines to retain at the and of the stacktrace
+     * @return the last part of the stacktrace of the given size
+     */
 
     public List<String> getLastLines(int lastSize) {
         int size = 0;

@@ -12,15 +12,14 @@ public class CustomField {
 
     /**
      * Include <i>custom field</i> key:value in the JSON output.
-     * 
+     *
      * @param key
-     *            the key, must not be null
+     *         the key, must not be null
      * @param value
-     *            the value, {@link String#valueOf} will be used to generate the
-     *            String representation
+     *         the value, {@link String#valueOf} will be used to generate the String representation
      * @return a CustomField object representing key=value
      * @throws IllegalArgumentException
-     *             if key is null
+     *         if key is null
      */
     public static CustomField customField(String key, Object value) {
         return new CustomField(key, value);

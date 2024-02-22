@@ -1,82 +1,66 @@
 package com.sap.hcp.cf.logback.filter;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verifyZeroInteractions;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.slf4j.MDC;
-import org.slf4j.Marker;
-
-import com.sap.hcp.cf.logging.common.helper.DynamicLogLevelHelper;
-
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.core.spi.FilterReply;
+import com.sap.hcp.cf.logging.common.helper.DynamicLogLevelHelper;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.slf4j.MDC;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
-@RunWith(MockitoJUnitRunner.class)
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class CustomLoggingTurboFilterTest {
 
-    private CustomLoggingTurboFilter filter;
+    private static final String FORMAT = "format";
+    private static final Marker MARKER = MarkerFactory.getMarker("test-marker");
+    private static final Object[] PARAMS = new Object[] { new Object() };
+    private static final Throwable THROWN = new Throwable();
 
-    @Mock
-    private Marker marker;
-    private Logger logger;
-    private String format;
-    @Mock
-    private Object param;
-    private Object[] params;
-    @Mock
-    private Throwable t;
+    private final CustomLoggingTurboFilter filter = new CustomLoggingTurboFilter();
 
-    @Before
-    public void setup() {
-        filter = new CustomLoggingTurboFilter();
-        params = new Object[] { param };
-        format = "format";
-    }
+    private final Logger logger = Mockito.mock(Logger.class);
 
-    @After
+    @AfterEach
     public void teardown() {
-        verifyZeroInteractions(marker, param, t);
         MDC.clear();
     }
 
     @Test
     public void testNeutralCondition() {
-        assertEquals(FilterReply.NEUTRAL, filter.decide(marker, logger, Level.TRACE, format, params, t));
-        assertEquals(FilterReply.NEUTRAL, filter.decide(marker, logger, Level.DEBUG, format, params, t));
-        assertEquals(FilterReply.NEUTRAL, filter.decide(marker, logger, Level.INFO, format, params, t));
-        assertEquals(FilterReply.NEUTRAL, filter.decide(marker, logger, Level.WARN, format, params, t));
-        assertEquals(FilterReply.NEUTRAL, filter.decide(marker, logger, Level.ERROR, format, params, t));
+        assertThat(filter.decide(MARKER, logger, Level.TRACE, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.NEUTRAL);
+        assertThat(filter.decide(MARKER, logger, Level.DEBUG, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.NEUTRAL);
+        assertThat(filter.decide(MARKER, logger, Level.INFO, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.NEUTRAL);
+        assertThat(filter.decide(MARKER, logger, Level.WARN, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.NEUTRAL);
+        assertThat(filter.decide(MARKER, logger, Level.ERROR, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.NEUTRAL);
     }
 
     @Test
     public void testAcceptCondition() {
-        assertEquals(FilterReply.NEUTRAL, filter.decide(marker, logger, Level.ERROR, format, params, t));
+        assertThat(filter.decide(MARKER, logger, Level.ERROR, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.NEUTRAL);
 
         MDC.put(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_KEY, "TRACE");
 
-        assertEquals(FilterReply.ACCEPT, filter.decide(marker, logger, Level.TRACE, format, params, t));
-        assertEquals(FilterReply.ACCEPT, filter.decide(marker, logger, Level.DEBUG, format, params, t));
-        assertEquals(FilterReply.ACCEPT, filter.decide(marker, logger, Level.INFO, format, params, t));
-        assertEquals(FilterReply.ACCEPT, filter.decide(marker, logger, Level.WARN, format, params, t));
-        assertEquals(FilterReply.ACCEPT, filter.decide(marker, logger, Level.ERROR, format, params, t));
+        assertThat(filter.decide(MARKER, logger, Level.TRACE, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.ACCEPT);
+        assertThat(filter.decide(MARKER, logger, Level.DEBUG, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.ACCEPT);
+        assertThat(filter.decide(MARKER, logger, Level.INFO, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.ACCEPT);
+        assertThat(filter.decide(MARKER, logger, Level.WARN, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.ACCEPT);
+        assertThat(filter.decide(MARKER, logger, Level.ERROR, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.ACCEPT);
     }
 
     @Test
     public void testDenyCondition() {
-        assertEquals(FilterReply.NEUTRAL, filter.decide(marker, logger, Level.DEBUG, format, params, t));
+        assertThat(filter.decide(MARKER, logger, Level.DEBUG, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.NEUTRAL);
 
         MDC.put(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_KEY, "INFO");
-        assertEquals(FilterReply.DENY, filter.decide(marker, logger, Level.TRACE, format, params, t));
-        assertEquals(FilterReply.DENY, filter.decide(marker, logger, Level.DEBUG, format, params, t));
-        assertEquals(FilterReply.ACCEPT, filter.decide(marker, logger, Level.INFO, format, params, t));
-        assertEquals(FilterReply.ACCEPT, filter.decide(marker, logger, Level.WARN, format, params, t));
-        assertEquals(FilterReply.ACCEPT, filter.decide(marker, logger, Level.ERROR, format, params, t));
+
+        assertThat(filter.decide(MARKER, logger, Level.TRACE, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.DENY);
+        assertThat(filter.decide(MARKER, logger, Level.DEBUG, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.DENY);
+        assertThat(filter.decide(MARKER, logger, Level.INFO, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.ACCEPT);
+        assertThat(filter.decide(MARKER, logger, Level.WARN, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.ACCEPT);
+        assertThat(filter.decide(MARKER, logger, Level.ERROR, FORMAT, PARAMS, THROWN)).isEqualTo(FilterReply.ACCEPT);
     }
 }

@@ -15,11 +15,11 @@ git remote set-head origin -a
 
 ## Summary
 
-This is a collection of support libraries for Java applications (Java 8 and above) that serves three main purposes: 
+This is a collection of support libraries for Java applications (Java 11 and above) that serves three main purposes: 
 
 1. Provide means to emit *structured application log messages* 
 2. Instrument parts of your application stack to *collect request metrics* 
-3. Allow production of *custom metrics*.
+3. Allow auto-configuration of OpenTelemetry exporters.
 
 The libraries started out to support applications running on Cloud Foundry.
 This integration has become optional.
@@ -35,9 +35,6 @@ While [logstash-logback-encoder](https://github.com/logstash/logstash-logback-en
 
 The instrumentation part is currently focusing on providing [request filters for Java Servlets](http://www.oracle.com/technetwork/java/filters-137243.html), but again, we're open to contributions for other APIs and frameworks.
 
-The custom metrics instrumentation allows users to easily define and emit custom metrics. 
-The different modules configure all necessary components and make it possible to define custom metrics with minimal code change.
-Once collected, custom metrics are sent as special log message.
 
 Lastly, there is also a project on [node.js logging support](https://github.com/SAP/cf-nodejs-logging-support).
 
@@ -71,36 +68,6 @@ Let's say you want to make use of the *servlet filter* feature, then you need to
 ```
 
 This feature only depends on the servlet API which you have included in your POM anyhow. You can find more information about the *servlet filter* feature (like e.g. how to adjust the web.xml) in the [Wiki](https://github.com/SAP/cf-java-logging-support/wiki/Instrumenting-Servlets).
-Note, that we provide two different servlet instrumentations:
-
-* cf-java-logging-support-servlet linked against `javax.servlet`
-* cf-java-logging-support-servlet-jakarta linked against `jakarta.servlet`
-
-Both modules build on the same code but use the respective API.
-
-If you want to use the `custom metrics`, just define the following dependency:
-
-* Spring Boot Support:
-
-``` xml
-
-<dependency>
-  <groupId>com.sap.hcp.cf.logging</groupId>
-  <artifactId>cf-custom-metrics-clients-spring-boot</artifactId>
-  <version>${cf-logging-version}</version>
-</dependency>
-```
-
-* Plain Java Support:
-
-``` xml
-
-<dependency>
-  <groupId>com.sap.hcp.cf.logging</groupId>
-  <artifactId>cf-custom-metrics-clients-java</artifactId>
-  <version>${cf-logging-version}</version>
-</dependency>
-```
 
 ## Implementation variants and logging configurations
 
@@ -177,8 +144,7 @@ Here are the minimal configurations you'd need:
 
 ``` xml
 <Configuration
-   status="warn" strict="true"
-   packages="com.sap.hcp.cf.log4j2.converter,com.sap.hcp.cf.log4j2.layout">
+   status="warn" strict="true">
 	<Appenders>
         <Console name="STDOUT-JSON" target="SYSTEM_OUT" follow="true">
             <JsonPatternLayout charset="utf-8"/>
@@ -198,132 +164,6 @@ Here are the minimal configurations you'd need:
 </Configuration>
 ```
 
-## Custom Metrics
-
-With the custom metrics feature you can send metrics defined inside your code. Metrics are emitted as log messages when your application is bound to a service called *application-logs*. This is done because of the
-special format supported by the SAP BTP Application Logging Service and for compatibility with the prior apporach. To use the feature you'd need:
-
-1. *Instrumenting Spring Boot 2 applications:*
-
-``` xml
-<dependency>
-  <groupId>com.sap.hcp.cf.logging</groupId>
-  <artifactId>cf-custom-metrics-clients-spring-boot</artifactId>
-  <version>${cf-logging-version}</version>
-</dependency>
-```
-
-The Spring Boot instrumentation uses `Spring Boot Actuator` which allows to read predefined metrics and write custom metrics. The Actuator supports [Micrometer](https://github.com/micrometer-metrics/micrometer) and is part of Actuator's dependencies.
-In your code you work directly with `Micrometer`. Define your custom metrics and iterate with them:
-
-``` java
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.LongTaskTimer;
-import io.micrometer.core.instrument.Metrics;
-import io.micrometer.core.instrument.Tag;
-
-@RestController
-public class DemoController {
-
-	private Counter counter;
-	private AtomicInteger concurrentHttpRequests;
-	private LongTaskTimer longTimer;
-
-	DemoController() {
-		this.counter = Metrics.counter("demo.controller.number.of.requests", "unit", "requests");
-		List<Tag> tags = new ArrayList<Tag>(Arrays.asList(new Tag[] { Tag.of("parallel", "clients") }));
-		this.concurrentHttpRequests = Metrics.gauge("demo.controller.number.of.clients.being.served", tags,
-				new AtomicInteger(0));
-		this.longTimer = Metrics.more().longTaskTimer("demo.controller.time.spends.in.serving.clients");
-	}
-
-	@RequestMapping("/")
-	public String index() {
-		longTimer.record(() -> {
-			this.counter.increment();
-			concurrentHttpRequests.addAndGet(1);
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				LOGGER.error(e);
-			} finally {
-				concurrentHttpRequests.addAndGet(-1);
-			}
-		});
-
-		return "Greetings from Custom Metrics!";
-	}
-}
-```
-
-In the example above, three custom metrics are defined and used. The metrics are `Counter`, `LongTaskTimer` and `Gauge`.
-
-2. *Instrumenting plain Java applications:*
-
-``` xml
-<dependency>
-  <groupId>com.sap.hcp.cf.logging</groupId>
-  <artifactId>cf-custom-metrics-clients-java</artifactId>
-  <version>${cf-logging-version}</version>
-</dependency>
-```
-
-The Java instrumentation uses [Dropwizard](https://metrics.dropwizard.io) which allows to define all kind of metrics supports by Dropwizard. The following metrics are available: `com.codahale.metrics.Gauge`, `com.codahale.metrics.Counter`, `com.codahale.metrics.Histogram`, `com.codahale.metrics.Meter` and `com.codahale.metrics.Timer`. More information about the [metric types and their usage](https://metrics.dropwizard.io/4.0.0/getting-started.html). Define your custom metrics and iterate with them:
-
-``` java
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Meter;
-import com.sap.cloud.cf.monitoring.java.CustomMetricRegistry;
-
-public class CustomMetricsServlet extends HttpServlet {
-    private static Counter counter = CustomMetricRegistry.get().counter("custom.metric.request.count");
-    private static Meter meter = CustomMetricRegistry.get().meter("custom.metric.request.meter");
-
-    @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        counter.inc(3);
-        meter.mark();
-        response.getWriter().println("<p>Greetings from Custom Metrics</p>");
-    }
-}
-```
-
-## Custom metrics Configurations
-
-This library supports the following configurations regarding sending custom metrics:
-  * `interval`: the interval for sending metrics, in millis. **Default value: `60000`**
-  * `enabled`: enables or disables the sending of metrics. **Default value: `true`**
-  * `metrics`: array of whitelisted metric names. Only mentioned metrics would be processed and sent. If it is an empty array all metrics are being sent. **Default value: `[]`**
-  * `metricQuantiles`: enables or disables the sending of metric's [quantiles](https://en.wikipedia.org/wiki/Quantile) like median, 95th percentile, 99th percentile. SpringBoot does not support this configuration. **Default value: `false`**
-
-  Configurations are read from environment variable named `CUSTOM_METRICS`. To change the default values, you should override the environment variable with your custom values. Example:
-
-```
-{
-    "interval": 30000,
-    "enabled": true,
-    "metrics": [
-        "my.whitelist.metric.1",
-        "my.whitelist.metric.2"
-    ],
-    "metricQuantiles":true
-}
-```
-
 ## Dynamic Log Levels
 
 This library provides the possibility to change the log-level threshold for a
@@ -338,8 +178,7 @@ Stacktraces can be logged within one log message. Further details can be found
 
 ## Sample Applications
 
-In order to illustrate how the different features are used, this repository includes two sample applications:
-  * a Jersey implementation in the  [./sample folder](./sample)
+In order to illustrate how the different features are used, this repository includes one sample application:
   * a Spring Boot implementation in the [./sample-spring-boot folder](./sample-spring-boot)
 
 ## Documentation

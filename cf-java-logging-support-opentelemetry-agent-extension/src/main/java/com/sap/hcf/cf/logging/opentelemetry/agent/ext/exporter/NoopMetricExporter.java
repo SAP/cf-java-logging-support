@@ -20,7 +20,6 @@ public class NoopMetricExporter implements MetricExporter {
         return INSTANCE;
     }
 
-
     @Override
     public CompletableResultCode export(Collection<MetricData> metrics) {
         return CompletableResultCode.ofSuccess();

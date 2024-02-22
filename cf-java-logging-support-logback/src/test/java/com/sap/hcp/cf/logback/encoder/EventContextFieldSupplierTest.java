@@ -1,38 +1,32 @@
 package com.sap.hcp.cf.logback.encoder;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import com.sap.hcp.cf.logback.converter.api.LogbackContextFieldSupplier;
+import com.sap.hcp.cf.logging.common.customfields.CustomField;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
-import com.sap.hcp.cf.logback.converter.api.LogbackContextFieldSupplier;
-import com.sap.hcp.cf.logging.common.customfields.CustomField;
-
-import ch.qos.logback.classic.spi.ILoggingEvent;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EventContextFieldSupplierTest {
 
+    private final LogbackContextFieldSupplier fieldSupplier = new EventContextFieldSupplier();
     @Mock
     private ILoggingEvent event;
-
-    private LogbackContextFieldSupplier fieldSupplier = new EventContextFieldSupplier();
 
     @Test
     public void emptyMdcAndNoArguments() {
         when(event.getMDCPropertyMap()).thenReturn(Collections.emptyMap());
         Map<String, Object> fields = fieldSupplier.map(event);
-        assertThat(fields.entrySet(), is(empty()));
+        assertThat(fields).isEmpty();
     }
 
     @Test
@@ -43,8 +37,9 @@ public class EventContextFieldSupplierTest {
         when(event.getMDCPropertyMap()).thenReturn(mdc);
 
         Map<String, Object> fields = fieldSupplier.map(event);
-        assertThat(fields, hasEntry("key", "value"));
-        assertThat(fields, hasEntry("this", "that"));
+
+        assertThat(fields).containsEntry("key", "value");
+        assertThat(fields).containsEntry("this", "that");
     }
 
     @Test
@@ -52,12 +47,13 @@ public class EventContextFieldSupplierTest {
         Object[] arguments = new Object[] { //
                                             new Object(), //
                                             CustomField.customField("key", "value"), //
-                                            CustomField.customField("number", Double.valueOf(123.456d)) };
+                                            CustomField.customField("number", 123.456d) };
         when(event.getArgumentArray()).thenReturn(arguments);
 
         Map<String, Object> fields = fieldSupplier.map(event);
-        assertThat(fields, hasEntry("key", "value"));
-        assertThat(fields, hasEntry("number", Double.valueOf(123.456d)));
+
+        assertThat(fields).containsEntry("key", "value");
+        assertThat(fields).containsEntry("number", 123.456d);
     }
 
     @Test
@@ -69,7 +65,8 @@ public class EventContextFieldSupplierTest {
         when(event.getArgumentArray()).thenReturn(arguments);
 
         Map<String, Object> fields = fieldSupplier.map(event);
-        assertThat(fields, hasEntry("key", "that"));
+
+        assertThat(fields).containsEntry("key", "that");
     }
 
 }

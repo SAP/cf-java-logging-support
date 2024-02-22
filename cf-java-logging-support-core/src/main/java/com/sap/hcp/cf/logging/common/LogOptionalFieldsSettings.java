@@ -1,9 +1,8 @@
 package com.sap.hcp.cf.logging.common;
 
+import com.sap.hcp.cf.logging.common.helper.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sap.hcp.cf.logging.common.helper.Environment;
 
 public class LogOptionalFieldsSettings {
 
@@ -19,8 +18,8 @@ public class LogOptionalFieldsSettings {
     }
 
     LogOptionalFieldsSettings(Environment environment, String invokingClass) {
-        logSensitiveConnectionData = readEnvironmentVariable(Environment.LOG_SENSITIVE_CONNECTION_DATA, environment,
-                                                             invokingClass);
+        logSensitiveConnectionData =
+                readEnvironmentVariable(Environment.LOG_SENSITIVE_CONNECTION_DATA, environment, invokingClass);
         logRemoteUserField = readEnvironmentVariable(Environment.LOG_REMOTE_USER, environment, invokingClass);
         logRefererField = readEnvironmentVariable(Environment.LOG_REFERER, environment, invokingClass);
         logSslHeaders = readEnvironmentVariable(Environment.LOG_SSL_HEADERS, environment, invokingClass);
@@ -47,9 +46,9 @@ public class LogOptionalFieldsSettings {
             return false;
         }
 
-        LOGGER.debug("Logging field {} is DEACTIVATED by default for {}. Environment variable \"LogRemoteIP = {}\" could not " +
-                     "be read. It should be set to true to activate Logging of remote IPs or to false to deactivate it",
-                     environmentVariableKey, invokingClass, tempEnvVariable);
+        LOGGER.debug(
+                "Logging field {} is DEACTIVATED by default for {}. Environment variable \"LogRemoteIP = {}\" could not " + "be read. It should be set to true to activate Logging of remote IPs or to false to deactivate it",
+                environmentVariableKey, invokingClass, tempEnvVariable);
         return false;
 
     }

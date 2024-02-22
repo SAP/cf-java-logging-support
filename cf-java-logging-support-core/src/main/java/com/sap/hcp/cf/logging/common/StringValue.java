@@ -2,7 +2,6 @@ package com.sap.hcp.cf.logging.common;
 
 /**
  * A {@link Value} implementation representing a <i>string</i>.
- *
  */
 public class StringValue implements Value {
 

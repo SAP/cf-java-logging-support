@@ -27,7 +27,8 @@ public class CloudLoggingLogsExporterProvider implements ConfigurableLogRecordEx
         this(config -> new CloudLoggingServicesProvider(config).get(), CloudLoggingCredentials.parser());
     }
 
-    CloudLoggingLogsExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider, CloudLoggingCredentials.Parser credentialParser) {
+    CloudLoggingLogsExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider,
+                                     CloudLoggingCredentials.Parser credentialParser) {
         this.servicesProvider = serviceProvider;
         this.credentialParser = credentialParser;
     }
@@ -49,10 +50,9 @@ public class CloudLoggingLogsExporterProvider implements ConfigurableLogRecordEx
 
     @Override
     public LogRecordExporter createExporter(ConfigProperties config) {
-        List<LogRecordExporter> exporters = servicesProvider.apply(config)
-                .map(svc -> createExporter(config, svc))
-                .filter(exp -> !(exp instanceof NoopLogRecordExporter))
-                .collect(Collectors.toList());
+        List<LogRecordExporter> exporters = servicesProvider.apply(config).map(svc -> createExporter(config, svc))
+                                                            .filter(exp -> !(exp instanceof NoopLogRecordExporter))
+                                                            .collect(Collectors.toList());
         return LogRecordExporter.composite(exporters);
     }
 
@@ -64,11 +64,9 @@ public class CloudLoggingLogsExporterProvider implements ConfigurableLogRecordEx
         }
 
         OtlpGrpcLogRecordExporterBuilder builder = OtlpGrpcLogRecordExporter.builder();
-        builder.setEndpoint(credentials.getEndpoint())
-                .setCompression(getCompression(config))
-                .setClientTls(credentials.getClientKey(), credentials.getClientCert())
-                .setTrustedCertificates(credentials.getServerCert())
-                .setRetryPolicy(RetryPolicy.getDefault());
+        builder.setEndpoint(credentials.getEndpoint()).setCompression(getCompression(config))
+               .setClientTls(credentials.getClientKey(), credentials.getClientCert())
+               .setTrustedCertificates(credentials.getServerCert()).setRetryPolicy(RetryPolicy.getDefault());
 
         Duration timeOut = getTimeOut(config);
         if (timeOut != null) {

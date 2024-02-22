@@ -1,28 +1,23 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.both;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-
-import java.util.Map;
-
-import javax.servlet.FilterChain;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.MDC;
 
-@RunWith(MockitoJUnitRunner.class)
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.matches;
+import static org.mockito.Mockito.verify;
+
+@ExtendWith(MockitoExtension.class)
 public class LogContextToRequestAttributeFilterTest {
 
     @Mock
@@ -42,23 +37,23 @@ public class LogContextToRequestAttributeFilterTest {
 
         new LogContextToRequestAttributeFilter().doFilter(request, response, chain);
 
-        verify(request).setAttribute(eq(MDC.class.getName()), addedAttribute.capture());
-        assertThat(addedAttribute.getValue().size(), is(2));
-        assertThat(addedAttribute.getValue(), both(hasEntry("this key", "this value")).and(hasEntry("that key",
-                                                                                                   "that value")));
+        verify(request).setAttribute(matches(MDC.class.getName()), addedAttribute.capture());
+        assertThat(addedAttribute.getValue()).hasSize(2) //
+                                             .containsEntry("this key", "this value")
+                                             .containsEntry("that key", "that value");
     }
-    
+
     @Test
     public void addedAttributeCanBeUsedToConfigureMDC() throws Exception {
         MDC.put("this key", "this value");
         MDC.put("that key", "that value");
         new LogContextToRequestAttributeFilter().doFilter(request, response, chain);
-        verify(request).setAttribute(eq(MDC.class.getName()), addedAttribute.capture());
+        verify(request).setAttribute(matches(MDC.class.getName()), addedAttribute.capture());
         MDC.clear();
 
         MDC.setContextMap(addedAttribute.getValue());
-        
-        assertThat(MDC.get("this key"), is(equalTo("this value")));
-        assertThat(MDC.get("that key"), is(equalTo("that value")));
+
+        assertThat(MDC.get("this key")).isEqualTo("this value");
+        assertThat(MDC.get("that key")).isEqualTo("that value");
     }
 }
