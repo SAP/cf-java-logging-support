@@ -4,13 +4,14 @@ import com.sap.hcp.cf.logging.sample.springboot.keystore.KeyStoreDynLogConfigura
 import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelConfiguration;
 import com.sap.hcp.cf.logging.servlet.filter.*;
 import jakarta.servlet.DispatcherType;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.time.Clock;
@@ -39,6 +40,8 @@ public class SampleAppSpringBootApplication {
         registrationBean.addUrlPatterns("/*");
         registrationBean.setDispatcherTypes(DispatcherType.REQUEST);
         registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        MDC.put("MDCkey", "value");
+        LoggerFactory.getLogger("setup").atInfo().addKeyValue("key", "value").log("Hello Worlds!");
         return registrationBean;
     }
 
@@ -52,17 +55,7 @@ public class SampleAppSpringBootApplication {
         return Clock.systemUTC();
     }
 
-    /**
-     * Provides a {@link BCryptPasswordEncoder} for Basic-Auth.
-     *
-     * @return the encoder
-     */
-    @Bean
-    public BCryptPasswordEncoder encoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    private class MyLoggingFilter extends CompositeFilter {
+    public static class MyLoggingFilter extends CompositeFilter {
 
         private MyLoggingFilter(DynamicLogLevelConfiguration dynLogConfig) {
             super(new AddVcapEnvironmentToLogContextFilter(), new AddHttpHeadersToLogContextFilter(),
