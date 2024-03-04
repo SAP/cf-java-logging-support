@@ -348,13 +348,13 @@ app-logs:
       example: |
         "#cf": {
           "string": [
-            {"l":"some_label", "v":"some_value", "i": 0},
-            {"l":"other_label", "v":"other_value", "i": 1}
+            {"k":"some_key", "v":"some_value", "i": 0},
+            {"k":"other_key", "v":"other_value", "i": 1}
           ]
         }
       description: |
         An object containing collections of non-standard fields.
-        The field "string" contains custom fields with label "l", value "v" and an index "i".
+        The field "string" contains custom fields with key "k", value "v" and an index "i".
         The index can be used for field order during parsing.
 
         NOTE: As this is "custom" there are no predefined fields here!
