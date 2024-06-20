@@ -9,6 +9,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.metrics.ConfigurableMetricExporter
 import io.opentelemetry.sdk.common.export.RetryPolicy;
 import io.opentelemetry.sdk.metrics.Aggregation;
 import io.opentelemetry.sdk.metrics.InstrumentType;
+import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector;
 import io.opentelemetry.sdk.metrics.export.DefaultAggregationSelector;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
@@ -27,6 +28,7 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
     public static final String CRED_DYNATRACE_APIURL = "apiurl";
     public static final String DT_APIURL_METRICS_SUFFIX = "/v2/otlp/v1/metrics";
     private static final Logger LOG = Logger.getLogger(DynatraceMetricsExporterProvider.class.getName());
+    private static final AggregationTemporalitySelector ALWAYS_DELTA = instrumentType -> AggregationTemporality.DELTA;
     private final Function<ConfigProperties, CfService> serviceProvider;
 
     public DynatraceMetricsExporterProvider() {
@@ -50,7 +52,7 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
     private static AggregationTemporalitySelector getAggregationTemporalitySelector(ConfigProperties config) {
         String temporalityStr = config.getString("otel.exporter.dynatrace.metrics.temporality.preference");
         if (temporalityStr == null) {
-            return AggregationTemporalitySelector.deltaPreferred();
+            return ALWAYS_DELTA;
         }
         AggregationTemporalitySelector temporalitySelector;
         switch (temporalityStr.toLowerCase(Locale.ROOT)) {
@@ -60,6 +62,8 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
             return AggregationTemporalitySelector.deltaPreferred();
         case "lowmemory":
             return AggregationTemporalitySelector.lowMemory();
+        case "always_delta":
+            return ALWAYS_DELTA;
         default:
             throw new ConfigurationException("Unrecognized aggregation temporality: " + temporalityStr);
         }
