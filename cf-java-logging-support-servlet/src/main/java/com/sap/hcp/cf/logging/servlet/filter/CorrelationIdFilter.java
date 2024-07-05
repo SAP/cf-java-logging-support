@@ -1,11 +1,8 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import static com.sap.hcp.cf.logging.common.customfields.CustomField.customField;
 import static com.sap.hcp.cf.logging.common.request.HttpHeaders.W3C_TRACEPARENT;
-import static java.util.Optional.ofNullable;
 
 import java.util.UUID;
-import java.util.function.Predicate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,8 +24,8 @@ import com.sap.hcp.cf.logging.common.request.HttpHeaders;
 public class CorrelationIdFilter extends AbstractLoggingFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(CorrelationIdFilter.class);
-    private HttpHeader correlationHeader;
-    private HttpHeader traceparentHeader;
+    private final HttpHeader correlationHeader;
+    private final HttpHeader traceparentHeader;
 
     public CorrelationIdFilter() {
         this(HttpHeaders.CORRELATION_ID);
@@ -59,29 +56,31 @@ public class CorrelationIdFilter extends AbstractLoggingFilter {
             correlationId = String.valueOf(UUID.randomUUID());
             // add correlation-id as custom field, since it is added to MDC only
             // in the next step
-            LOG.debug("Generated new correlation-id <{}>", correlationId, customField(correlationHeader.getField(),
-                                                                                      correlationId));
+            LOG.debug("Generated new correlation-id <{}>", correlationId);
         }
         return correlationId;
     }
 
-    private boolean isBlankOrDefault(String value) {
+    private static boolean isBlankOrDefault(String value) {
         return value == null || value.isEmpty() || value.equals(Defaults.UNKNOWN);
     }
 
     private String getCorrelationIdFromTraceparent(HttpServletRequest request) {
         String traceparent = HttpHeaderUtilities.getHeaderValue(request, traceparentHeader);
-        return ofNullable(traceparent).filter(not(this::isBlankOrDefault)).map(this::parseTraceparent).orElse(
-                                                                                                                        null);
+        return isBlankOrDefault(traceparent) ? null : parseTraceparent(traceparent);
     }
 
-    private <T> Predicate<T> not(Predicate<T> p) {
-        return p.negate();
-    }
-
-    private String parseTraceparent(String value) {
-        String[] tokens = value.split("-");
-        return tokens.length >= 2 ? tokens[1] : null;
+    private static String parseTraceparent(String value) {
+        int idx1 = value.indexOf('-');
+        if (idx1 != -1) {
+            ++idx1;
+            int idx2 = value.indexOf('-', idx1);
+            if (idx2 != -1) {
+                // return string between first and second '-'.
+                return value.substring(idx1, idx2);
+            }
+        }
+        return null;
     }
 
     private void addCorrelationIdHeader(HttpServletResponse response, String correlationId) {
