@@ -1,5 +1,6 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
+import static com.sap.hcp.cf.logging.common.customfields.CustomField.customField;
 import static com.sap.hcp.cf.logging.common.request.HttpHeaders.W3C_TRACEPARENT;
 
 import java.util.UUID;
@@ -56,7 +57,8 @@ public class CorrelationIdFilter extends AbstractLoggingFilter {
             correlationId = String.valueOf(UUID.randomUUID());
             // add correlation-id as custom field, since it is added to MDC only
             // in the next step
-            LOG.debug("Generated new correlation-id <{}>", correlationId);
+            LOG.debug("Generated new correlation-id <{}>", correlationId, customField(correlationHeader.getField(),
+                                                                                      correlationId));
         }
         return correlationId;
     }
