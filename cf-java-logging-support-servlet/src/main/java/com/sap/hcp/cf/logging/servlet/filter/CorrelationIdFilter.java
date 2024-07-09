@@ -8,6 +8,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.sap.hcp.cf.logging.common.Fields;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,7 @@ public class CorrelationIdFilter extends AbstractLoggingFilter {
     @Override
     protected void beforeFilter(HttpServletRequest request, HttpServletResponse response) {
         String correlationId = determineCorrelationId(request);
-        LogContext.add(correlationHeader.getField(), correlationId);
+        LogContext.add(Fields.CORRELATION_ID, correlationId);
         addCorrelationIdHeader(response, correlationId);
     }
 
@@ -93,6 +94,6 @@ public class CorrelationIdFilter extends AbstractLoggingFilter {
 
     @Override
     protected void cleanup(HttpServletRequest request, HttpServletResponse response) {
-        LogContext.remove(correlationHeader.getField());
+        LogContext.remove(Fields.CORRELATION_ID);
     }
 }
