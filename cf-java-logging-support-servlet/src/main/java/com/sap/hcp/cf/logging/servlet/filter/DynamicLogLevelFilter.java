@@ -56,7 +56,13 @@ public class DynamicLogLevelFilter extends AbstractLoggingFilter {
      *            use a lambda: {@code () -> config}
      */
     public DynamicLogLevelFilter(ConcurrentInitializer<DynamicLogLevelConfiguration> configuration) {
-        this.configuration = configuration;
+        this.configuration = new LazyInitializer<DynamicLogLevelConfiguration>() {
+
+            @Override
+            protected DynamicLogLevelConfiguration initialize() throws ConcurrentException {
+                return configuration.get();
+            }
+        };
         this.processor = new LazyInitializer<DynamicLogLevelProcessor>() {
 
             @Override
