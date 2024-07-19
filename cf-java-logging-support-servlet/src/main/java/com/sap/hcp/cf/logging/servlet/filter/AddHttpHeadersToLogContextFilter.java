@@ -6,7 +6,6 @@ import static java.util.stream.Collectors.toList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,8 +22,8 @@ import com.sap.hcp.cf.logging.common.request.HttpHeaders;
  */
 public class AddHttpHeadersToLogContextFilter extends AbstractLoggingFilter {
 
-    private List<HttpHeader> headers;
-    private List<String> fields;
+    private final List<HttpHeader> headers;
+    private final List<String> fields;
 
     /**
      * The default constructor uses {@link HttpHeaders#propagated()} to define
@@ -53,16 +52,16 @@ public class AddHttpHeadersToLogContextFilter extends AbstractLoggingFilter {
      */
     public AddHttpHeadersToLogContextFilter(List<? extends HttpHeader> list, HttpHeader... custom) {
         Stream<HttpHeader> allHeaders = Stream.concat(list.stream(), Arrays.stream(custom));
-        this.headers = unmodifiableList(allHeaders.filter(HttpHeader::isPropagated).collect(toList()));
-        this.fields = unmodifiableList(headers.stream().map(HttpHeader::getField).filter(Objects::nonNull).collect(
-                                                                                                                   toList()));
+        this.headers = unmodifiableList(allHeaders
+                .filter(HttpHeader::isPropagated).filter(h -> h.getField() != null).collect(toList()));
+        this.fields = unmodifiableList(headers.stream().map(HttpHeader::getField).collect(toList()));
     }
 
     @Override
     protected void beforeFilter(HttpServletRequest request, HttpServletResponse response) {
         for (HttpHeader header: headers) {
             String headerValue = HttpHeaderUtilities.getHeaderValue(request, header);
-            if (header.getField() != null && headerValue != null) {
+            if (headerValue != null) {
                 LogContext.add(header.getField(), headerValue);
             }
         }
