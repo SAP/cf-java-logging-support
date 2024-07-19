@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 public class CloudLoggingConfigurationCustomizerProvider implements AutoConfigurationCustomizerProvider {
 
     private static final Logger LOG = Logger.getLogger(CloudLoggingConfigurationCustomizerProvider.class.getName());
-    private static final String VERSION = "3.8.3";
+    private static final String VERSION = "3.8.4";
     private static final CfEnv cfEnv = new CfEnv();
 
     @Override

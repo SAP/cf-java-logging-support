@@ -3,7 +3,7 @@
   <parent>
     <artifactId>cf-java-logging-support-parent</artifactId>
     <groupId>com.sap.hcp.cf.logging</groupId>
-    <version>3.8.3</version>
+    <version>3.8.4</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>cf-java-logging-support-opentelemetry-agent-extension</artifactId>
