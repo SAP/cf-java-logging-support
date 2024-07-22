@@ -1,14 +1,13 @@
 package com.sap.hcp.cf.logback.encoder;
 
-import java.util.Map;
-
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.sap.hcp.cf.logback.converter.api.LogbackContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.serialization.AbstractContextFieldSupplier;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
+import java.util.Map;
 
-public class EventContextFieldSupplier extends AbstractContextFieldSupplier<ILoggingEvent> implements
-                                       LogbackContextFieldSupplier {
+public class EventContextFieldSupplier extends AbstractContextFieldSupplier<ILoggingEvent>
+        implements LogbackContextFieldSupplier {
 
     @Override
     protected Object[] getParameterArray(ILoggingEvent event) {

@@ -5,34 +5,26 @@ import com.sap.hcp.cf.log4j2.layout.supppliers.BaseFieldSupplier;
 import com.sap.hcp.cf.logging.common.Fields;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.time.Instant;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Clock;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
-
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BaseFieldSupplierTest {
 
+    private final Log4jContextFieldSupplier baseFieldSupplier = new BaseFieldSupplier();
     @Mock
     private LogEvent event;
 
-    private Log4jContextFieldSupplier baseFieldSupplier = new BaseFieldSupplier();
-
-    @Before
+    @BeforeEach
     public void initializeEvent() {
         when(event.getInstant()).thenReturn(mock(Instant.class));
     }
@@ -41,8 +33,8 @@ public class BaseFieldSupplierTest {
     public void addsNoExceptionFieldsWithoutException() {
         Map<String, Object> fields = baseFieldSupplier.map(event);
 
-        assertThat(fields, not(hasKey(Fields.EXCEPTION_TYPE)));
-        assertThat(fields, not(hasKey(Fields.EXCEPTION_MESSAGE)));
+        assertThat(fields).doesNotContainKey(Fields.EXCEPTION_TYPE);
+        assertThat(fields).doesNotContainKey(Fields.EXCEPTION_MESSAGE);
     }
 
     @Test
@@ -52,7 +44,7 @@ public class BaseFieldSupplierTest {
 
         Map<String, Object> fields = baseFieldSupplier.map(event);
 
-        assertThat(fields, hasEntry(Fields.EXCEPTION_TYPE, RuntimeException.class.getName()));
-        assertThat(fields, hasEntry(Fields.EXCEPTION_MESSAGE, "exception message"));
+        assertThat(fields).containsEntry(Fields.EXCEPTION_TYPE, RuntimeException.class.getName());
+        assertThat(fields).containsEntry(Fields.EXCEPTION_MESSAGE, "exception message");
     }
 }

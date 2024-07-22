@@ -1,12 +1,11 @@
 package com.sap.hcp.cf.logback.encoder;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.sap.hcp.cf.logback.converter.api.LogbackContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.serialization.AbstractRequestRecordFieldSupplier;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
-
-public class RequestRecordFieldSupplier extends AbstractRequestRecordFieldSupplier<ILoggingEvent> implements
-                                        LogbackContextFieldSupplier {
+public class RequestRecordFieldSupplier extends AbstractRequestRecordFieldSupplier<ILoggingEvent>
+        implements LogbackContextFieldSupplier {
 
     @Override
     protected boolean isRequestLog(ILoggingEvent event) {

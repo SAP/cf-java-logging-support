@@ -4,13 +4,13 @@ import java.util.List;
 
 public interface HttpHeader {
 
-	boolean isPropagated();
+    boolean isPropagated();
 
-	String getName();
+    String getName();
 
-	String getField();
+    String getField();
 
-	List<HttpHeader> getAliases();
+    List<HttpHeader> getAliases();
 
-	String getFieldValue();
+    String getFieldValue();
 }

@@ -1,17 +1,17 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
+import com.sap.hcp.cf.logging.common.request.HttpHeader;
+
 import java.util.Arrays;
 import java.util.List;
 
-import com.sap.hcp.cf.logging.common.request.HttpHeader;
-
 public class HttpTestHeader implements HttpHeader {
 
-    private String name;
-    private String field;
-    private String fieldValue;
-    private boolean propagated;
-    private List<HttpHeader> aliases;
+    private final String name;
+    private final String field;
+    private final String fieldValue;
+    private final boolean propagated;
+    private final List<HttpHeader> aliases;
 
     public HttpTestHeader(String name, String field, String fieldValue, boolean propagated, HttpHeader... aliases) {
         this.name = name;

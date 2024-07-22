@@ -1,9 +1,8 @@
 package com.sap.hcp.cf.logging.common;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TestDoubleValue {
 
@@ -11,7 +10,7 @@ public class TestDoubleValue {
     public void test() {
         double value = 123.456789;
 
-        assertThat(new DoubleValue(value).toString(), is("123.457"));
+        assertThat(new DoubleValue(value)).asString().isEqualTo("123.457");
     }
 
 }

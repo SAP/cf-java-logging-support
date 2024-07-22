@@ -1,43 +1,29 @@
 package com.sap.hcp.cf.logging.servlet.dynlog;
 
-import static org.junit.Assert.*;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.sap.hcp.cf.logging.common.helper.DynamicLogLevelHelper;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.MDC;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.slf4j.MDC;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.sap.hcp.cf.logging.common.helper.DynamicLogLevelHelper;
-
-@RunWith(MockitoJUnitRunner.class)
-public class DynamicLogLevelProcessorTest extends Mockito {
+@ExtendWith(MockitoExtension.class)
+public class DynamicLogLevelProcessorTest {
 
     private DynamicLogLevelProcessor processor;
 
     private String token;
 
     private KeyPair keyPair;
-
-    @Before
-    public void setup() throws NoSuchAlgorithmException, NoSuchProviderException, DynamicLogLevelException {
-        this.keyPair = KeyPairGenerator.getInstance("RSA").generateKeyPair();
-        Date issuedAt = new Date();
-        Date expiresAt = new Date(new Date().getTime() + 10000);
-        this.token = TokenCreator.createToken(keyPair, "issuer", issuedAt, expiresAt, "TRACE", "myPrefix");
-        this.processor = new DynamicLogLevelProcessor(getRSAPublicKey(keyPair));
-    }
 
     private static RSAPublicKey getRSAPublicKey(KeyPair keyPair) {
         PublicKey publicKey = keyPair.getPublic();
@@ -47,7 +33,16 @@ public class DynamicLogLevelProcessorTest extends Mockito {
         return null;
     }
 
-    @After
+    @BeforeEach
+    public void setup() throws NoSuchAlgorithmException, NoSuchProviderException, DynamicLogLevelException {
+        this.keyPair = KeyPairGenerator.getInstance("RSA").generateKeyPair();
+        Date issuedAt = new Date();
+        Date expiresAt = new Date(new Date().getTime() + 10000);
+        this.token = TokenCreator.createToken(keyPair, "issuer", issuedAt, expiresAt, "TRACE", "myPrefix");
+        this.processor = new DynamicLogLevelProcessor(getRSAPublicKey(keyPair));
+    }
+
+    @AfterEach
     public void removeDynamicLogLevelFromMDC() {
         processor.removeDynamicLogLevelFromMDC();
     }
@@ -55,27 +50,27 @@ public class DynamicLogLevelProcessorTest extends Mockito {
     @Test
     public void copiesDynamicLogLevelToMDC() throws Exception {
         processor.copyDynamicLogLevelToMDC(token);
-        assertEquals("TRACE", MDC.get(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_KEY));
+        assertThat(MDC.get(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_KEY)).isEqualTo("TRACE");
     }
 
     @Test
     public void deletesDynamicLogLevelFromMDC() throws Exception {
         processor.copyDynamicLogLevelToMDC(token);
         processor.removeDynamicLogLevelFromMDC();
-        assertEquals(null, MDC.get(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_KEY));
+        assertNull(MDC.get(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_KEY));
     }
 
     @Test
     public void copiesDynamicLogPackagesToMDC() throws Exception {
         processor.copyDynamicLogLevelToMDC(token);
-        assertEquals("myPrefix", MDC.get(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_PREFIXES));
+        assertThat(MDC.get(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_PREFIXES)).isEqualTo("myPrefix");
     }
 
     @Test
     public void doesNotCopyDynamicLogLevelOnInvalidJwt() throws Exception {
         KeyPair invalidKeyPair = KeyPairGenerator.getInstance("RSA").generateKeyPair();
         new DynamicLogLevelProcessor(getRSAPublicKey(invalidKeyPair)).copyDynamicLogLevelToMDC(token);
-        assertEquals(null, MDC.get(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_KEY));
+        assertNull(MDC.get(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_KEY));
     }
 
     @Test
@@ -87,6 +82,6 @@ public class DynamicLogLevelProcessorTest extends Mockito {
             }
         };
         myProcessor.copyDynamicLogLevelToMDC(token);
-        assertEquals(null, MDC.get(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_KEY));
+        assertNull(MDC.get(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_KEY));
     }
 }

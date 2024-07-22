@@ -1,28 +1,25 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import static com.sap.hcp.cf.logging.common.customfields.CustomField.customField;
-import static com.sap.hcp.cf.logging.common.request.HttpHeaders.W3C_TRACEPARENT;
-import static java.util.Optional.ofNullable;
-
-import java.util.UUID;
-import java.util.function.Predicate;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sap.hcp.cf.logging.common.Defaults;
 import com.sap.hcp.cf.logging.common.LogContext;
 import com.sap.hcp.cf.logging.common.request.HttpHeader;
 import com.sap.hcp.cf.logging.common.request.HttpHeaders;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.UUID;
+import java.util.function.Predicate;
+
+import static com.sap.hcp.cf.logging.common.customfields.CustomField.customField;
+import static com.sap.hcp.cf.logging.common.request.HttpHeaders.W3C_TRACEPARENT;
+import static java.util.Optional.ofNullable;
 
 /**
- * The {@link CorrelationIdFilter} extracts a correlation id according to
- * {@link HttpHeaders#CORRELATION_ID}. It will generate a random uuid, if no
- * correlation id is found in the headers. In any case the correlation id is set
- * as a response header, if possible
+ * The {@link CorrelationIdFilter} extracts a correlation id according to {@link HttpHeaders#CORRELATION_ID}. It will
+ * generate a random uuid, if no correlation id is found in the headers. In any case the correlation id is set as a
+ * response header, if possible
  */
 public class CorrelationIdFilter extends AbstractLoggingFilter {
 
@@ -59,8 +56,8 @@ public class CorrelationIdFilter extends AbstractLoggingFilter {
             correlationId = String.valueOf(UUID.randomUUID());
             // add correlation-id as custom field, since it is added to MDC only
             // in the next step
-            LOG.debug("Generated new correlation-id <{}>", correlationId, customField(correlationHeader.getField(),
-                                                                                      correlationId));
+            LOG.debug("Generated new correlation-id <{}>", correlationId,
+                      customField(correlationHeader.getField(), correlationId));
         }
         return correlationId;
     }
@@ -71,8 +68,7 @@ public class CorrelationIdFilter extends AbstractLoggingFilter {
 
     private String getCorrelationIdFromTraceparent(HttpServletRequest request) {
         String traceparent = HttpHeaderUtilities.getHeaderValue(request, traceparentHeader);
-        return ofNullable(traceparent).filter(not(this::isBlankOrDefault)).map(this::parseTraceparent).orElse(
-                                                                                                                        null);
+        return ofNullable(traceparent).filter(not(this::isBlankOrDefault)).map(this::parseTraceparent).orElse(null);
     }
 
     private <T> Predicate<T> not(Predicate<T> p) {

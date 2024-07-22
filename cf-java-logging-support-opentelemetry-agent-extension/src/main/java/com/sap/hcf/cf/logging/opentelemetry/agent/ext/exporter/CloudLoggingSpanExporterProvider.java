@@ -28,7 +28,8 @@ public class CloudLoggingSpanExporterProvider implements ConfigurableSpanExporte
         this(config -> new CloudLoggingServicesProvider(config).get(), CloudLoggingCredentials.parser());
     }
 
-    CloudLoggingSpanExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider, CloudLoggingCredentials.Parser credentialParser) {
+    CloudLoggingSpanExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider,
+                                     CloudLoggingCredentials.Parser credentialParser) {
         this.servicesProvider = serviceProvider;
         this.credentialParser = credentialParser;
     }
@@ -50,10 +51,9 @@ public class CloudLoggingSpanExporterProvider implements ConfigurableSpanExporte
 
     @Override
     public SpanExporter createExporter(ConfigProperties config) {
-        List<SpanExporter> exporters = servicesProvider.apply(config)
-                .map(svc -> createExporter(config, svc))
-                .filter(exp -> !(exp instanceof NoopSpanExporter))
-                .collect(Collectors.toList());
+        List<SpanExporter> exporters = servicesProvider.apply(config).map(svc -> createExporter(config, svc))
+                                                       .filter(exp -> !(exp instanceof NoopSpanExporter))
+                                                       .collect(Collectors.toList());
         return SpanExporter.composite(exporters);
     }
 
@@ -66,11 +66,9 @@ public class CloudLoggingSpanExporterProvider implements ConfigurableSpanExporte
         }
 
         OtlpGrpcSpanExporterBuilder builder = OtlpGrpcSpanExporter.builder();
-        builder.setEndpoint(credentials.getEndpoint())
-                .setCompression(getCompression(config))
-                .setClientTls(credentials.getClientKey(), credentials.getClientCert())
-                .setTrustedCertificates(credentials.getServerCert())
-                .setRetryPolicy(RetryPolicy.getDefault());
+        builder.setEndpoint(credentials.getEndpoint()).setCompression(getCompression(config))
+               .setClientTls(credentials.getClientKey(), credentials.getClientCert())
+               .setTrustedCertificates(credentials.getServerCert()).setRetryPolicy(RetryPolicy.getDefault());
 
         Duration timeOut = getTimeOut(config);
         if (timeOut != null) {

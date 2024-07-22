@@ -1,35 +1,30 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.sap.hcp.cf.logging.servlet.dynlog.DynLogEnvironment;
+import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelConfiguration;
+import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelProcessor;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.ConcurrentInitializer;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sap.hcp.cf.logging.servlet.dynlog.DynLogEnvironment;
-import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelConfiguration;
-import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelProcessor;
+import java.util.Optional;
 
 /**
  * <p>
- * The {@link DynamicLogLevelFilter} provides an adapter to an
- * {@link DynamicLogLevelProcessor}. It extracts the JWT from the HTTP header
- * and hands it over to the {@link DynamicLogLevelProcessor} for verification
- * and modification of the MDC.
+ * The {@link DynamicLogLevelFilter} provides an adapter to an {@link DynamicLogLevelProcessor}. It extracts the JWT
+ * from the HTTP header and hands it over to the {@link DynamicLogLevelProcessor} for verification and modification of
+ * the MDC.
  * </p>
- * 
+ *
  * <p>
- * Setup and processing of these tokens can be changed with own implementations
- * of {@link DynamicLogLevelConfiguration} and {@link DynamicLogLevelProcessor}.
- * For integration provide a subclass of {@link DynamicLogLevelFilter} and
- * overwrite {@link DynamicLogLevelFilter#getConfiguration()} and
- * {@link DynamicLogLevelFilter#getProcessor()}. Alternatively you can use the
- * different constructors to provide a custom configuration and processor
+ * Setup and processing of these tokens can be changed with own implementations of {@link DynamicLogLevelConfiguration}
+ * and {@link DynamicLogLevelProcessor}. For integration provide a subclass of {@link DynamicLogLevelFilter} and
+ * overwrite {@link DynamicLogLevelFilter#getConfiguration()} and {@link DynamicLogLevelFilter#getProcessor()}.
+ * Alternatively you can use the different constructors to provide a custom configuration and processor
  * </p>
  */
 public class DynamicLogLevelFilter extends AbstractLoggingFilter {
@@ -40,20 +35,18 @@ public class DynamicLogLevelFilter extends AbstractLoggingFilter {
     private ConcurrentInitializer<DynamicLogLevelProcessor> processor;
 
     /**
-     * Provides dynamic log levels by reading the configuration from environment
-     * variables and using the default {@link DynamicLogLevelProcessor}.
+     * Provides dynamic log levels by reading the configuration from environment variables and using the default
+     * {@link DynamicLogLevelProcessor}.
      */
     public DynamicLogLevelFilter() {
         this(() -> new DynLogEnvironment());
     }
 
     /**
-     * Provides dynamic log levels by using the given configuration and the
-     * default {@link DynamicLogLevelProcessor}.
-     * 
+     * Provides dynamic log levels by using the given configuration and the default {@link DynamicLogLevelProcessor}.
+     *
      * @param configuration
-     *            a {@link ConcurrentInitializer} for the configuration, you can
-     *            use a lambda: {@code () -> config}
+     *         a {@link ConcurrentInitializer} for the configuration, you can use a lambda: {@code () -> config}
      */
     public DynamicLogLevelFilter(ConcurrentInitializer<DynamicLogLevelConfiguration> configuration) {
         this.configuration = configuration;
@@ -61,23 +54,19 @@ public class DynamicLogLevelFilter extends AbstractLoggingFilter {
 
             @Override
             protected DynamicLogLevelProcessor initialize() throws ConcurrentException {
-                return getConfiguration().map(DynamicLogLevelConfiguration::getRsaPublicKey).map(
-                                                                                                 DynamicLogLevelProcessor::new)
-                                         .orElse(null);
+                return getConfiguration().map(DynamicLogLevelConfiguration::getRsaPublicKey)
+                                         .map(DynamicLogLevelProcessor::new).orElse(null);
             }
         };
     }
 
     /**
-     * Provides dynamic log levels by using the given configuration and
-     * processor.
-     * 
+     * Provides dynamic log levels by using the given configuration and processor.
+     *
      * @param configuration
-     *            a {@link ConcurrentInitializer} for the configuration, you can
-     *            use a lambda: {@code () -> config}
+     *         a {@link ConcurrentInitializer} for the configuration, you can use a lambda: {@code () -> config}
      * @param processor
-     *            a {@link ConcurrentInitializer} for the processor, you can use
-     *            a lambda: {@code () -> processor}
+     *         a {@link ConcurrentInitializer} for the processor, you can use a lambda: {@code () -> processor}
      */
     public DynamicLogLevelFilter(ConcurrentInitializer<DynamicLogLevelConfiguration> configuration,
                                  ConcurrentInitializer<DynamicLogLevelProcessor> processor) {
@@ -86,9 +75,9 @@ public class DynamicLogLevelFilter extends AbstractLoggingFilter {
     }
 
     /**
-     * Get the current {@link DynamicLogLevelConfiguration}. Overload this
-     * method for customization when you cannot use the constructors.
-     * 
+     * Get the current {@link DynamicLogLevelConfiguration}. Overload this method for customization when you cannot use
+     * the constructors.
+     *
      * @return an {@link Optional} of the current configuration
      */
     protected Optional<DynamicLogLevelConfiguration> getConfiguration() {
@@ -101,9 +90,9 @@ public class DynamicLogLevelFilter extends AbstractLoggingFilter {
     }
 
     /**
-     * Get the current {@link DynamicLogLevelProcessor}. Overload this method
-     * for customization when you cannot use the constructors.
-     * 
+     * Get the current {@link DynamicLogLevelProcessor}. Overload this method for customization when you cannot use the
+     * constructors.
+     *
      * @return an {@link Optional} of the current processor
      */
     protected Optional<DynamicLogLevelProcessor> getProcessor() {

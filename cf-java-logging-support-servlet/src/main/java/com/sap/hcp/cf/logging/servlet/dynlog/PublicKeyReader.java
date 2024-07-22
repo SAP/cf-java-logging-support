@@ -1,5 +1,9 @@
 package com.sap.hcp.cf.logging.servlet.dynlog;
 
+import com.sap.hcp.cf.logging.common.helper.Environment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -8,11 +12,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.sap.hcp.cf.logging.common.helper.Environment;
-
 public class PublicKeyReader {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PublicKeyReader.class);
@@ -20,8 +19,8 @@ public class PublicKeyReader {
     private PublicKeyReader() {
     }
 
-    public static RSAPublicKey readPublicKey(Environment environment) throws IOException, NoSuchAlgorithmException,
-                                                                      InvalidKeySpecException {
+    public static RSAPublicKey readPublicKey(Environment environment)
+            throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 
         String pemKey = environment.getVariable("DYN_LOG_LEVEL_KEY");
 

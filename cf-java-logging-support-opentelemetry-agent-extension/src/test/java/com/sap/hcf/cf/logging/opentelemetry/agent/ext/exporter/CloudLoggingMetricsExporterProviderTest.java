@@ -4,13 +4,13 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.metrics.ConfigurableMetricExporterProvider;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.pivotal.cfenv.core.CfService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
@@ -20,14 +20,13 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mock.Strictness.LENIENT;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CloudLoggingMetricsExporterProviderTest {
 
     @Mock
@@ -36,13 +35,13 @@ public class CloudLoggingMetricsExporterProviderTest {
     @Mock
     private CloudLoggingCredentials.Parser credentialParser;
 
-    @Mock
+    @Mock(strictness = LENIENT)
     private ConfigProperties config;
 
     @InjectMocks
     private CloudLoggingMetricsExporterProvider exporterProvider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(config.getString(any(), any())).thenAnswer(new Answer<Object>() {
             @Override
@@ -55,18 +54,19 @@ public class CloudLoggingMetricsExporterProviderTest {
 
     @Test
     public void canLoadViaSPI() {
-        ServiceLoader<ConfigurableMetricExporterProvider> loader = ServiceLoader.load(ConfigurableMetricExporterProvider.class);
+        ServiceLoader<ConfigurableMetricExporterProvider> loader =
+                ServiceLoader.load(ConfigurableMetricExporterProvider.class);
         Stream<ConfigurableMetricExporterProvider> providers = StreamSupport.stream(loader.spliterator(), false);
-        assertTrue(CloudLoggingMetricsExporterProvider.class.getName() + " not loaded via SPI",
-                providers.anyMatch(p -> p instanceof CloudLoggingMetricsExporterProvider));
+        assertThat(providers).describedAs(CloudLoggingMetricsExporterProvider.class.getName() + " not loaded via SPI")
+                             .anySatisfy(p -> assertThat(p).isInstanceOf(CloudLoggingMetricsExporterProvider.class));
     }
 
     @Test
     public void registersNoopExporterWithoutBindings() {
         when(servicesProvider.apply(config)).thenReturn(Stream.empty());
         MetricExporter exporter = exporterProvider.createExporter(config);
-        assertThat(exporter, is(notNullValue()));
-        assertThat(exporter.toString(), containsString("Noop"));
+        assertThat(exporter).isNotNull();
+        assertThat(exporter.toString()).containsSubsequence("Noop");
     }
 
     @Test
@@ -77,8 +77,8 @@ public class CloudLoggingMetricsExporterProviderTest {
         when(credentialParser.parse(any())).thenReturn(cloudLoggingCredentials);
         when(cloudLoggingCredentials.validate()).thenReturn(false);
         MetricExporter exporter = exporterProvider.createExporter(config);
-        assertThat(exporter, is(notNullValue()));
-        assertThat(exporter.toString(), containsString("Noop"));
+        assertThat(exporter).isNotNull();
+        assertThat(exporter.toString()).containsSubsequence("Noop");
     }
 
     @Test
@@ -96,8 +96,9 @@ public class CloudLoggingMetricsExporterProviderTest {
         when(validCredentials.getServerCert()).thenReturn(PEMUtil.read("certificate.pem"));
         when(credentialParser.parse(any())).thenReturn(invalidCredentials).thenReturn(validCredentials);
         MetricExporter exporter = exporterProvider.createExporter(config);
-        assertThat(exporter, is(notNullValue()));
-        assertThat(exporter.toString(), both(containsString("OtlpGrpcMetricExporter")).and(containsString("https://otlp-example.sap")));
+        assertThat(exporter).isNotNull();
+        assertThat(exporter.toString()).containsSubsequence("OtlpGrpcMetricExporter")
+                                       .containsSubsequence("https://otlp-example.sap");
     }
 
 }

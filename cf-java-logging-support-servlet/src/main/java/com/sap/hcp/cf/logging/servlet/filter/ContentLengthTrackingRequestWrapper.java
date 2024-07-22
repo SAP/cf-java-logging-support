@@ -1,11 +1,11 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+
 import java.io.BufferedReader;
 import java.io.IOException;
-
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 
 /**
  *
@@ -20,7 +20,7 @@ public class ContentLengthTrackingRequestWrapper extends HttpServletRequestWrapp
      *
      * @param request
      * @throws IllegalArgumentException
-     *             if the request is null
+     *         if the request is null
      */
     public ContentLengthTrackingRequestWrapper(HttpServletRequest request) {
         super(request);
@@ -35,7 +35,7 @@ public class ContentLengthTrackingRequestWrapper extends HttpServletRequestWrapp
     @Override
     public BufferedReader getReader() throws IOException {
         wrappedReader = new WrappedInputReader(super.getReader());
-		return new BufferedReader(wrappedReader);
+        return new BufferedReader(wrappedReader);
     }
 
     @Override

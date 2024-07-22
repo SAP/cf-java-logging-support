@@ -1,10 +1,9 @@
 package com.sap.hcp.cf.logback.encoder;
 
-import java.util.Map;
-
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.sap.hcp.cf.logging.common.Markers;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
+import java.util.Map;
 
 public final class ILoggingEventUtilities {
 

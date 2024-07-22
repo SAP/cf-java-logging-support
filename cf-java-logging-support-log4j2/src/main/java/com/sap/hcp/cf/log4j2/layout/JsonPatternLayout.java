@@ -1,25 +1,5 @@
 package com.sap.hcp.cf.log4j2.layout;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.StringLayout;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.plugins.Plugin;
-import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
-import org.apache.logging.log4j.core.config.plugins.PluginConfiguration;
-import org.apache.logging.log4j.core.config.plugins.PluginElement;
-import org.apache.logging.log4j.core.config.plugins.PluginFactory;
-import org.apache.logging.log4j.core.layout.AbstractStringLayout;
-import org.apache.logging.log4j.core.util.StringBuilderWriter;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.jr.ob.JSON;
 import com.fasterxml.jackson.jr.ob.JSONComposer;
@@ -37,14 +17,28 @@ import com.sap.hcp.cf.logging.common.converter.StacktraceLines;
 import com.sap.hcp.cf.logging.common.serialization.ContextFieldConverter;
 import com.sap.hcp.cf.logging.common.serialization.ContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.serialization.JsonSerializationException;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.StringLayout;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.plugins.*;
+import org.apache.logging.log4j.core.layout.AbstractStringLayout;
+import org.apache.logging.log4j.core.util.StringBuilderWriter;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * A {@link StringLayout} implementation that encodes an {@link LogEvent} as a
- * JSON object.
+ * A {@link StringLayout} implementation that encodes an {@link LogEvent} as a JSON object.
  * <p>
- * Under the hood, it's using Jackson to serialize the logging event into JSON.
- * The encoder can be confiugred in the log4j.xml:<blockquote>
- * 
+ * Under the hood, it's using Jackson to serialize the logging event into JSON. The encoder can be confiugred in the
+ * log4j.xml:<blockquote>
+ *
  * <pre>
  * &lt;Appenders&gt;
  *   &lt;Console name="STDOUT-JSON" target="SYSTEM_OUT" follow="true"&gt;
@@ -52,7 +46,7 @@ import com.sap.hcp.cf.logging.common.serialization.JsonSerializationException;
  *   &lt;/Console&gt;
  * &lt;/Appenders&gt;
  * </pre>
- * 
+ *
  * </blockquote> The layout can be customized by several xml elements. See the
  * annotations on the factory method {@link #createLayout}.
  */
@@ -61,31 +55,14 @@ import com.sap.hcp.cf.logging.common.serialization.JsonSerializationException;
 public final class JsonPatternLayout extends AbstractStringLayout {
 
     private static final String NEWLINE = "\n";
-
+    private final ContextFieldConverter contextFieldConverter;
     private List<Log4jContextFieldSupplier> log4jContextFieldSuppliers = new ArrayList<>();
     private List<ContextFieldSupplier> contextFieldSuppliers = new ArrayList<>();
-
-    private final ContextFieldConverter contextFieldConverter;
-
     private int maxStacktraceSize;
 
     private boolean sendDefaultValues;
 
     private JSON json;
-
-    @PluginFactory
-    public static JsonPatternLayout createLayout(@PluginAttribute(value = "charset") final Charset charset,
-                                                 @PluginAttribute(value = "sendDefaultValues") final boolean sendDefaultValues,
-                                                 @PluginAttribute(value = "maxStacktraceSize") final int maxStacktraceSize,
-                                                 @PluginAttribute(value = "jsonBuilder") final String jsonBuilderClass,
-                                                 @PluginElement(value = "customField") CustomFieldElement[] customFieldMdcKeyNames,
-                                                 @PluginElement(value = "log4jContextFieldSupplier") Log4jContextFieldSupplierElement[] log4jContextFieldSupplierElements,
-                                                 @PluginElement(value = "contextFieldSupplier") ContextFieldSupplierElement[] contextFieldSupplierElements,
-                                                 @PluginConfiguration final Configuration config) {
-        return new JsonPatternLayout(charset, sendDefaultValues, maxStacktraceSize, jsonBuilderClass,
-                                     customFieldMdcKeyNames, log4jContextFieldSupplierElements,
-                                     contextFieldSupplierElements);
-    }
 
     protected JsonPatternLayout(Charset charset, boolean sendDefaultValues, int maxStacktraceSize,
                                 String jsonBuilderClass, CustomFieldElement[] customFieldMdcKeys,
@@ -102,8 +79,8 @@ public final class JsonPatternLayout extends AbstractStringLayout {
         if (log4jContextFieldSupplierElements != null) {
             for (Log4jContextFieldSupplierElement current: log4jContextFieldSupplierElements) {
                 try {
-                    Log4jContextFieldSupplier instance = createInstance(current.getSupplierClass(),
-                                                                        Log4jContextFieldSupplier.class);
+                    Log4jContextFieldSupplier instance =
+                            createInstance(current.getSupplierClass(), Log4jContextFieldSupplier.class);
                     log4jContextFieldSuppliers.add(instance);
                 } catch (ReflectiveOperationException cause) {
                     LOGGER.warn("Cannot register Log4jContextFieldSupplier.", cause);
@@ -113,14 +90,33 @@ public final class JsonPatternLayout extends AbstractStringLayout {
         if (contextFieldSupplierElements != null) {
             for (ContextFieldSupplierElement current: contextFieldSupplierElements) {
                 try {
-                    ContextFieldSupplier instance = createInstance(current.getSupplierClass(),
-                                                                   ContextFieldSupplier.class);
+                    ContextFieldSupplier instance =
+                            createInstance(current.getSupplierClass(), ContextFieldSupplier.class);
                     contextFieldSuppliers.add(instance);
                 } catch (ReflectiveOperationException cause) {
                     LOGGER.warn("Cannot register ContextFieldSupplier.", cause);
                 }
             }
         }
+    }
+
+    @PluginFactory
+    public static JsonPatternLayout createLayout(@PluginAttribute(value = "charset") final Charset charset,
+                                                 @PluginAttribute(
+                                                         value = "sendDefaultValues") final boolean sendDefaultValues,
+                                                 @PluginAttribute(
+                                                         value = "maxStacktraceSize") final int maxStacktraceSize,
+                                                 @PluginAttribute(value = "jsonBuilder") final String jsonBuilderClass,
+                                                 @PluginElement(
+                                                         value = "customField") CustomFieldElement[] customFieldMdcKeyNames,
+                                                 @PluginElement(
+                                                         value = "log4jContextFieldSupplier") Log4jContextFieldSupplierElement[] log4jContextFieldSupplierElements,
+                                                 @PluginElement(
+                                                         value = "contextFieldSupplier") ContextFieldSupplierElement[] contextFieldSupplierElements,
+                                                 @PluginConfiguration final Configuration config) {
+        return new JsonPatternLayout(charset, sendDefaultValues, maxStacktraceSize, jsonBuilderClass,
+                                     customFieldMdcKeyNames, log4jContextFieldSupplierElements,
+                                     contextFieldSupplierElements);
     }
 
     private static JSON createJson(String jsonBuilderClass) {
@@ -173,8 +169,8 @@ public final class JsonPatternLayout extends AbstractStringLayout {
         }
     }
 
-    private <P extends ComposerBase> void addMarkers(ObjectComposer<P> oc, LogEvent event) throws IOException,
-                                                                                           JsonProcessingException {
+    private <P extends ComposerBase> void addMarkers(ObjectComposer<P> oc, LogEvent event)
+            throws IOException, JsonProcessingException {
         if (sendDefaultValues || event.getMarker() != null) {
             ArrayComposer<ObjectComposer<P>> ac = oc.startArrayField(Fields.CATEGORIES);
             addMarker(ac, event.getMarker());
@@ -183,7 +179,7 @@ public final class JsonPatternLayout extends AbstractStringLayout {
     }
 
     private <P extends ComposerBase> void addMarker(ArrayComposer<P> ac, org.apache.logging.log4j.Marker marker)
-                                                                                                                 throws IOException {
+            throws IOException {
         if (marker == null) {
             return;
         }
@@ -202,8 +198,8 @@ public final class JsonPatternLayout extends AbstractStringLayout {
         return contextFields;
     }
 
-    private <P extends ComposerBase> void addStacktrace(ObjectComposer<P> oc, LogEvent event) throws IOException,
-                                                                                              JsonProcessingException {
+    private <P extends ComposerBase> void addStacktrace(ObjectComposer<P> oc, LogEvent event)
+            throws IOException, JsonProcessingException {
         if (event.getThrown() != null) {
             LineWriter lw = new LineWriter();
             event.getThrown().printStackTrace(new PrintWriter(lw));

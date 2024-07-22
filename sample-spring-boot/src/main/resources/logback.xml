@@ -1,29 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE xml>
 <configuration debug="false" scan="false">
-	<turboFilter
-		class="com.sap.hcp.cf.logback.filter.DynamicLevelPrefixLoggerTurboFilter" />
-	<!-- write logs to console -->
-	<appender name="STDOUT-JSON"
-		class="ch.qos.logback.core.ConsoleAppender">
-		<!-- encode and enrich full message with the required fields/tags -->
-		<encoder class="com.sap.hcp.cf.logback.encoder.JsonEncoder">
-			<contextFieldSupplier>com.sap.hcp.cf.logging.sample.springboot.statistics.StatisticsContextFieldSupplier</contextFieldSupplier>
-			<!-- Uncomment to send message count as nested custom field: -->
-			<!-- <customFieldMdcKeyName>message_count</customFieldMdcKeyName> -->
-		</encoder>
-	</appender>
-	<appender name="STDOUT"
-		class="ch.qos.logback.core.ConsoleAppender">
-		<encoder>
-			<pattern>%d %-5level [%thread] %logger{0} [%mdc]>: %msg
-				%replace(%xEx){'\n', ' | '}%nopex%n</pattern>
-		</encoder>
-	</appender>
-	<!-- default log level for all loggers is INFO by default -->
-	<root level="${LOG_ROOT_LEVEL:-INFO}">
-		<appender-ref ref="STDOUT-JSON" />
-	</root>
+    <turboFilter
+            class="com.sap.hcp.cf.logback.filter.DynamicLevelPrefixLoggerTurboFilter"/>
+    <!-- write logs to console -->
+    <appender name="STDOUT-JSON"
+              class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encode and enrich full message with the required fields/tags -->
+        <encoder class="com.sap.hcp.cf.logback.encoder.JsonEncoder">
+            <contextFieldSupplier>com.sap.hcp.cf.logging.sample.springboot.statistics.StatisticsContextFieldSupplier
+            </contextFieldSupplier>
+            <!-- Uncomment to send message count as nested custom field: -->
+            <!-- <customFieldMdcKeyName>message_count</customFieldMdcKeyName> -->
+        </encoder>
+    </appender>
+    <appender name="STDOUT"
+              class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d %-5level [%thread] %logger{0} [%mdc]>: %msg
+                %replace(%xEx){'\n', ' | '}%nopex%n
+            </pattern>
+        </encoder>
+    </appender>
+    <!-- default log level for all loggers is INFO by default -->
+    <root level="${LOG_ROOT_LEVEL:-INFO}">
+        <appender-ref ref="STDOUT-JSON"/>
+    </root>
 
-	<logger name="com.sap.hcp.cf" level="${LOG_HCP_CF_LEVEL:-INFO}" />
+    <logger name="com.sap.hcp.cf" level="${LOG_HCP_CF_LEVEL:-INFO}"/>
 </configuration>

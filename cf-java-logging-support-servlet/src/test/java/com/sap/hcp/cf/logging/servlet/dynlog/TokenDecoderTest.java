@@ -1,6 +1,8 @@
 package com.sap.hcp.cf.logging.servlet.dynlog;
 
-import static org.junit.Assert.assertEquals;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -9,10 +11,8 @@ import java.security.NoSuchProviderException;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import com.auth0.jwt.interfaces.DecodedJWT;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TokenDecoderTest {
 
@@ -20,26 +20,28 @@ public class TokenDecoderTest {
     private KeyPair validKeyPair;
     private KeyPair invalidKeyPair;
 
-    @Before
+    @BeforeEach
     public void setup() throws NoSuchAlgorithmException, NoSuchProviderException, DynamicLogLevelException {
         validKeyPair = KeyPairGenerator.getInstance("RSA").generateKeyPair();
         invalidKeyPair = KeyPairGenerator.getInstance("RSA").generateKeyPair();
         Date issuedAt = new Date();
         Date expiresAt = new Date(new Date().getTime() + 10000);
-		token = TokenCreator.createToken(validKeyPair, "issuer", issuedAt, expiresAt, "TRACE", "myPrefix");
+        token = TokenCreator.createToken(validKeyPair, "issuer", issuedAt, expiresAt, "TRACE", "myPrefix");
     }
 
     @Test
     public void testTokenContent() throws Exception {
         TokenDecoder tokenDecoder = new TokenDecoder((RSAPublicKey) validKeyPair.getPublic());
         DecodedJWT jwt = tokenDecoder.validateAndDecodeToken(token);
-        assertEquals(jwt.getClaim("level").asString(), "TRACE");
-		assertEquals(jwt.getClaim("packages").asString(), "myPrefix");
+        assertThat(jwt.getClaim("level").asString()).isEqualTo("TRACE");
+        assertThat(jwt.getClaim("packages").asString()).isEqualTo("myPrefix");
     }
 
-    @Test(expected = DynamicLogLevelException.class)
+    @Test
     public void testInvalidPublicKey() throws Exception {
-        TokenDecoder tokenDecoder = new TokenDecoder((RSAPublicKey) invalidKeyPair.getPublic());
-        tokenDecoder.validateAndDecodeToken(token);
+        assertThrows(DynamicLogLevelException.class, () -> {
+            TokenDecoder tokenDecoder = new TokenDecoder((RSAPublicKey) invalidKeyPair.getPublic());
+            tokenDecoder.validateAndDecodeToken(token);
+        });
     }
 }

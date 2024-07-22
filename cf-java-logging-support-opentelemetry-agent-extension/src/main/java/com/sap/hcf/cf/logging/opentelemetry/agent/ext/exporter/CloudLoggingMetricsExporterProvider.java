@@ -37,7 +37,8 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
         this(config -> new CloudLoggingServicesProvider(config).get(), CloudLoggingCredentials.parser());
     }
 
-    CloudLoggingMetricsExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider, CloudLoggingCredentials.Parser credentialParser) {
+    CloudLoggingMetricsExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider,
+                                        CloudLoggingCredentials.Parser credentialParser) {
         this.servicesProvider = serviceProvider;
         this.credentialParser = credentialParser;
     }
@@ -59,14 +60,14 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
         }
         AggregationTemporalitySelector temporalitySelector;
         switch (temporalityStr.toLowerCase(Locale.ROOT)) {
-            case "cumulative":
-                return AggregationTemporalitySelector.alwaysCumulative();
-            case "delta":
-                return AggregationTemporalitySelector.deltaPreferred();
-            case "lowmemory":
-                return AggregationTemporalitySelector.lowMemory();
-            default:
-                throw new ConfigurationException("Unrecognized aggregation temporality: " + temporalityStr);
+        case "cumulative":
+            return AggregationTemporalitySelector.alwaysCumulative();
+        case "delta":
+            return AggregationTemporalitySelector.deltaPreferred();
+        case "lowmemory":
+            return AggregationTemporalitySelector.lowMemory();
+        default:
+            throw new ConfigurationException("Unrecognized aggregation temporality: " + temporalityStr);
         }
     }
 
@@ -74,16 +75,17 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
         String defaultHistogramAggregation =
                 config.getString("otel.exporter.cloud-logging.metrics.default.histogram.aggregation");
         if (defaultHistogramAggregation == null) {
-            return DefaultAggregationSelector.getDefault().with(InstrumentType.HISTOGRAM, Aggregation.defaultAggregation());
+            return DefaultAggregationSelector.getDefault()
+                                             .with(InstrumentType.HISTOGRAM, Aggregation.defaultAggregation());
         }
         if (AggregationUtil.aggregationName(Aggregation.base2ExponentialBucketHistogram())
-                .equalsIgnoreCase(defaultHistogramAggregation)) {
-            return
-                    DefaultAggregationSelector.getDefault()
-                            .with(InstrumentType.HISTOGRAM, Aggregation.base2ExponentialBucketHistogram());
+                           .equalsIgnoreCase(defaultHistogramAggregation)) {
+            return DefaultAggregationSelector.getDefault().with(InstrumentType.HISTOGRAM,
+                                                                Aggregation.base2ExponentialBucketHistogram());
         } else if (AggregationUtil.aggregationName(explicitBucketHistogram())
-                .equalsIgnoreCase(defaultHistogramAggregation)) {
-            return DefaultAggregationSelector.getDefault().with(InstrumentType.HISTOGRAM, Aggregation.explicitBucketHistogram());
+                                  .equalsIgnoreCase(defaultHistogramAggregation)) {
+            return DefaultAggregationSelector.getDefault()
+                                             .with(InstrumentType.HISTOGRAM, Aggregation.explicitBucketHistogram());
         } else {
             throw new ConfigurationException(
                     "Unrecognized default histogram aggregation: " + defaultHistogramAggregation);
@@ -97,15 +99,16 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
 
     @Override
     public MetricExporter createExporter(ConfigProperties config) {
-        List<MetricExporter> exporters = servicesProvider.apply(config)
-                .map(svc -> createExporter(config, svc))
-                .filter(exp -> !(exp instanceof NoopMetricExporter))
-                .collect(Collectors.toList());
-        return MultiMetricExporter.composite(exporters, getAggregationTemporalitySelector(config), getDefaultAggregationSelector(config));
+        List<MetricExporter> exporters = servicesProvider.apply(config).map(svc -> createExporter(config, svc))
+                                                         .filter(exp -> !(exp instanceof NoopMetricExporter))
+                                                         .collect(Collectors.toList());
+        return MultiMetricExporter.composite(exporters, getAggregationTemporalitySelector(config),
+                                             getDefaultAggregationSelector(config));
     }
 
     private MetricExporter createExporter(ConfigProperties config, CfService service) {
-        LOG.info("Creating metrics exporter for service binding " + service.getName() + " (" + service.getLabel() + ")");
+        LOG.info(
+                "Creating metrics exporter for service binding " + service.getName() + " (" + service.getLabel() + ")");
         CfCredentials cfCredentials = service.getCredentials();
         CloudLoggingCredentials credentials = credentialParser.parse(cfCredentials);
         if (!credentials.validate()) {
@@ -113,13 +116,11 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
         }
 
         OtlpGrpcMetricExporterBuilder builder = OtlpGrpcMetricExporter.builder();
-        builder.setEndpoint(credentials.getEndpoint())
-                .setCompression(getCompression(config))
-                .setClientTls(credentials.getClientKey(), credentials.getClientCert())
-                .setTrustedCertificates(credentials.getServerCert())
-                .setRetryPolicy(RetryPolicy.getDefault())
-                .setAggregationTemporalitySelector(getAggregationTemporalitySelector(config))
-                .setDefaultAggregationSelector(getDefaultAggregationSelector(config));
+        builder.setEndpoint(credentials.getEndpoint()).setCompression(getCompression(config))
+               .setClientTls(credentials.getClientKey(), credentials.getClientCert())
+               .setTrustedCertificates(credentials.getServerCert()).setRetryPolicy(RetryPolicy.getDefault())
+               .setAggregationTemporalitySelector(getAggregationTemporalitySelector(config))
+               .setDefaultAggregationSelector(getDefaultAggregationSelector(config));
 
         Duration timeOut = getTimeOut(config);
         if (timeOut != null) {

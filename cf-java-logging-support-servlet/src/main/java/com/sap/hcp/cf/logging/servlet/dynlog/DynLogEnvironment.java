@@ -1,14 +1,13 @@
 package com.sap.hcp.cf.logging.servlet.dynlog;
 
+import com.sap.hcp.cf.logging.common.helper.Environment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.sap.hcp.cf.logging.common.helper.Environment;
 
 public class DynLogEnvironment implements DynamicLogLevelConfiguration {
 
@@ -27,8 +26,9 @@ public class DynLogEnvironment implements DynamicLogLevelConfiguration {
             LOGGER.info("The header key used to retrieve the dynamic log level token has been set to {}", header);
         } else {
             dynLogHeaderKey = "SAP-LOG-LEVEL";
-            LOGGER.info("The header key used to retrieve the dynamic log level token has been set to the default value: {}",
-                        dynLogHeaderKey);
+            LOGGER.info(
+                    "The header key used to retrieve the dynamic log level token has been set to the default value: {}",
+                    dynLogHeaderKey);
         }
 
         RSAPublicKey tempKey = null;

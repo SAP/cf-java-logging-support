@@ -1,8 +1,8 @@
 package com.sap.hcp.cf.logging.servlet.dynlog;
 
-import java.security.interfaces.RSAPublicKey;
+import jakarta.servlet.http.HttpServletRequest;
 
-import javax.servlet.http.HttpServletRequest;
+import java.security.interfaces.RSAPublicKey;
 
 @FunctionalInterface
 public interface DynamicLogLevelConfiguration {
@@ -11,7 +11,9 @@ public interface DynamicLogLevelConfiguration {
 
     default String getDynLogHeaderKey() {
         return "SAP-LOG-LEVEL";
-    };
+    }
+
+    ;
 
     default String getDynLogHeaderValue(HttpServletRequest httpRequest) {
         return httpRequest.getHeader(getDynLogHeaderKey());
