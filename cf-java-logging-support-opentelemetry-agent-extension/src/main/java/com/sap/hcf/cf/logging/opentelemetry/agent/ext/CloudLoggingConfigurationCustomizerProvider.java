@@ -1,6 +1,7 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext;
 
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudLoggingBindingPropertiesSupplier;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.processor.TenantIdLogRecordProcessor;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.pivotal.cfenv.core.CfEnv;
@@ -16,10 +17,9 @@ public class CloudLoggingConfigurationCustomizerProvider implements AutoConfigur
     @Override
     public void customize(AutoConfigurationCustomizer autoConfiguration) {
         LOG.info("Initializing SAP BTP Observability extension " + VERSION);
-        autoConfiguration
-                .addPropertiesSupplier(new CloudLoggingBindingPropertiesSupplier());
-
-        // ConfigurableLogRecordExporterProvider
+        autoConfiguration.addPropertiesSupplier(new CloudLoggingBindingPropertiesSupplier());
+        autoConfiguration.addLoggerProviderCustomizer(
+                (builder, config) -> builder.addLogRecordProcessor(new TenantIdLogRecordProcessor()));
     }
 
 }
