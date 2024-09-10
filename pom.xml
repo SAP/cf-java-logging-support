@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.sap.hcp.cf.logging</groupId>
@@ -8,7 +8,9 @@
     <packaging>pom</packaging>
 
     <name>Cloud Foundry Java logging support components</name>
-    <description>Supports the creation of structured log messages and the collection of request metrics for Java applications running on Cloud Foundry</description>
+    <description>Supports the creation of structured log messages and the collection of request metrics for Java
+        applications running on Cloud Foundry
+    </description>
     <developers>
         <developer>
             <id>WolfgangTheilmann</id>
@@ -24,76 +26,76 @@
             <organization>SAP SE</organization>
             <organizationUrl>https://github.com/SAP</organizationUrl>
         </developer>
-       <developer>
-           <id>deyanzhelyazkov</id>
-           <name>Deyan Zhelyazkov</name>
-           <email>deyan.zhelyazkov@sap.com</email>
-           <organization>SAP SE</organization>
-           <organizationUrl>https://github.com/SAP</organizationUrl>
-       </developer>
-       <developer>
-           <id>angelts</id>
-           <name>Angel Tsanev</name>
-           <email>angel.tsanev@sap.com</email>
-           <organization>SAP SE</organization>
-           <organizationUrl>https://github.com/SAP</organizationUrl>
-       </developer>
-       <developer>
-           <id>martein</id>
-           <name>Martin Nikolov</name>
-           <email>martin.nikolov@sap.com</email>
-           <organization>SAP SE</organization>
-           <organizationUrl>https://github.com/SAP</organizationUrl>
-       </developer>
-       <developer>
-           <id>HariG</id>
-           <name>Hariharan Gandhi</name>
-           <email>hariharan.gandhi@sap.com</email>
-           <organization>SAP SE</organization>
-           <organizationUrl>https://github.com/SAP</organizationUrl>
-       </developer>
-       <developer>
-           <id>haraldfuchs</id>
-           <name>Harald Fuchs</name>
-           <email>harald.fuchs@sap.com</email>
-           <organization>SAP SE</organization>
-           <organizationUrl>https://github.com/SAP</organizationUrl>
-       </developer>
-       <developer>
-           <id>nicklas-dohrn</id>
-           <name>Nicklas Dohrn</name>
-           <email>nicklas.dohrn@sap.com</email>
-           <organization>SAP SE</organization>
-           <organizationUrl>https://github.com/SAP</organizationUrl>
-       </developer>
-       <developer>
-           <id>bgoerzig</id>
-           <name>Benny Goerzig</name>
-           <email>benny.goerzig@sap.com</email>
-           <organization>SAP SE</organization>
-           <organizationUrl>https://github.com/SAP</organizationUrl>
-       </developer>
-       <developer>
-           <id>juergen-walter</id>
-           <name>Juergen Walter</name>
-           <email>juergen.walter@sap.com</email>
-           <organization>SAP SE</organization>
-           <organizationUrl>https://github.com/SAP</organizationUrl>
-       </developer>
-       <developer>
-           <id>D070188</id>
-           <name>Xiaozhong Zhang</name>
-           <email>xiaozhong.zhang@sap.com</email>
-           <organization>SAP SE</organization>
-           <organizationUrl>https://github.com/SAP</organizationUrl>
-       </developer>
-       <developer>
-           <id>p-singh</id>
-           <name>Prabhjot Singh</name>
-           <email>prabhjot.singh02@sap.com</email>
-           <organization>SAP SE</organization>
-           <organizationUrl>https://github.com/SAP</organizationUrl>
-       </developer>
+        <developer>
+            <id>deyanzhelyazkov</id>
+            <name>Deyan Zhelyazkov</name>
+            <email>deyan.zhelyazkov@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
+        <developer>
+            <id>angelts</id>
+            <name>Angel Tsanev</name>
+            <email>angel.tsanev@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
+        <developer>
+            <id>martein</id>
+            <name>Martin Nikolov</name>
+            <email>martin.nikolov@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
+        <developer>
+            <id>HariG</id>
+            <name>Hariharan Gandhi</name>
+            <email>hariharan.gandhi@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
+        <developer>
+            <id>haraldfuchs</id>
+            <name>Harald Fuchs</name>
+            <email>harald.fuchs@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
+        <developer>
+            <id>nicklas-dohrn</id>
+            <name>Nicklas Dohrn</name>
+            <email>nicklas.dohrn@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
+        <developer>
+            <id>bgoerzig</id>
+            <name>Benny Goerzig</name>
+            <email>benny.goerzig@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
+        <developer>
+            <id>juergen-walter</id>
+            <name>Juergen Walter</name>
+            <email>juergen.walter@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
+        <developer>
+            <id>D070188</id>
+            <name>Xiaozhong Zhang</name>
+            <email>xiaozhong.zhang@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
+        <developer>
+            <id>p-singh</id>
+            <name>Prabhjot Singh</name>
+            <email>prabhjot.singh02@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
     </developers>
 
     <licenses>
@@ -142,7 +144,7 @@
         <javadoc.plugin.version>3.5.0</javadoc.plugin.version>
         <gpg.plugin.version>1.6</gpg.plugin.version>
         <maven.compiler.release>8</maven.compiler.release>
-        <java-jwt.version>3.19.4</java-jwt.version>
+        <java-jwt.version>4.4.0</java-jwt.version>
         <jackson-databind.version>2.13.4.1</jackson-databind.version>
         <httpclient.version>4.5.14</httpclient.version>
     </properties>
@@ -186,18 +188,18 @@
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
-		<dependency>
-			<groupId>org.openjdk.jmh</groupId>
-			<artifactId>jmh-core</artifactId>
-			<version>${jmh.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.openjdk.jmh</groupId>
-			<artifactId>jmh-generator-annprocess</artifactId>
-			<version>${jmh.version}</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>${jmh.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>${jmh.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
