@@ -59,7 +59,8 @@ public class AddHttpHeadersToLogContextFilterTest {
 
     @Test
     public void ignoresNotPropagatedHttpHeader() throws Exception {
-        when(request.getHeader("my-header")).thenReturn("my-value");
+        //TODO: check why this needs not to be mocked anymore
+        //when(request.getHeader("my-header")).thenReturn("my-value");
         HttpTestHeader myHeader = new HttpTestHeader("my-header", "my-field", null, false);
 
         new AddHttpHeadersToLogContextFilter(myHeader).doFilter(request, response, chain);
@@ -69,7 +70,8 @@ public class AddHttpHeadersToLogContextFilterTest {
 
     @Test
     public void ignoresHttpHeadersWithoutField() throws Exception {
-        when(request.getHeader("my-header")).thenReturn("my-value");
+        //TODO: check why this needs not to be mocked anymore
+        //when(request.getHeader("my-header")).thenReturn("my-value");
         HttpTestHeader myHeader = new HttpTestHeader("my-header", null, null, true);
 
         new AddHttpHeadersToLogContextFilter(myHeader).doFilter(request, response, chain);

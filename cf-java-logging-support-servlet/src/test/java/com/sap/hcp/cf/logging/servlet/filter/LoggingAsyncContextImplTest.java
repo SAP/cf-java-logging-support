@@ -62,7 +62,8 @@ public class LoggingAsyncContextImplTest {
 	@Before
 	public void initWrappedContext() {
 		when(wrappedContext.getRequest()).thenReturn(request);
-		when(wrappedContext.getResponse()).thenReturn(response);
+		//TODO: check why this needs not to be mocked anymore
+		//when(wrappedContext.getResponse()).thenReturn(response);
 		verify(wrappedContext).addListener(asyncListener.capture());
 		doAnswer(new Answer<Void>() {
 

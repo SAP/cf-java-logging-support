@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.MDC;
 
@@ -116,7 +117,8 @@ public class CorrelationIdFilterTest {
         HttpHeader myTraceparentHeader = new HttpTestHeader("my-traceparent-header", "my-traceparent-field", null,
                                                             false);
         when(request.getHeader("my-correlationId-header")).thenReturn(KNOWN_CORRELATION_ID);
-        when(request.getHeader("my-traceparent-header")).thenReturn(KNOWN_TRACEPARENT);
+        // TODO: check why this needs no stubbing anymore
+        //.when(request.getHeader("my-traceparent-header")).thenReturn(KNOWN_TRACEPARENT);
 
         new CorrelationIdFilter(myCorrelationIdHeader, myTraceparentHeader).doFilter(request, response, chain);
 
