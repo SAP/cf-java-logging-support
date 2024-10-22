@@ -4,9 +4,9 @@ import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -21,7 +21,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.MDC;
 
 import com.sap.hcp.cf.logging.common.Fields;
@@ -92,7 +92,7 @@ public class RequestLoggerTest {
 		mockGetHeader(HttpHeaders.CONTENT_LENGTH, "1234");
 		createLoggerWithoutResponse(httpResponse).logRequest();
 		verify(requestRecord).addValue(eq(Fields.RESPONSE_SIZE_B), valueCaptor.capture());
-		verifyZeroInteractions(responseWrapper);
+		verifyNoMoreInteractions(responseWrapper);
 		assertThat(valueCaptor.getValue().asLong(), is(1234L));
 	}
 

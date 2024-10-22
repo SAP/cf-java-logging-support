@@ -1,7 +1,7 @@
 package com.sap.cloud.cf.monitoring.spring;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyListOf;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sap.cloud.cf.monitoring.client.MonitoringClient;
 import com.sap.cloud.cf.monitoring.client.configuration.CustomMetricsConfiguration;
@@ -66,13 +66,13 @@ public class CustomMetricWriterTest {
 
     @Test
     public void testPublish_withException() throws Exception {
-        doThrow(MonitoringClientException.class).when(client).send(anyListOf(Metric.class));
+        doThrow(MonitoringClientException.class).when(client).send(anyList());
         CustomMetricWriter writer = createWriter();
         writer.timer("timer");
 
         writer.publish();
 
-        verify(client, times(2)).send(anyListOf(Metric.class));
+        verify(client, times(2)).send(anyList());
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

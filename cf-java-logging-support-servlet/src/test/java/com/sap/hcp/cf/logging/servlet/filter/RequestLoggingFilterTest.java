@@ -5,8 +5,8 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.text.IsEmptyString.isEmptyOrNullString;
-import static org.mockito.Matchers.anyMapOf;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -79,7 +79,7 @@ public class RequestLoggingFilterTest {
                 contextMap.putAll((Map<? extends String, ? extends String>) arguments[1]);
                 return null;
             }
-        }).when(mockReq).setAttribute(eq(MDC.class.getName()), anyMapOf(String.class, String.class));
+        }).when(mockReq).setAttribute(eq(MDC.class.getName()), anyMap());//String.class, String.class
 
         when(mockReq.getAttribute(MDC.class.getName())).thenReturn(contextMap);
     }

@@ -18,12 +18,15 @@
         <slf4j.version>1.7.12</slf4j.version>
         <jersey.version>2.22.2</jersey.version>
         <javax.ws.version>2.0.1</javax.ws.version>
+        <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
+        <servlet-api.version>3.0.1</servlet-api.version>
+        <tomcat8-maven-plugin.version>3.0-r1655215</tomcat8-maven-plugin.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.0.1</version>
+            <version>${servlet-api.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -95,19 +98,19 @@
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>
                 <artifactId>tomcat8-maven-plugin</artifactId>
-                <version>3.0-r1655215</version>
+                <version>${tomcat8-maven-plugin.version}</version>
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.0.2</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.6</version>
+                <version>${maven-war-plugin.version}</version>
                 <configuration>
                     <attachClasses>true</attachClasses>
                 </configuration>

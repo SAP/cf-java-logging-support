@@ -15,7 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sap.hcp.cf.log4j2.converter.api.Log4jContextFieldSupplier;
 import com.sap.hcp.cf.log4j2.layout.supppliers.EventContextFieldSupplier;

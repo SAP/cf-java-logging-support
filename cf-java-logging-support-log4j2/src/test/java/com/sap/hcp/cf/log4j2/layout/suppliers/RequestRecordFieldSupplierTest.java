@@ -19,7 +19,7 @@ import org.apache.logging.log4j.message.ParameterizedMessage;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sap.hcp.cf.log4j2.converter.api.Log4jContextFieldSupplier;
 import com.sap.hcp.cf.log4j2.layout.supppliers.RequestRecordFieldSupplier;

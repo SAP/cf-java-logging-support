@@ -2,7 +2,7 @@ package com.sap.cloud.cf.monitoring.java;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyListOf;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -17,7 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
@@ -116,7 +116,7 @@ public class CustomMetricsReporterTest {
     public void testReportEmptyMetrics() {
         reporter.report();
 
-        verify(client, never()).send(anyListOf(Metric.class));
+        verify(client, never()).send(anyList());
     }
 
     @Test
@@ -139,27 +139,27 @@ public class CustomMetricsReporterTest {
         reporter = new CustomMetricsReporter(registry, client, customMetricsConfig);
         reporter.report();
 
-        verify(client, never()).send(anyListOf(Metric.class));
+        verify(client, never()).send(anyList());
     }
 
     @Test
     public void testReportNonEmptyMetricsWithMonitoringClientEx() {
-        doThrow(MonitoringClientException.class).when(client).send(anyListOf(Metric.class));
+        doThrow(MonitoringClientException.class).when(client).send(anyList());
         registry.counter(METRIC_NAME);
 
         reporter.report();
 
-        verify(client, times(CustomMetricsReporter.SEND_METRICS_ATTEMPTS)).send(anyListOf(Metric.class));
+        verify(client, times(CustomMetricsReporter.SEND_METRICS_ATTEMPTS)).send(anyList());
     }
 
     @Test
     public void testReportNonEmptyMetricsWithException() {
-        doThrow(Exception.class).when(client).send(anyListOf(Metric.class));
+        doThrow(Exception.class).when(client).send(anyList());
         registry.counter(METRIC_NAME);
 
         reporter.report();
 
-        verify(client, times(1)).send(anyListOf(Metric.class));
+        verify(client, times(1)).send(anyList());
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

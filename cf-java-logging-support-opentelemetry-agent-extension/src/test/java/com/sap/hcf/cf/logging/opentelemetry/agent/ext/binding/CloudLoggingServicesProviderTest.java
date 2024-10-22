@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.mockito.Matchers.anyListOf;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,7 +32,7 @@ public class CloudLoggingServicesProviderTest {
 
     @Before
     public void setUp() throws Exception {
-        when(adapter.stream(anyListOf(String.class), anyListOf(String.class))).thenReturn(Stream.of(mockService));
+        when(adapter.stream(anyList(), anyList())).thenReturn(Stream.of(mockService));
     }
 
     @Test

@@ -1,14 +1,14 @@
 package com.sap.hcp.cf.logback.filter;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.MDC;
 import org.slf4j.Marker;
 
@@ -42,7 +42,7 @@ public class CustomLoggingTurboFilterTest {
 
     @After
     public void teardown() {
-        verifyZeroInteractions(marker, param, t);
+        verifyNoMoreInteractions(marker, param, t);
         MDC.clear();
     }
 

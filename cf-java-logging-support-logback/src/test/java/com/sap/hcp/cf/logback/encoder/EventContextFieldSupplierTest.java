@@ -13,7 +13,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sap.hcp.cf.logback.converter.api.LogbackContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.customfields.CustomField;
