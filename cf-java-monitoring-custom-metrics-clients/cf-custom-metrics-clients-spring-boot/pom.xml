@@ -12,7 +12,7 @@
     <name>cf-java-monitoring-custom-metrics-clients-spring-boot</name>
 
     <properties>
-        <spring.boot.version>2.0.6.RELEASE</spring.boot.version><!-- 2.0.6.RELEASE - should be 2.7.18 micrometer change.. -->
+        <spring.boot.version>2.0.6.RELEASE</spring.boot.version><!-- 2.0.6.RELEASE - should be 2.7.18 micrometer change.. please rework -->
     </properties>
 
     <dependencies>

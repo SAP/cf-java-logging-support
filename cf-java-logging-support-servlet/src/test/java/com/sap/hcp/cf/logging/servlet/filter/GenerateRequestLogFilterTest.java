@@ -72,10 +72,9 @@ public class GenerateRequestLogFilterTest {
     }
 
     @Test
-    @Disabled //TODO: check why this does not work anymore
     public void setsRequestAttribute() throws Exception {
         new GenerateRequestLogFilter(requestRecordFactory).doFilter(request, response, chain);
-        verify(request).setAttribute(eq(MDC.class.getName()), anyMap());
+        verify(request).setAttribute(eq(MDC.class.getName()), eq(null));
     }
 
     @Test
