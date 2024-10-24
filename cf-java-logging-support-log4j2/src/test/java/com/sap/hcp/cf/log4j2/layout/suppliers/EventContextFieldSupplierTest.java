@@ -11,17 +11,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.logging.log4j.core.LogEvent;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sap.hcp.cf.log4j2.converter.api.Log4jContextFieldSupplier;
 import com.sap.hcp.cf.log4j2.layout.supppliers.EventContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.customfields.CustomField;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EventContextFieldSupplierTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)

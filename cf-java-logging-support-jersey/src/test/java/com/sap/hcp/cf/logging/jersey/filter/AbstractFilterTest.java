@@ -6,7 +6,6 @@ import java.io.PrintStream;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.After;
 import org.junit.Before;
-
 import com.fasterxml.jackson.jr.ob.JSON;
 
 public abstract class AbstractFilterTest extends JerseyTest {

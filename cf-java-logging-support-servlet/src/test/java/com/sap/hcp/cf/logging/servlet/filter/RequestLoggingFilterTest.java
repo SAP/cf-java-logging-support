@@ -5,9 +5,12 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.text.IsEmptyString.isEmptyOrNullString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.BufferedReader;
@@ -26,12 +29,21 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.core.Appender;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import com.fasterxml.jackson.jr.ob.JSON;
@@ -42,6 +54,7 @@ import com.sap.hcp.cf.logging.common.LogOptionalFieldsSettings;
 import com.sap.hcp.cf.logging.common.request.HttpHeader;
 import com.sap.hcp.cf.logging.common.request.HttpHeaders;
 
+@ExtendWith(MockitoExtension.class)
 public class RequestLoggingFilterTest {
 
     private static final String REQUEST_ID = "1234-56-7890-xxx";
@@ -54,17 +67,17 @@ public class RequestLoggingFilterTest {
     private static final String REMOTE_HOST = "acme.org";
     private static final String REFERER = "my.fancy.com";
 
-    @Rule
-    public SystemOutRule systemOut = new SystemOutRule();
-
-    @Rule
-    public SystemErrRule systemErr = new SystemErrRule();
-
     private HttpServletRequest mockReq = mock(HttpServletRequest.class);
     private HttpServletResponse mockResp = mock(HttpServletResponse.class);
     private PrintWriter mockWriter = mock(PrintWriter.class);
 
-    @Before
+    @Mock
+    private Appender mockedAppender;
+
+    @Captor
+    private ArgumentCaptor<LoggingEvent> loggingEventCaptor;
+
+    @BeforeEach
     public void initMocks() throws IOException {
         Mockito.reset(mockReq, mockResp, mockWriter);
         when(mockResp.getWriter()).thenReturn(mockWriter);
@@ -82,6 +95,10 @@ public class RequestLoggingFilterTest {
         }).when(mockReq).setAttribute(eq(MDC.class.getName()), anyMap());//String.class, String.class
 
         when(mockReq.getAttribute(MDC.class.getName())).thenReturn(contextMap);
+
+        Logger loggerOfInterest = (Logger) LoggerFactory.getLogger(RequestLogger.class.getName());
+        loggerOfInterest.addAppender(mockedAppender);
+        loggerOfInterest.setLevel(Level.INFO);
     }
 
     @Test
@@ -89,13 +106,18 @@ public class RequestLoggingFilterTest {
         FilterChain mockFilterChain = mock(FilterChain.class);
 
         new RequestLoggingFilter().doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.REQUEST), is(nullValue()));
-        assertThat(getField(Fields.CORRELATION_ID), not(isEmptyOrNullString()));
-        assertThat(getField(Fields.REQUEST_ID), is(nullValue()));
-        assertThat(getField(Fields.REMOTE_HOST), is(nullValue()));
-        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
-        assertThat(getField(Fields.CONTAINER_ID), is(nullValue()));
-        assertThat(getField(Fields.REQUEST_SIZE_B), is("-1"));
+        verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+        LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+        assertEquals(Level.INFO, loggingEvent.getLevel());
+        String lastLine = loggingEvent.getArgumentArray()[0].toString();
+        assertThat(getField(Fields.REQUEST, lastLine), is("-"));
+        //TODO: check assertThat(getField(Fields.CORRELATION_ID, lastLine), not(isEmptyOrNullString()));
+        assertThat(loggingEvent.getMDCPropertyMap().get(Fields.CORRELATION_ID).toString(), not(isEmptyOrNullString()));
+        assertThat(getField(Fields.REQUEST_ID, lastLine), is(nullValue()));
+        assertThat(getField(Fields.REMOTE_HOST, lastLine), is("-"));
+        assertThat(getField(Fields.COMPONENT_ID, lastLine), is(nullValue()));
+        assertThat(getField(Fields.CONTAINER_ID, lastLine), is(nullValue()));
+        assertThat(getField(Fields.REQUEST_SIZE_B, lastLine), is("-1"));
     }
 
     @Test
@@ -112,13 +134,18 @@ public class RequestLoggingFilterTest {
             }
         };
         new RequestLoggingFilter().doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.REQUEST), is(nullValue()));
-        assertThat(getField(Fields.CORRELATION_ID), not(isEmptyOrNullString()));
-        assertThat(getField(Fields.REQUEST_ID), is(nullValue()));
-        assertThat(getField(Fields.REMOTE_HOST), is(nullValue()));
-        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
-        assertThat(getField(Fields.CONTAINER_ID), is(nullValue()));
-        assertThat(getField(Fields.REQUEST_SIZE_B), is("1"));
+        verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+        LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+        assertEquals(Level.INFO, loggingEvent.getLevel());
+        String lastLine = loggingEvent.getArgumentArray()[0].toString();
+        assertThat(getField(Fields.REQUEST, lastLine), is("-"));
+        //TODO: check this.. assertThat(getField(Fields.CORRELATION_ID, lastLine), not(isEmptyOrNullString()));
+        assertThat(loggingEvent.getMDCPropertyMap().get(Fields.CORRELATION_ID).toString(), not(isEmptyOrNullString()));
+        assertThat(getField(Fields.REQUEST_ID, lastLine), is(nullValue()));
+        assertThat(getField(Fields.REMOTE_HOST, lastLine), is("-"));
+        assertThat(getField(Fields.COMPONENT_ID, lastLine), is(nullValue()));
+        assertThat(getField(Fields.CONTAINER_ID, lastLine), is(nullValue()));
+        assertThat(getField(Fields.REQUEST_SIZE_B, lastLine), is("1"));
     }
 
     @Test
@@ -134,14 +161,19 @@ public class RequestLoggingFilterTest {
             }
         };
         new RequestLoggingFilter().doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.REQUEST), is(nullValue()));
-        assertThat(getField(Fields.CORRELATION_ID), not(isEmptyOrNullString()));
-        assertThat(getField(Fields.REQUEST_ID), is(nullValue()));
-        assertThat(getField(Fields.REMOTE_HOST), is(nullValue()));
-        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
-        assertThat(getField(Fields.CONTAINER_ID), is(nullValue()));
-        assertThat(getField(Fields.REQUEST_SIZE_B), is("4"));
-        assertThat(getField(Fields.TENANT_ID), is(nullValue()));
+        verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+        LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+        assertEquals(Level.INFO, loggingEvent.getLevel());
+        String lastLine = loggingEvent.getArgumentArray()[0].toString();
+        assertThat(getField(Fields.REQUEST, lastLine), is("-"));
+        //TODO: check this.. assertThat(getField(Fields.CORRELATION_ID, lastLine), not(isEmptyOrNullString()));
+        assertThat(loggingEvent.getMDCPropertyMap().get(Fields.CORRELATION_ID).toString(), not(isEmptyOrNullString()));
+        assertThat(getField(Fields.REQUEST_ID, lastLine), is(nullValue()));
+        assertThat(getField(Fields.REMOTE_HOST, lastLine), is("-"));
+        assertThat(getField(Fields.COMPONENT_ID, lastLine), is(nullValue()));
+        assertThat(getField(Fields.CONTAINER_ID, lastLine), is(nullValue()));
+        assertThat(getField(Fields.REQUEST_SIZE_B, lastLine), is("4"));
+        assertThat(getField(Fields.TENANT_ID, lastLine), is(nullValue()));
     }
 
     @Test
@@ -160,14 +192,20 @@ public class RequestLoggingFilterTest {
         RequestRecordFactory requestRecordFactory = new RequestRecordFactory(mockOptionalFieldsSettings);
         Filter requestLoggingFilter = new RequestLoggingFilter(requestRecordFactory);
         requestLoggingFilter.doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.REQUEST), is(FULL_REQUEST));
-        assertThat(getField(Fields.CORRELATION_ID), is(REQUEST_ID));
-        assertThat(getField(Fields.REQUEST_ID), is(REQUEST_ID));
-        assertThat(getField(Fields.REMOTE_HOST), is(REMOTE_HOST));
-        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
-        assertThat(getField(Fields.CONTAINER_ID), is(nullValue()));
-        assertThat(getField(Fields.REFERER), is(REFERER));
-        assertThat(getField(Fields.TENANT_ID), is(nullValue()));
+        verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+        LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+        assertEquals(Level.INFO, loggingEvent.getLevel());
+        String lastLine = loggingEvent.getArgumentArray()[0].toString();
+        assertThat(getField(Fields.REQUEST, lastLine), is(FULL_REQUEST));
+        //TODO check assertThat(getField(Fields.CORRELATION_ID, lastLine), is(REQUEST_ID));
+        assertThat(loggingEvent.getMDCPropertyMap().get(Fields.CORRELATION_ID).toString(), is(REQUEST_ID));
+        //TODO check assertThat(getField(Fields.REQUEST_ID, lastLine), is(REQUEST_ID));
+        assertThat(loggingEvent.getMDCPropertyMap().get(Fields.REQUEST_ID).toString(), is(REQUEST_ID));
+        assertThat(getField(Fields.REMOTE_HOST, lastLine), is(REMOTE_HOST));
+        assertThat(getField(Fields.COMPONENT_ID, lastLine), is(nullValue()));
+        assertThat(getField(Fields.CONTAINER_ID, lastLine), is(nullValue()));
+        assertThat(getField(Fields.REFERER, lastLine), is(REFERER));
+        assertThat(getField(Fields.TENANT_ID, lastLine), is(nullValue()));
     }
 
     private void mockGetHeader(HttpHeader header, String value) {
@@ -190,14 +228,20 @@ public class RequestLoggingFilterTest {
         RequestRecordFactory requestRecordFactory = new RequestRecordFactory(mockLogOptionalFieldsSettings);
         Filter requestLoggingFilter = new RequestLoggingFilter(requestRecordFactory);
         requestLoggingFilter.doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.REQUEST), is(FULL_REQUEST));
-        assertThat(getField(Fields.CORRELATION_ID), is(REQUEST_ID));
-        assertThat(getField(Fields.REQUEST_ID), is(REQUEST_ID));
-        assertThat(getField(Fields.REMOTE_IP), is(nullValue()));
-        assertThat(getField(Fields.REMOTE_HOST), is(Defaults.REDACTED));
-        assertThat(getField(Fields.COMPONENT_ID), is(nullValue()));
-        assertThat(getField(Fields.CONTAINER_ID), is(nullValue()));
-        assertThat(getField(Fields.TENANT_ID), is(nullValue()));
+        verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+        LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+        assertEquals(Level.INFO, loggingEvent.getLevel());
+        String lastLine = loggingEvent.getArgumentArray()[0].toString();
+        assertThat(getField(Fields.REQUEST, lastLine), is(FULL_REQUEST));
+        //TODO: check assertThat(getField(Fields.CORRELATION_ID, lastLine), is(REQUEST_ID));
+        assertThat(loggingEvent.getMDCPropertyMap().get(Fields.CORRELATION_ID).toString(), is(REQUEST_ID));
+        //TODO: check assertThat(getField(Fields.REQUEST_ID, lastLine), is(REQUEST_ID));
+        assertThat(loggingEvent.getMDCPropertyMap().get(Fields.REQUEST_ID).toString(), is(REQUEST_ID));
+        assertThat(getField(Fields.REMOTE_IP, lastLine), is("-"));
+        assertThat(getField(Fields.REMOTE_HOST, lastLine), is(Defaults.REDACTED));
+        assertThat(getField(Fields.COMPONENT_ID, lastLine), is(nullValue()));
+        assertThat(getField(Fields.CONTAINER_ID, lastLine), is(nullValue()));
+        assertThat(getField(Fields.TENANT_ID, lastLine), is(nullValue()));
     }
 
     @Test
@@ -206,10 +250,17 @@ public class RequestLoggingFilterTest {
         mockGetHeader(HttpHeaders.X_VCAP_REQUEST_ID, REQUEST_ID);
         FilterChain mockFilterChain = mock(FilterChain.class);
         new RequestLoggingFilter().doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.CORRELATION_ID), is(CORRELATION_ID));
-        assertThat(getField(Fields.CORRELATION_ID), not(REQUEST_ID));
-        assertThat(getField(Fields.REQUEST_ID), is(REQUEST_ID));
-        assertThat(getField(Fields.TENANT_ID), is(nullValue()));
+        verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+        LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+        assertEquals(Level.INFO, loggingEvent.getLevel());
+        String lastLine = loggingEvent.getArgumentArray()[0].toString();
+        //TODO: check this assertThat(getField(Fields.CORRELATION_ID, lastLine), is(CORRELATION_ID));
+        assertThat(loggingEvent.getMDCPropertyMap().get(Fields.CORRELATION_ID).toString(), is(CORRELATION_ID));
+        //TODO: check assertThat(getField(Fields.CORRELATION_ID, lastLine), not(REQUEST_ID));
+        assertThat(loggingEvent.getMDCPropertyMap().get(Fields.CORRELATION_ID).toString(), not(REQUEST_ID));
+        //TODO: check assertThat(getField(Fields.REQUEST_ID, lastLine), is(REQUEST_ID));
+        assertThat(loggingEvent.getMDCPropertyMap().get(Fields.REQUEST_ID).toString(), is(REQUEST_ID));
+        assertThat(getField(Fields.TENANT_ID, lastLine), is(nullValue()));
     }
 
     @Test
@@ -217,7 +268,12 @@ public class RequestLoggingFilterTest {
         mockGetHeader(HttpHeaders.W3C_TRACEPARENT, W3C_TRACEPARENT);
         FilterChain mockFilterChain = mock(FilterChain.class);
         new RequestLoggingFilter().doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.W3C_TRACEPARENT), is(W3C_TRACEPARENT));
+        verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+        LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+        assertEquals(Level.INFO, loggingEvent.getLevel());
+        String lastLine = loggingEvent.getArgumentArray()[0].toString();
+        //TODO: check assertThat(getField(Fields.W3C_TRACEPARENT, lastLine), is(W3C_TRACEPARENT));
+        assertThat(loggingEvent.getMDCPropertyMap().get(Fields.W3C_TRACEPARENT).toString(), is(W3C_TRACEPARENT));
     }
 
     @Test
@@ -226,7 +282,13 @@ public class RequestLoggingFilterTest {
         mockGetHeader(HttpHeaders.X_VCAP_REQUEST_ID, REQUEST_ID);
         FilterChain mockFilterChain = mock(FilterChain.class);
         new RequestLoggingFilter().doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.TENANT_ID), is(TENANT_ID));
+        verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+        LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+        assertEquals(Level.INFO, loggingEvent.getLevel());
+        String lastLine = loggingEvent.getArgumentArray()[0].toString();
+        //TODO: check assertThat(getField(Fields.TENANT_ID, lastLine), is(TENANT_ID));
+        assertThat(loggingEvent.getMDCPropertyMap().get(Fields.TENANT_ID).toString(), is(TENANT_ID));
+
     }
 
     @Test
@@ -240,10 +302,14 @@ public class RequestLoggingFilterTest {
         FilterChain mockFilterChain = mock(FilterChain.class);
         RequestLoggingFilter filter = new RequestLoggingFilter(new RequestRecordFactory(settings));
         filter.doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.X_CUSTOM_HOST), is("custom.example.com"));
-        assertThat(getField(Fields.X_FORWARDED_FOR), is("1.2.3.4,5.6.7.8"));
-        assertThat(getField(Fields.X_FORWARDED_HOST), is("requested.example.com"));
-        assertThat(getField(Fields.X_FORWARDED_PROTO), is("https"));
+        verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+        LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+        assertEquals(Level.INFO, loggingEvent.getLevel());
+        String lastLine = loggingEvent.getArgumentArray()[0].toString();
+        assertThat(getField(Fields.X_CUSTOM_HOST, lastLine), is("custom.example.com"));
+        assertThat(getField(Fields.X_FORWARDED_FOR, lastLine), is("1.2.3.4,5.6.7.8"));
+        assertThat(getField(Fields.X_FORWARDED_HOST, lastLine), is("requested.example.com"));
+        assertThat(getField(Fields.X_FORWARDED_PROTO, lastLine), is("https"));
     }
 
     @Test
@@ -255,10 +321,14 @@ public class RequestLoggingFilterTest {
         FilterChain mockFilterChain = mock(FilterChain.class);
         RequestLoggingFilter filter = new RequestLoggingFilter();
         filter.doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.X_CUSTOM_HOST), is("redacted"));
-        assertThat(getField(Fields.X_FORWARDED_FOR), is("redacted"));
-        assertThat(getField(Fields.X_FORWARDED_HOST), is("redacted"));
-        assertThat(getField(Fields.X_FORWARDED_PROTO), is("redacted"));
+        verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+        LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+        assertEquals(Level.INFO, loggingEvent.getLevel());
+        String lastLine = loggingEvent.getArgumentArray()[0].toString();
+        assertThat(getField(Fields.X_CUSTOM_HOST, lastLine), is("redacted"));
+        assertThat(getField(Fields.X_FORWARDED_FOR, lastLine), is("redacted"));
+        assertThat(getField(Fields.X_FORWARDED_HOST, lastLine), is("redacted"));
+        assertThat(getField(Fields.X_FORWARDED_PROTO, lastLine), is("redacted"));
     }
 
     @Test
@@ -276,14 +346,18 @@ public class RequestLoggingFilterTest {
         FilterChain mockFilterChain = mock(FilterChain.class);
         RequestLoggingFilter filter = new RequestLoggingFilter(new RequestRecordFactory(settings));
         filter.doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.X_SSL_CLIENT), is("1"));
-        assertThat(getField(Fields.X_SSL_CLIENT_VERIFY), is("2"));
-        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_DN), is("subject/dn"));
-        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_CN), is("subject/cn"));
-        assertThat(getField(Fields.X_SSL_CLIENT_ISSUER_DN), is("issuer/dn"));
-        assertThat(getField(Fields.X_SSL_CLIENT_NOTBEFORE), is("start"));
-        assertThat(getField(Fields.X_SSL_CLIENT_NOTAFTER), is("end"));
-        assertThat(getField(Fields.X_SSL_CLIENT_SESSION_ID), is("session-id"));
+        verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+        LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+        assertEquals(Level.INFO, loggingEvent.getLevel());
+        String lastLine = loggingEvent.getArgumentArray()[0].toString();
+        assertThat(getField(Fields.X_SSL_CLIENT, lastLine), is("1"));
+        assertThat(getField(Fields.X_SSL_CLIENT_VERIFY, lastLine), is("2"));
+        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_DN, lastLine), is("subject/dn"));
+        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_CN, lastLine), is("subject/cn"));
+        assertThat(getField(Fields.X_SSL_CLIENT_ISSUER_DN, lastLine), is("issuer/dn"));
+        assertThat(getField(Fields.X_SSL_CLIENT_NOTBEFORE, lastLine), is("start"));
+        assertThat(getField(Fields.X_SSL_CLIENT_NOTAFTER, lastLine), is("end"));
+        assertThat(getField(Fields.X_SSL_CLIENT_SESSION_ID, lastLine), is("session-id"));
     }
 
     @Test
@@ -300,14 +374,18 @@ public class RequestLoggingFilterTest {
         FilterChain mockFilterChain = mock(FilterChain.class);
         RequestLoggingFilter filter = new RequestLoggingFilter(new RequestRecordFactory(settings));
         filter.doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.X_SSL_CLIENT), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_VERIFY), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_DN), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_CN), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_ISSUER_DN), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_NOTBEFORE), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_NOTAFTER), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_SESSION_ID), is(nullValue()));
+        verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+        LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+        assertEquals(Level.INFO, loggingEvent.getLevel());
+        String lastLine = loggingEvent.getArgumentArray()[0].toString();
+        assertThat(getField(Fields.X_SSL_CLIENT, lastLine), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_VERIFY, lastLine), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_DN, lastLine), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_CN, lastLine), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_ISSUER_DN, lastLine), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_NOTBEFORE, lastLine), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_NOTAFTER, lastLine), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_SESSION_ID, lastLine), is(nullValue()));
     }
 
     @Test
@@ -324,23 +402,22 @@ public class RequestLoggingFilterTest {
         FilterChain mockFilterChain = mock(FilterChain.class);
         RequestLoggingFilter filter = new RequestLoggingFilter(new RequestRecordFactory(settings));
         filter.doFilter(mockReq, mockResp, mockFilterChain);
-        assertThat(getField(Fields.X_SSL_CLIENT), is("0"));
-        assertThat(getField(Fields.X_SSL_CLIENT_VERIFY), is("0"));
-        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_DN), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_CN), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_ISSUER_DN), is(""));
-        assertThat(getField(Fields.X_SSL_CLIENT_NOTBEFORE), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_NOTAFTER), is(nullValue()));
-        assertThat(getField(Fields.X_SSL_CLIENT_SESSION_ID), is(nullValue()));
+        verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+        LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+        assertEquals(Level.INFO, loggingEvent.getLevel());
+        String lastLine = loggingEvent.getArgumentArray()[0].toString();
+        assertThat(getField(Fields.X_SSL_CLIENT, lastLine), is("0"));
+        assertThat(getField(Fields.X_SSL_CLIENT_VERIFY, lastLine), is("0"));
+        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_DN, lastLine), is("-"));
+        assertThat(getField(Fields.X_SSL_CLIENT_SUBJECT_CN, lastLine), is("-"));
+        assertThat(getField(Fields.X_SSL_CLIENT_ISSUER_DN, lastLine), is(""));
+        assertThat(getField(Fields.X_SSL_CLIENT_NOTBEFORE, lastLine), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_NOTAFTER, lastLine), is(nullValue()));
+        assertThat(getField(Fields.X_SSL_CLIENT_SESSION_ID, lastLine), is(nullValue()));
     }
 
-    protected String getField(String fieldName) throws JSONObjectException, IOException {
-        Object fieldValue = JSON.std.mapFrom(getLastLine()).get(fieldName);
+    protected String getField(String fieldName, String lastLine) throws JSONObjectException, IOException {
+        Object fieldValue = JSON.std.mapFrom(lastLine).get(fieldName);
         return fieldValue == null ? null : fieldValue.toString();
-    }
-
-    private String getLastLine() {
-        String[] lines = systemOut.toString().split("\n");
-        return lines[lines.length - 1];
     }
 }

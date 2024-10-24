@@ -1,6 +1,6 @@
 package com.sap.hcp.cf.logging.servlet.dynlog;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -10,18 +10,18 @@ import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.MDC;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.sap.hcp.cf.logging.common.helper.DynamicLogLevelHelper;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DynamicLogLevelProcessorTest extends Mockito {
 
     private DynamicLogLevelProcessor processor;
@@ -30,7 +30,7 @@ public class DynamicLogLevelProcessorTest extends Mockito {
 
     private KeyPair keyPair;
 
-    @Before
+    @BeforeEach
     public void setup() throws NoSuchAlgorithmException, NoSuchProviderException, DynamicLogLevelException {
         this.keyPair = KeyPairGenerator.getInstance("RSA").generateKeyPair();
         Date issuedAt = new Date();
@@ -47,7 +47,7 @@ public class DynamicLogLevelProcessorTest extends Mockito {
         return null;
     }
 
-    @After
+    @AfterEach
     public void removeDynamicLogLevelFromMDC() {
         processor.removeDynamicLogLevelFromMDC();
     }

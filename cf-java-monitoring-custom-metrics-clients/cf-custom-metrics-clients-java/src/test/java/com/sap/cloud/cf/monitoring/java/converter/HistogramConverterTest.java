@@ -11,26 +11,28 @@ import static com.sap.cloud.cf.monitoring.java.converter.ConverterTestUtil.SUFFI
 import static com.sap.cloud.cf.monitoring.java.converter.ConverterTestUtil.SUFFIX_P99;
 import static com.sap.cloud.cf.monitoring.java.converter.ConverterTestUtil.SUFFIX_P999;
 import static com.sap.cloud.cf.monitoring.java.converter.ConverterTestUtil.SUFFIX_STDDEV;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Reservoir;
 import com.codahale.metrics.Snapshot;
 import com.sap.cloud.cf.monitoring.client.model.Metric;
 import com.sap.cloud.cf.monitoring.java.converter.MetricConverter.MetricType;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HistogramConverterTest {
 
     private static final String HISTOGRAM_METRIC = "histogramMetric";
@@ -43,7 +45,7 @@ public class HistogramConverterTest {
     @Mock
     private Snapshot snapshot;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         when(reservoir.getSnapshot()).thenReturn(snapshot);
         when(snapshot.getMax()).thenReturn(100l);
@@ -84,6 +86,7 @@ public class HistogramConverterTest {
     }
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     public void testTimerMetricWithoutMetricQuantiles() {
         List<Metric> metrics = new HistogramConverter(false).convert(histograms, currentTimeMillis);
 

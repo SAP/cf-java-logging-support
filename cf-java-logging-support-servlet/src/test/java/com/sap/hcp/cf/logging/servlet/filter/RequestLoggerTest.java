@@ -1,10 +1,11 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import static org.hamcrest.Matchers.both;
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -15,13 +16,19 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.core.Appender;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import com.sap.hcp.cf.logging.common.Fields;
@@ -29,11 +36,8 @@ import com.sap.hcp.cf.logging.common.Value;
 import com.sap.hcp.cf.logging.common.request.HttpHeaders;
 import com.sap.hcp.cf.logging.common.request.RequestRecord;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RequestLoggerTest {
-
-	@Rule
-	public SystemOutRule systemOut = new SystemOutRule();
 
 	@Mock
 	private ContentLengthTrackingResponseWrapper responseWrapper;
@@ -49,6 +53,12 @@ public class RequestLoggerTest {
 
 	@Captor
 	private ArgumentCaptor<Value> valueCaptor;
+
+	@Mock
+	private Appender mockedAppender;
+
+	@Captor
+	private ArgumentCaptor<LoggingEvent> loggingEventCaptor;
 
 	private RequestLogger createLoggerWithoutResponse(HttpServletResponse response) {
 		return new RequestLogger(requestRecord, httpRequest, response);
@@ -69,6 +79,7 @@ public class RequestLoggerTest {
 	}
 
 	@Test
+	@MockitoSettings(strictness = Strictness.LENIENT)
 	public void addsResponseContentTypeAsTag() throws Exception {
 		mockGetHeader(HttpHeaders.CONTENT_TYPE, "application/vnd.test");
 		createLoggerWithoutResponse(httpResponse).logRequest();
@@ -76,6 +87,7 @@ public class RequestLoggerTest {
 	}
 
 	private void mockGetHeader(HttpHeaders header, String value) {
+		//doReturn(value).when(httpResponse.getHeader(header.getName()));//.thenReturn(value);
 		when(httpResponse.getHeader(header.getName())).thenReturn(value);
 	}
 
@@ -106,15 +118,22 @@ public class RequestLoggerTest {
 
 	@Test
 	public void writesRequestLogWithMDCEntries() throws Exception {
+
+		Logger loggerOfInterest = (Logger) LoggerFactory.getLogger(RequestLogger.class.getName());
+		loggerOfInterest.addAppender(mockedAppender);
+		loggerOfInterest.setLevel(Level.INFO);
+
 		Map<String, String> mdcAttributes = new HashMap<>();
 		mdcAttributes.put("this-key", "this-value");
 		mdcAttributes.put("that-key", "that-value");
 		when(httpRequest.getAttribute(MDC.class.getName())).thenReturn(mdcAttributes);
 		createLoggerWithoutResponse(httpResponse).logRequest();
 
-		assertThat(systemOut.toString(),
-				both(containsString("\"this-key\":\"this-value\""))
-						.and(containsString("\"that-key\":\"that-value\"")));
+		verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+		LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+		assertEquals(Level.INFO, loggingEvent.getLevel());
+		assertThat(loggingEvent.getMDCPropertyMap(), hasEntry("this-key", "this-value"));
+		assertThat(loggingEvent.getMDCPropertyMap(), hasEntry("that-key", "that-value"));
 
 	}
 

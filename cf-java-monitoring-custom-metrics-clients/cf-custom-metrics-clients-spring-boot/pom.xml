@@ -12,7 +12,7 @@
     <name>cf-java-monitoring-custom-metrics-clients-spring-boot</name>
 
     <properties>
-        <spring.boot.version>2.0.6.RELEASE</spring.boot.version>
+        <spring.boot.version>2.0.6.RELEASE</spring.boot.version><!-- 2.0.6.RELEASE - should be 2.7.18 micrometer change.. -->
     </properties>
 
     <dependencies>
@@ -54,12 +54,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- Test dependencies -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
@@ -74,5 +68,17 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

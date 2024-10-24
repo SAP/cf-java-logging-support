@@ -10,17 +10,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sap.hcp.cf.logback.converter.api.LogbackContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.customfields.CustomField;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EventContextFieldSupplierTest {
 
     @Mock

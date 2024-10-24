@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.sap.cloud.cf.monitoring.client.configuration.SystemGetEnvWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +85,7 @@ public class MainServlet extends HttpServlet {
 
     protected void printEnv(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
         writer.println("<h2>Environment Variables:</h2><p>");
-        for (Entry<String, String> evar: System.getenv().entrySet()) {
+        for (Entry<String, String> evar: SystemGetEnvWrapper.getenv().entrySet()) {
             writer.println("<i>" + evar.getKey() + "</i>: " + evar.getValue() + "<br/>");
         }
         writer.println("</p>");

@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class WrappedInputStreamTest {
 

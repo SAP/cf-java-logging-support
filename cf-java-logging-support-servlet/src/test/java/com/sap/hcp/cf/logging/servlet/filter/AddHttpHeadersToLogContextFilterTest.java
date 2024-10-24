@@ -18,17 +18,17 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.MDC;
 
 import com.sap.hcp.cf.logging.common.request.HttpHeader;
 import com.sap.hcp.cf.logging.common.request.HttpHeaders;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AddHttpHeadersToLogContextFilterTest {
 
     @Mock
@@ -40,7 +40,7 @@ public class AddHttpHeadersToLogContextFilterTest {
 
     private ContextMapExtractor mdcExtractor;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         MDC.clear();
         mdcExtractor = new ContextMapExtractor();

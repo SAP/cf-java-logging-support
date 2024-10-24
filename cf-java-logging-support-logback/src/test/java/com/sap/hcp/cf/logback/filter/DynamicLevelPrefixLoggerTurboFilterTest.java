@@ -1,12 +1,12 @@
 package com.sap.hcp.cf.logback.filter;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
 import com.sap.hcp.cf.logging.common.helper.DynamicLogLevelHelper;
@@ -27,7 +27,7 @@ public class DynamicLevelPrefixLoggerTurboFilterTest {
 	private LoggerContext loggerContext = new LoggerContext();
 	private TurboFilter filter = new DynamicLevelPrefixLoggerTurboFilter();
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		MDC.clear();
 		MDC.put(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_KEY, "DEBUG");

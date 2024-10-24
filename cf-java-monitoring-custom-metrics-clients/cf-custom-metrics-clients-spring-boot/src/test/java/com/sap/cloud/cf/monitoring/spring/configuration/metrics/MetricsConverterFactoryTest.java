@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Test;
-
 import com.sap.cloud.cf.monitoring.client.model.Metric;
+
+import org.junit.jupiter.api.Test;
 
 public class MetricsConverterFactoryTest {
 

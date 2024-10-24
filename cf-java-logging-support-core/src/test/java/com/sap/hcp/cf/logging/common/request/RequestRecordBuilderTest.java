@@ -1,14 +1,14 @@
 package com.sap.hcp.cf.logging.common.request;
 
 import static com.sap.hcp.cf.logging.common.request.RequestRecordBuilder.requestRecord;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
-import org.junit.Test;
-
 import com.fasterxml.jackson.jr.ob.JSON;
 import com.fasterxml.jackson.jr.ob.JSONObjectException;
+import org.junit.jupiter.api.Test;
+
 import com.sap.hcp.cf.logging.common.Defaults;
 
 public class RequestRecordBuilderTest {

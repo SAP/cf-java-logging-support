@@ -1,7 +1,7 @@
 package com.sap.cloud.cf.monitoring.java;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -12,12 +12,12 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
@@ -27,7 +27,7 @@ import com.sap.cloud.cf.monitoring.client.configuration.CustomMetricsConfigurati
 import com.sap.cloud.cf.monitoring.client.exceptions.MonitoringClientException;
 import com.sap.cloud.cf.monitoring.client.model.Metric;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CustomMetricsReporterTest {
 
     private static final String METRIC_NAME = "metricName";
@@ -40,7 +40,7 @@ public class CustomMetricsReporterTest {
     @Mock
     private CustomMetricsConfiguration customMetricsConfig;
 
-    @Before
+    @BeforeEach
     public void setup() {
         registry = new MetricRegistry();
 
@@ -154,7 +154,7 @@ public class CustomMetricsReporterTest {
 
     @Test
     public void testReportNonEmptyMetricsWithException() {
-        doThrow(Exception.class).when(client).send(anyList());
+        doThrow(RuntimeException.class).when(client).send(anyList());
         registry.counter(METRIC_NAME);
 
         reporter.report();

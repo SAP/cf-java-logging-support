@@ -1,15 +1,11 @@
 package com.sap.cloud.cf.monitoring.spring.configuration.metrics;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.junit.Test;
 
 import com.sap.cloud.cf.monitoring.client.model.Metric;
 
@@ -17,6 +13,7 @@ import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.Meter.Id;
 import io.micrometer.core.instrument.Meter.Type;
 import io.micrometer.core.instrument.distribution.ValueAtPercentile;
+import org.junit.jupiter.api.Test;
 
 public abstract class MetricsConverterTest<T extends Meter> {
 

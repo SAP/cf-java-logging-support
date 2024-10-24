@@ -10,7 +10,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import java.time.Instant;
 
 import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;

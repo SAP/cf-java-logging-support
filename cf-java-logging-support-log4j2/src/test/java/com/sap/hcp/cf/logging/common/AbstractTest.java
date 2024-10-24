@@ -6,10 +6,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
-
-import org.junit.After;
-import org.junit.Before;
-
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import com.fasterxml.jackson.jr.ob.JSON;
 
 public abstract class AbstractTest {
@@ -32,7 +30,7 @@ public abstract class AbstractTest {
     private PrintStream stdout;
     private PrintStream stderr;
 
-    @Before
+    @BeforeEach
     public void setupStreams() {
         stdout = System.out;
         stderr = System.err;
@@ -40,7 +38,7 @@ public abstract class AbstractTest {
         System.setErr(new PrintStream(errContent));
     }
 
-    @After
+    @AfterEach
     public void teardownStreams() {
         System.setOut(stdout);
         System.setErr(stderr);

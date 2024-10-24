@@ -17,16 +17,16 @@ import org.apache.logging.log4j.core.impl.MutableLogEvent;
 import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.message.ParameterizedMessage;
 import org.apache.logging.log4j.message.SimpleMessage;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sap.hcp.cf.log4j2.converter.api.Log4jContextFieldSupplier;
 import com.sap.hcp.cf.log4j2.layout.supppliers.RequestRecordFieldSupplier;
 import com.sap.hcp.cf.logging.common.Markers;
 import com.sap.hcp.cf.logging.common.request.RequestRecord;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RequestRecordFieldSupplierTest {
 
     private static final Marker MARKER = MarkerManager.getMarker(Markers.REQUEST_MARKER.getName());

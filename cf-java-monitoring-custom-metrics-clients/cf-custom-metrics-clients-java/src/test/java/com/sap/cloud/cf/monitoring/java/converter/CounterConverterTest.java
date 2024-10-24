@@ -1,14 +1,14 @@
 package com.sap.cloud.cf.monitoring.java.converter;
 
 import static com.sap.cloud.cf.monitoring.java.converter.ConverterTestUtil.SUFFIX_COUNT;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.codahale.metrics.Counter;
 import com.sap.cloud.cf.monitoring.client.model.Metric;
@@ -24,7 +24,7 @@ public class CounterConverterTest {
 
     private CounterConverter counterConverter;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         counterConverter = new CounterConverter();
         SortedMap<String, Counter> counters = new TreeMap<>();

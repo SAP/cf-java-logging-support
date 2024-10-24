@@ -5,25 +5,24 @@ import com.sap.hcp.cf.log4j2.layout.supppliers.BaseFieldSupplier;
 import com.sap.hcp.cf.logging.common.Fields;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.time.Instant;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
-
+import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BaseFieldSupplierTest {
 
     @Mock
@@ -31,7 +30,7 @@ public class BaseFieldSupplierTest {
 
     private Log4jContextFieldSupplier baseFieldSupplier = new BaseFieldSupplier();
 
-    @Before
+    @BeforeEach
     public void initializeEvent() {
         when(event.getInstant()).thenReturn(mock(Instant.class));
     }

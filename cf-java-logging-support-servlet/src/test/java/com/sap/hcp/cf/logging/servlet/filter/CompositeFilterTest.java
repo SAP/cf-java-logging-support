@@ -14,15 +14,17 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CompositeFilterTest {
 
     @Mock
@@ -30,7 +32,7 @@ public class CompositeFilterTest {
     @Mock
     private Filter filter2;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         Mockito.doAnswer(inv -> {
             doFilter(inv.getArguments());
@@ -50,6 +52,7 @@ public class CompositeFilterTest {
     }
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     public void forwardsInitConfig() throws Exception {
         CompositeFilter filter = new CompositeFilter(filter1, filter2);
         FilterConfig config = mock(FilterConfig.class);
@@ -62,6 +65,7 @@ public class CompositeFilterTest {
     }
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     public void destroysInCorrectOrder() throws Exception {
         CompositeFilter filter = new CompositeFilter(filter1, filter2);
 

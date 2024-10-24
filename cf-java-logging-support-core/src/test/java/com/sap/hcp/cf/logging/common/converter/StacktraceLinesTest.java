@@ -1,17 +1,19 @@
 package com.sap.hcp.cf.logging.common.converter;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 public class StacktraceLinesTest {
 
@@ -48,7 +50,8 @@ public class StacktraceLinesTest {
         assertThat(extractedLines.size(), equalTo(0));
     }
 
-    @Test(timeout = 1000)
+    @Test
+    @Timeout(value = 1000, unit = TimeUnit.MILLISECONDS)
     public void testStacktraceLinesGetFirstLinesOverEstimatingTotalSizeOfLines() {
         int maxSizeOfFirstPart = 2500;
         StacktraceLines stackTraceLines = new StacktraceLines(lines);
@@ -78,7 +81,8 @@ public class StacktraceLinesTest {
         assertThat(extractedLines.size(), equalTo(0));
     }
 
-    @Test(timeout = 1000)
+    @Test
+    @Timeout(value = 1000, unit = TimeUnit.MILLISECONDS)
     public void testStacktraceLinesGetLastLinesOverEstimatingTotalSizeOfLines() {
         int maxSizeOfFirstPart = 2500;
         StacktraceLines stackTraceLines = new StacktraceLines(lines);

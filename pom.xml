@@ -134,15 +134,16 @@
         <buildnumber.plugin.version>1.4</buildnumber.plugin.version>
         <source.plugin.version>3.2.1</source.plugin.version>
         <jar.plugin.version>3.4.2</jar.plugin.version>
-        <hamcrest.version>1.3</hamcrest.version>
-        <junit.version>4.13.2</junit.version>
-        <mockito.version>5.14.2</mockito.version><!-- 1.10.19 -->
+        <hamcrest.version>3.0</hamcrest.version>
+        <junit.version>5.11.3</junit.version>
+        <mockito.version>5.14.2</mockito.version>
         <jmh.version>1.36</jmh.version>
         <surefire.plugin.version>2.22.2</surefire.plugin.version>
         <animal.sniffer.version>1.22</animal.sniffer.version>
         <exec.plugin.version>1.6.0</exec.plugin.version>
         <javadoc.plugin.version>3.5.0</javadoc.plugin.version>
         <gpg.plugin.version>1.6</gpg.plugin.version>
+        <maven-shade-plugin.version>3.5.1</maven-shade-plugin.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -150,6 +151,7 @@
         <java-jwt.version>4.4.0</java-jwt.version>
         <jackson-databind.version>2.13.4.1</jackson-databind.version>
         <httpclient.version>4.5.14</httpclient.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
     </properties>
 
     <modules>
@@ -180,12 +182,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
@@ -206,28 +202,6 @@
     </dependencies>
     <build>
         <plugins>
-
-
-            <plugin>
-                <groupId>org.openrewrite.maven</groupId>
-                <artifactId>rewrite-maven-plugin</artifactId>
-                <version>5.42.2</version>
-                <configuration>
-                    <activeRecipes>
-                        <recipe>org.openrewrite.java.testing.mockito.Mockito1to3Migration</recipe>
-                    </activeRecipes>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.openrewrite.recipe</groupId>
-                        <artifactId>rewrite-testing-frameworks</artifactId>
-                        <version>2.20.0</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-
-
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>

@@ -5,14 +5,14 @@ import static com.sap.cloud.cf.monitoring.java.converter.ConverterTestUtil.SUFFI
 import static com.sap.cloud.cf.monitoring.java.converter.ConverterTestUtil.SUFFIX_M1_RATE;
 import static com.sap.cloud.cf.monitoring.java.converter.ConverterTestUtil.SUFFIX_M5_RATE;
 import static com.sap.cloud.cf.monitoring.java.converter.ConverterTestUtil.SUFFIX_MEAN_RATE;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.codahale.metrics.Meter;
 import com.sap.cloud.cf.monitoring.client.model.Metric;
@@ -24,7 +24,7 @@ public class MeterConverterTest {
     private long currentTimeMillis = System.currentTimeMillis();
     private SortedMap<String, Meter> meters;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         meters = new TreeMap<>();
         Meter meter = new Meter();

@@ -2,12 +2,12 @@ package com.sap.hcp.cf.logging.servlet.filter;
 
 import static java.util.Collections.emptyMap;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
@@ -24,19 +24,19 @@ import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.slf4j.MDC;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class LoggingAsyncContextImplTest {
 
 	@Mock
@@ -59,7 +59,7 @@ public class LoggingAsyncContextImplTest {
 	@InjectMocks
 	private LoggingAsyncContextImpl testedContext;
 
-	@Before
+	@BeforeEach
 	public void initWrappedContext() {
 		when(wrappedContext.getRequest()).thenReturn(request);
 		//TODO: check why this needs not to be mocked anymore

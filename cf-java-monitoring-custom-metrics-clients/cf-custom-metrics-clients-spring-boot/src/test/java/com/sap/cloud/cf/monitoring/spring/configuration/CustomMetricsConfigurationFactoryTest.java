@@ -1,18 +1,17 @@
 package com.sap.cloud.cf.monitoring.spring.configuration;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
-import org.junit.Test;
+import com.sap.cloud.cf.monitoring.client.configuration.SystemGetEnvWrapper;
+import org.junit.jupiter.api.Test;
 
-import com.sap.cloud.cf.monitoring.client.configuration.EnvUtils;
-
-public class CustomMetricsConfigurationFactoryTest {
+public class CustomMetricsConfigurationFactoryTest extends CustomMetricsTestBase{
 
     @Test
     public void testMatches_WithoutEnv() throws Exception {
-        EnvUtils.setEnvs(new String[][] {});
+        systemGetEnvWrapper.when(SystemGetEnvWrapper::getenv).thenReturn(convertEnvArrayIntoEnvMap(new String[][] {}));
 
         testDefault();
     }
@@ -20,7 +19,7 @@ public class CustomMetricsConfigurationFactoryTest {
     @Test
     public void testMatches_WithEmptyEnv() throws Exception {
         String[] CUSTOM_METRICS_ENV = new String[] { "CUSTOM_METRICS", "" };
-        EnvUtils.setEnvs(new String[][] { CUSTOM_METRICS_ENV });
+        systemGetEnvWrapper.when(SystemGetEnvWrapper::getenv).thenReturn(convertEnvArrayIntoEnvMap(new String[][] { CUSTOM_METRICS_ENV }));
 
         testDefault();
     }
@@ -35,7 +34,7 @@ public class CustomMetricsConfigurationFactoryTest {
 
     @Test
     public void testMatches_WithEnv() throws Exception {
-        EnvUtils.setEnvs(new String[][] { getCustomMetricsEnv() });
+        systemGetEnvWrapper.when(SystemGetEnvWrapper::getenv).thenReturn(convertEnvArrayIntoEnvMap(new String[][] { getCustomMetricsEnv() }));
 
         CustomMetricsConfiguration config = CustomMetricsConfigurationFactory.create();
 

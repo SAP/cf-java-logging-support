@@ -1,6 +1,7 @@
 package com.sap.cloud.cf.monitoring.spring;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -8,11 +9,11 @@ import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.sap.cloud.cf.monitoring.client.configuration.SystemGetEnvWrapper;
+import com.sap.cloud.cf.monitoring.spring.configuration.CustomMetricsTestBase;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sap.cloud.cf.monitoring.client.MonitoringClient;
 import com.sap.cloud.cf.monitoring.client.configuration.CustomMetricsConfiguration;
@@ -22,24 +23,25 @@ import com.sap.cloud.cf.monitoring.client.model.Metric;
 
 import io.micrometer.core.instrument.Clock;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CustomMetricWriterTest {
+public class CustomMetricWriterTest extends CustomMetricsTestBase {
 
     @Mock
     private MonitoringClient client;
 
     @Test
     public void testWriter_disabled() throws Exception {
-        EnvUtils.setEnvs(new String[][] { getCustomMetricsEnv() });
+        systemGetEnvWrapper.when(SystemGetEnvWrapper::getenv).thenReturn(convertEnvArrayIntoEnvMap(new String[][] { getCustomMetricsEnv() }));
 
         initMockedWriter(CustomMetricsConfigurationFactory.create());
     }
 
-    @Test(expected = StartIsCalledException.class)
-    public void testWriter_enabled() throws Exception {
-        EnvUtils.setEnvs(new String[][] {});
+    @Test
+    public void testWriter_enabled() {
+        assertThrows(StartIsCalledException.class, () -> {
+            systemGetEnvWrapper.when(SystemGetEnvWrapper::getenv).thenReturn(convertEnvArrayIntoEnvMap(new String[][]{}));
 
-        initMockedWriter(CustomMetricsConfigurationFactory.create());
+            initMockedWriter(CustomMetricsConfigurationFactory.create());
+        });
     }
 
     @Test
@@ -54,7 +56,7 @@ public class CustomMetricWriterTest {
 
     @Test
     public void testPublish_successfullyWithWhitelistedMetrics() throws Exception {
-        EnvUtils.setEnvs(new String[][] { getCustomMetricsEnv() });
+        systemGetEnvWrapper.when(SystemGetEnvWrapper::getenv).thenReturn(convertEnvArrayIntoEnvMap(new String[][] { getCustomMetricsEnv() }));
         CustomMetricWriter writer = createWriter();
         writer.timer("timer");
         writer.timer("secondTimer");

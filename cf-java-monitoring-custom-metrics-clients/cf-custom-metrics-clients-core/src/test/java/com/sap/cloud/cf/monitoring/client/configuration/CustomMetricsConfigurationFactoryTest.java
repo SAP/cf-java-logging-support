@@ -1,27 +1,46 @@
 package com.sap.cloud.cf.monitoring.client.configuration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mockStatic;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 public class CustomMetricsConfigurationFactoryTest {
 
+    MockedStatic<SystemGetEnvWrapper> systemGetEnvWrapper;
+
+    @BeforeEach
+    public void gearUpSystemGetEnvWrapper() {
+        systemGetEnvWrapper = mockStatic(SystemGetEnvWrapper.class);
+    }
+
+    @AfterEach
+    public void tearDownSystemGetEnvWrapper() {
+        systemGetEnvWrapper.close();
+    }
+
+    public static Map<String, String> convertEnvArrayIntoEnvMap(String[][] envArray) {
+        return  Stream.of(envArray)
+                .collect(Collectors.toMap(data -> data[0], data -> data[1]));
+    }
+
     @Test
     public void testMatches_WithoutEnv() throws Exception {
-        EnvUtils.setEnvs(new String[][] {});
-
+        systemGetEnvWrapper.when(SystemGetEnvWrapper::getenv).thenReturn(convertEnvArrayIntoEnvMap(new String[][] {}));
         testDefault();
     }
 
     @Test
     public void testMatches_WithEmptyEnv() throws Exception {
-        EnvUtils.setEnvs(new String[][] { { "CUSTOM_METRICS", "" } });
-
+        systemGetEnvWrapper.when(SystemGetEnvWrapper::getenv).thenReturn(convertEnvArrayIntoEnvMap(new String[][] { { "CUSTOM_METRICS", "" } }));
         testDefault();
     }
 
@@ -37,7 +56,7 @@ public class CustomMetricsConfigurationFactoryTest {
 
     @Test
     public void testMatches_WithEnv() throws Exception {
-        EnvUtils.setEnvs(new String[][] { getCustomMetricsEnv("20000") });
+        systemGetEnvWrapper.when(SystemGetEnvWrapper::getenv).thenReturn(convertEnvArrayIntoEnvMap(new String[][] { getCustomMetricsEnv("20000") }));
 
         CustomMetricsConfiguration config = CustomMetricsConfigurationFactory.create();
 
@@ -52,7 +71,7 @@ public class CustomMetricsConfigurationFactoryTest {
 
     @Test
     public void testMatches_WithShortIntervalEnv() throws Exception {
-        EnvUtils.setEnvs(new String[][] { getCustomMetricsEnv("1000") });
+        systemGetEnvWrapper.when(SystemGetEnvWrapper::getenv).thenReturn(convertEnvArrayIntoEnvMap(new String[][] { getCustomMetricsEnv("1000") }));
 
         CustomMetricsConfiguration config = CustomMetricsConfigurationFactory.create();
 
@@ -64,11 +83,13 @@ public class CustomMetricsConfigurationFactoryTest {
         assertTrue(metrics.contains("summary"));
     }
 
-    @Test(expected = NumberFormatException.class)
-    public void testMatches_WrongIntervalFormat() throws Exception {
-        EnvUtils.setEnvs(new String[][] { getCustomMetricsEnv("wronginterval") });
+    @Test
+    public void testMatches_WrongIntervalFormat() {
+        assertThrows(NumberFormatException.class, () -> {
+            systemGetEnvWrapper.when(SystemGetEnvWrapper::getenv).thenReturn(convertEnvArrayIntoEnvMap(new String[][]{getCustomMetricsEnv("wronginterval")}));
 
-        CustomMetricsConfigurationFactory.create();
+            CustomMetricsConfigurationFactory.create();
+        });
     }
 
     private static String[] getCustomMetricsEnv(String interval) {

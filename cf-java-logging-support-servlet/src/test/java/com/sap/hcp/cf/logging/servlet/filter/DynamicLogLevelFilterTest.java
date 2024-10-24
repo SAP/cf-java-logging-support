@@ -8,15 +8,15 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelConfiguration;
 import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelProcessor;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DynamicLogLevelFilterTest {
 
     @Mock

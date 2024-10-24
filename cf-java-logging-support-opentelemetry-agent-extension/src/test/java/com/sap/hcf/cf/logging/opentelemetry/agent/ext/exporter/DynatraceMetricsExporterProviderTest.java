@@ -4,14 +4,16 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.metrics.ConfigurableMetricExporterProvider;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.pivotal.cfenv.core.CfService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
@@ -25,11 +27,12 @@ import java.util.stream.StreamSupport;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class DynatraceMetricsExporterProviderTest {
 
     @Mock
@@ -41,7 +44,7 @@ public class DynatraceMetricsExporterProviderTest {
     @InjectMocks
     private DynatraceMetricsExporterProvider exporterProvider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(config.getString("otel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name")).thenReturn("ingest-token");
         when(config.getString(any(), any())).thenAnswer(new Answer<Object>() {
@@ -57,8 +60,8 @@ public class DynatraceMetricsExporterProviderTest {
     public void canLoadViaSPI() {
         ServiceLoader<ConfigurableMetricExporterProvider> loader = ServiceLoader.load(ConfigurableMetricExporterProvider.class);
         Stream<ConfigurableMetricExporterProvider> providers = StreamSupport.stream(loader.spliterator(), false);
-        assertTrue(DynatraceMetricsExporterProviderTest.class.getName() + " not loaded via SPI",
-                providers.anyMatch(p -> p instanceof DynatraceMetricsExporterProvider));
+        assertTrue(providers.anyMatch(p -> p instanceof DynatraceMetricsExporterProvider),
+                DynatraceMetricsExporterProviderTest.class.getName() + " not loaded via SPI");
     }
 
     @Test

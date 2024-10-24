@@ -4,13 +4,15 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterProvider;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.pivotal.cfenv.core.CfService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
@@ -22,12 +24,13 @@ import java.util.stream.StreamSupport;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class CloudLoggingSpanExporterProviderTest {
 
     @Mock
@@ -42,7 +45,7 @@ public class CloudLoggingSpanExporterProviderTest {
     @InjectMocks
     private CloudLoggingSpanExporterProvider exporterProvider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(config.getString(any(), any())).thenAnswer(new Answer<Object>() {
             @Override
@@ -57,8 +60,8 @@ public class CloudLoggingSpanExporterProviderTest {
     public void canLoadViaSPI() {
         ServiceLoader<ConfigurableSpanExporterProvider> loader = ServiceLoader.load(ConfigurableSpanExporterProvider.class);
         Stream<ConfigurableSpanExporterProvider> providers = StreamSupport.stream(loader.spliterator(), false);
-        assertTrue(CloudLoggingSpanExporterProvider.class.getName() + " not loaded via SPI",
-                providers.anyMatch(p -> p instanceof CloudLoggingSpanExporterProvider));
+        assertTrue(providers.anyMatch(p -> p instanceof CloudLoggingSpanExporterProvider),
+                CloudLoggingSpanExporterProvider.class.getName() + " not loaded via SPI");
     }
 
     @Test
