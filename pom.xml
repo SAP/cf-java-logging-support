@@ -127,7 +127,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson-jr.version>2.14.2</jackson-jr.version>
+        <jackson-jr.version>2.18.2</jackson-jr.version>
         <slf4j.version>1.7.36</slf4j.version>
         <logback.version>1.2.13</logback.version>
         <log4j2.version>2.20.0</log4j2.version>
@@ -145,7 +145,7 @@
         <gpg.plugin.version>1.6</gpg.plugin.version>
         <maven.compiler.release>8</maven.compiler.release>
         <java-jwt.version>4.4.0</java-jwt.version>
-        <jackson-databind.version>2.13.4.1</jackson-databind.version>
+        <jackson-databind.version>2.18.2</jackson-databind.version>
         <httpclient.version>4.5.14</httpclient.version>
     </properties>
 
