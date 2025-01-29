@@ -1,10 +1,10 @@
 package com.sap.hcp.cf.logging.jersey.filter;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
 
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;

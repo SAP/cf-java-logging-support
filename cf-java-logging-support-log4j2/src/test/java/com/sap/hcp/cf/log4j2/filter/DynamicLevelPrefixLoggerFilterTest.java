@@ -1,7 +1,7 @@
 package com.sap.hcp.cf.log4j2.filter;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
 import org.apache.logging.log4j.core.impl.JdkMapAdapterStringMap;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
 import com.sap.hcp.cf.logging.common.helper.DynamicLogLevelHelper;

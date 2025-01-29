@@ -16,17 +16,19 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.slf4j.MDC;
 
 import com.sap.hcp.cf.logging.common.request.HttpHeader;
 import com.sap.hcp.cf.logging.common.request.HttpHeaders;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CorrelationIdFilterTest {
 
     private static final String KNOWN_CORRELATION_ID = UUID.randomUUID().toString();
@@ -42,7 +44,7 @@ public class CorrelationIdFilterTest {
 
     private ContextMapExtractor mdcExtractor;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         MDC.clear();
         mdcExtractor = new ContextMapExtractor();
@@ -116,7 +118,8 @@ public class CorrelationIdFilterTest {
         HttpHeader myTraceparentHeader = new HttpTestHeader("my-traceparent-header", "my-traceparent-field", null,
                                                             false);
         when(request.getHeader("my-correlationId-header")).thenReturn(KNOWN_CORRELATION_ID);
-        when(request.getHeader("my-traceparent-header")).thenReturn(KNOWN_TRACEPARENT);
+        // TODO: check why this needs no stubbing anymore
+        //.when(request.getHeader("my-traceparent-header")).thenReturn(KNOWN_TRACEPARENT);
 
         new CorrelationIdFilter(myCorrelationIdHeader, myTraceparentHeader).doFilter(request, response, chain);
 
@@ -125,6 +128,7 @@ public class CorrelationIdFilterTest {
     }
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     public void usesCustomTraceparentHeader() throws Exception {
         HttpHeader myCorrelationIdHeader = new HttpTestHeader("my-correlationId-header", "my-correlationId-field", null,
                                                               false);
@@ -139,6 +143,7 @@ public class CorrelationIdFilterTest {
     }
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     public void usesTraceparentIfCorrelationIdHeaderNotPresent() throws Exception {
         when(request.getHeader(HttpHeaders.W3C_TRACEPARENT.getName())).thenReturn(KNOWN_TRACEPARENT);
 

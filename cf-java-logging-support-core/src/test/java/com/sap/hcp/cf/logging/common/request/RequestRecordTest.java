@@ -13,8 +13,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
 import com.fasterxml.jackson.jr.ob.JSON;
@@ -31,7 +31,7 @@ public class RequestRecordTest {
 
     private RequestRecord rrec;
 
-    @Before
+    @BeforeEach
     public void resetRequestRecordClock() {
         setRequestRecordClock(FIXED_CLOCK_EPOCH);
     }

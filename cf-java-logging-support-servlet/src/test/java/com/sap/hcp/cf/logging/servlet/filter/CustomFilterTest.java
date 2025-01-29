@@ -4,6 +4,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.EnumSet;
 
@@ -12,6 +15,10 @@ import javax.servlet.Filter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.core.Appender;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -20,17 +27,34 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import com.sap.hcp.cf.logging.common.Fields;
 import com.sap.hcp.cf.logging.common.request.HttpHeaders;
 
+@ExtendWith(MockitoExtension.class)
 public class CustomFilterTest {
 
-    @Rule
-    public SystemOutRule systemOutRule = new SystemOutRule();
+    @Mock
+    private Appender mockedAppender;
+
+    @Captor
+    private ArgumentCaptor<LoggingEvent> loggingEventCaptor;
+
+    @BeforeEach
+    public void setupLogCapturing() {
+        Logger loggerOfInterest = (Logger) LoggerFactory.getLogger(LoggingTestServlet.class.getName());
+        loggerOfInterest.addAppender(mockedAppender);
+        loggerOfInterest.setLevel(Level.INFO);
+    }
 
     @Test
     public void setsFixedTenantId() throws Exception {
@@ -39,9 +63,10 @@ public class CustomFilterTest {
             jetty.start();
             try (CloseableHttpResponse response = client.execute(createBasicGetRequest(jetty))) {
                 assertThat(response.getStatusLine().getStatusCode(), is(equalTo(200)));
-                assertThat(systemOutRule.findLineAsMapWith(Fields.MSG, LoggingTestServlet.LOG_MESSAGE), hasEntry(
-                                                                                                                 Fields.TENANT_ID,
-                                                                                                                 "my_tenant"));
+                verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+                LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+                assertEquals(Level.INFO, loggingEvent.getLevel());
+                assertThat(loggingEvent.getMDCPropertyMap(), hasEntry(Fields.TENANT_ID, "my_tenant"));
             }
         } finally {
             jetty.stop();
@@ -67,11 +92,10 @@ public class CustomFilterTest {
             request.addHeader(HttpHeaders.TENANT_ID.getName(), "other_tenant");
             try (CloseableHttpResponse response = client.execute(request)) {
                 assertThat(response.getStatusLine().getStatusCode(), is(equalTo(200)));
-                assertThat(systemOutRule.findLineAsMapWith(Fields.MSG, LoggingTestServlet.LOG_MESSAGE), hasEntry(
-                                                                                                                 Fields.TENANT_ID,
-                                                                                                                 "custom_tenant"));
-                assertThat(systemOutRule.findLineAsMapWith(Fields.LAYER, "[SERVLET]"), hasEntry(Fields.TENANT_ID,
-                                                                                                "custom_tenant"));
+                verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+                LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+                assertEquals(Level.INFO, loggingEvent.getLevel());
+                assertThat(loggingEvent.getMDCPropertyMap(), hasEntry(Fields.TENANT_ID, "custom_tenant"));
             }
         } finally {
             jetty.stop();
@@ -87,11 +111,10 @@ public class CustomFilterTest {
             jetty.start();
             try (CloseableHttpResponse response = client.execute(createBasicGetRequest(jetty))) {
                 assertThat(response.getStatusLine().getStatusCode(), is(equalTo(200)));
-                assertThat(systemOutRule.findLineAsMapWith(Fields.MSG, LoggingTestServlet.LOG_MESSAGE), hasEntry(
-                                                                                                                 Fields.CORRELATION_ID,
-                                                                                                                 "my_correlation"));
-                assertThat(systemOutRule.findLineAsMapWith(Fields.LAYER, "[SERVLET]"), hasEntry(Fields.CORRELATION_ID,
-                                                                                                "my_correlation"));
+                verify(mockedAppender, times(1)).doAppend(loggingEventCaptor.capture());
+                LoggingEvent loggingEvent = loggingEventCaptor.getAllValues().get(0);
+                assertEquals(Level.INFO, loggingEvent.getLevel());
+                assertThat(loggingEvent.getMDCPropertyMap(), hasEntry(Fields.CORRELATION_ID, "my_correlation"));
             }
         } finally {
             jetty.stop();

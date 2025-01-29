@@ -1,22 +1,22 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelConfiguration;
 import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelProcessor;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DynamicLogLevelFilterTest {
 
     @Mock
@@ -52,7 +52,7 @@ public class DynamicLogLevelFilterTest {
         new DynamicLogLevelFilter(() -> configuration, () -> processor).doFilter(request, response, chain);
 
         verify(processor).removeDynamicLogLevelFromMDC();
-        verifyZeroInteractions(processor);
+        verifyNoMoreInteractions(processor);
 
     }
 

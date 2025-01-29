@@ -2,17 +2,17 @@ package com.sap.hcp.cf.logging.common;
 
 import static com.sap.hcp.cf.logging.common.LogContext.getCorrelationId;
 import static com.sap.hcp.cf.logging.common.LogContext.initializeContext;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.text.IsEmptyString.isEmptyOrNullString;
-import static org.junit.Assert.assertThat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
 public class TestLoggerContext extends AbstractTest {

@@ -2,11 +2,11 @@ package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.pivotal.cfenv.core.CfService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,11 +16,11 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Matchers.anyListOf;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DynatraceServicesProviderTest {
 
     @Mock
@@ -29,9 +29,9 @@ public class DynatraceServicesProviderTest {
     @Mock
     private CfService mockService;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        when(adapter.stream(anyListOf(String.class), anyListOf(String.class))).thenReturn(Stream.of(mockService));
+        when(adapter.stream(anyList(), anyList())).thenReturn(Stream.of(mockService));
     }
 
     @Test

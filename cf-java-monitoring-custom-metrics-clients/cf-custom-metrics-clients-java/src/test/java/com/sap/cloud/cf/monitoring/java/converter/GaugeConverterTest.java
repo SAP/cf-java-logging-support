@@ -1,15 +1,13 @@
 package com.sap.cloud.cf.monitoring.java.converter;
 
 import static com.sap.cloud.cf.monitoring.java.converter.ConverterTestUtil.SUFFIX_VALUE;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import com.codahale.metrics.Gauge;
 import com.sap.cloud.cf.monitoring.client.model.Metric;
@@ -21,9 +19,6 @@ public class GaugeConverterTest {
     private static final String GAUGE_METRIC = "gaugeMetric";
     private static final Double METRIC_VALUE = 5.00;
     private final long currentTimeMillis = System.currentTimeMillis();
-    
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void testGaugeMetric() {
@@ -46,18 +41,19 @@ public class GaugeConverterTest {
 
     @Test
     public void testGaugeMetricWithNonNumberValue() {
-        SortedMap<String, Gauge> gauges = new TreeMap<>();
-        Gauge<String> gauge = new Gauge<String>() {
+        final Gauge<String> gauge = new Gauge<String>() {
             @Override
             public String getValue() {
                 return String.valueOf(METRIC_VALUE);
             }
         };
-        gauges.put(GAUGE_METRIC, gauge);
+        Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+            SortedMap<String, Gauge> gauges = new TreeMap<>();
 
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(String.format("The type {%s} for Gauge {%s} is invalid. The supported type is {%s}", gauge.getValue().getClass().getName(), GAUGE_METRIC, Number.class.getName()));
+            gauges.put(GAUGE_METRIC, gauge);
 
-        new GaugeConverter().convert(gauges, currentTimeMillis);
+            new GaugeConverter().convert(gauges, currentTimeMillis);
+        });
+        assertTrue(exception.getMessage().contains(String.format("The type {%s} for Gauge {%s} is invalid. The supported type is {%s}", gauge.getValue().getClass().getName(), GAUGE_METRIC, Number.class.getName())));
     }
 }
