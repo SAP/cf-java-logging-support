@@ -58,7 +58,6 @@ public class AddHttpHeadersToLogContextFilterTest {
 
     @Test
     public void ignoresHttpHeadersWithoutField() throws Exception {
-        when(request.getHeader("my-header")).thenReturn("my-value");
         HttpTestHeader myHeader = new HttpTestHeader("my-header", null, null, true);
 
         new AddHttpHeadersToLogContextFilter(myHeader).doFilter(request, response, chain);
