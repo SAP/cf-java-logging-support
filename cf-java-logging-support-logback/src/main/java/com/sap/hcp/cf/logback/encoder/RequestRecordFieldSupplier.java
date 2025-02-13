@@ -8,6 +8,11 @@ public class RequestRecordFieldSupplier extends AbstractRequestRecordFieldSuppli
         implements LogbackContextFieldSupplier {
 
     @Override
+    public int order() {
+        return LogbackContextFieldSupplier.REQUEST_FIELDS;
+    }
+
+    @Override
     protected boolean isRequestLog(ILoggingEvent event) {
         return ILoggingEventUtilities.isRequestLog(event);
     }
