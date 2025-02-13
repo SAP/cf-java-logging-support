@@ -16,6 +16,7 @@ import io.opentelemetry.sdk.metrics.internal.aggregator.AggregationUtil;
 import io.pivotal.cfenv.core.CfService;
 
 import java.time.Duration;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
@@ -44,6 +45,24 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
     private static Duration getTimeOut(ConfigProperties config) {
         Duration timeout = config.getDuration("otel.exporter.dynatrace.metrics.timeout");
         return timeout != null ? timeout : config.getDuration("otel.exporter.dynatrace.timeout");
+    }
+
+    private static AggregationTemporalitySelector getAggregationTemporalitySelector(ConfigProperties config) {
+        String temporalityStr = config.getString("otel.exporter.dynatrace.metrics.temporality.preference");
+        if (temporalityStr == null) {
+            return AggregationTemporalitySelector.deltaPreferred();
+        }
+        AggregationTemporalitySelector temporalitySelector;
+        switch (temporalityStr.toLowerCase(Locale.ROOT)) {
+        case "cumulative":
+            return AggregationTemporalitySelector.alwaysCumulative();
+        case "delta":
+            return AggregationTemporalitySelector.deltaPreferred();
+        case "lowmemory":
+            return AggregationTemporalitySelector.lowMemory();
+        default:
+            throw new ConfigurationException("Unrecognized aggregation temporality: " + temporalityStr);
+        }
     }
 
     private static DefaultAggregationSelector getDefaultAggregationSelector(ConfigProperties config) {
@@ -108,7 +127,7 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
         OtlpHttpMetricExporterBuilder builder = OtlpHttpMetricExporter.builder();
         builder.setEndpoint(apiUrl + DT_APIURL_METRICS_SUFFIX).setCompression(getCompression(config))
                .addHeader("Authorization", "Api-Token " + apiToken).setRetryPolicy(RetryPolicy.getDefault())
-               .setAggregationTemporalitySelector(AggregationTemporalitySelector.alwaysCumulative())
+               .setAggregationTemporalitySelector(getAggregationTemporalitySelector(config))
                .setDefaultAggregationSelector(getDefaultAggregationSelector(config));
 
         Duration timeOut = getTimeOut(config);
