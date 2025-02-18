@@ -15,6 +15,11 @@ import java.util.Map;
 public class BaseFieldSupplier implements LogbackContextFieldSupplier {
 
     @Override
+    public int order() {
+        return LogbackContextFieldSupplier.BASE_FIELDS;
+    }
+
+    @Override
     public Map<String, Object> map(ILoggingEvent event) {
         Map<String, Object> fields = new HashMap<>(6);
         fields.put(Fields.WRITTEN_AT, Instant.ofEpochMilli(event.getTimeStamp()).toString());

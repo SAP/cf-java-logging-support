@@ -10,6 +10,11 @@ public class EventContextFieldSupplier extends AbstractContextFieldSupplier<ILog
         implements LogbackContextFieldSupplier {
 
     @Override
+    public int order() {
+        return LogbackContextFieldSupplier.CONTEXT_FIELDS;
+    }
+
+    @Override
     protected Object[] getParameterArray(ILoggingEvent event) {
         return event.getArgumentArray();
     }

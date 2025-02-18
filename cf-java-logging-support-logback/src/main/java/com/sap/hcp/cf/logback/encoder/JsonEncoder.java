@@ -5,7 +5,6 @@ import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.ThrowableProxy;
 import ch.qos.logback.core.encoder.Encoder;
 import ch.qos.logback.core.encoder.EncoderBase;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.jr.ob.JSON;
 import com.fasterxml.jackson.jr.ob.JSON.Builder;
 import com.fasterxml.jackson.jr.ob.JSONComposer;
@@ -51,8 +50,8 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
 
     private static final String NEWLINE = "\n";
     private Charset charset = StandardCharsets.UTF_8;
-    private List<String> customFieldMdcKeyNames = new ArrayList<>();
-    private List<String> retainFieldMdcKeyNames = new ArrayList<>();
+    private final List<String> customFieldMdcKeyNames = new ArrayList<>();
+    private final List<String> retainFieldMdcKeyNames = new ArrayList<>();
     private boolean sendDefaultValues = false;
     private List<LogbackContextFieldSupplier> logbackContextFieldSuppliers = new ArrayList<>();
     private List<ContextFieldSupplier> contextFieldSuppliers = new ArrayList<>();
@@ -230,7 +229,7 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
     public void addContextFieldSupplier(String className) {
         try {
             ContextFieldSupplier instance = createInstance(className, ContextFieldSupplier.class);
-            contextFieldSuppliers.add((ContextFieldSupplier) instance);
+            contextFieldSuppliers.add(instance);
 
         } catch (Exception cause) {
             LoggerHolder.LOG.warn("Cannot register ContextFieldSupplier.", cause);
@@ -242,6 +241,10 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
         this.json = new JSON(jsonBuilder);
         this.contextFieldConverter =
                 new ContextFieldConverter(sendDefaultValues, customFieldMdcKeyNames, retainFieldMdcKeyNames);
+        this.contextFieldSuppliers =
+                ContextFieldSuppliersServiceLoader.addSpiContextFieldSuppliers(contextFieldSuppliers);
+        this.logbackContextFieldSuppliers =
+                ContextFieldSuppliersServiceLoader.addSpiLogbackContextFieldSuppliers(logbackContextFieldSuppliers);
         super.start();
     }
 
@@ -277,8 +280,7 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
         }
     }
 
-    private <P extends ComposerBase> void addMarkers(ObjectComposer<P> oc, ILoggingEvent event)
-            throws IOException, JsonProcessingException {
+    private <P extends ComposerBase> void addMarkers(ObjectComposer<P> oc, ILoggingEvent event) throws IOException {
         if (sendDefaultValues || event.getMarker() != null) {
             ArrayComposer<ObjectComposer<P>> ac = oc.startArrayField(Fields.CATEGORIES);
             addMarker(ac, event.getMarker());
@@ -306,8 +308,7 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
         return contextFields;
     }
 
-    private <P extends ComposerBase> void addStacktrace(ObjectComposer<P> oc, ILoggingEvent event)
-            throws IOException, JsonProcessingException {
+    private <P extends ComposerBase> void addStacktrace(ObjectComposer<P> oc, ILoggingEvent event) throws IOException {
         IThrowableProxy proxy = event.getThrowableProxy();
         if (proxy != null && ThrowableProxy.class.isAssignableFrom(proxy.getClass())) {
             Throwable throwable = ((ThrowableProxy) proxy).getThrowable();
