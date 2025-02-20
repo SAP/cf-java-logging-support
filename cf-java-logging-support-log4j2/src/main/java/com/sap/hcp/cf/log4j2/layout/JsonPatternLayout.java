@@ -1,21 +1,18 @@
 package com.sap.hcp.cf.log4j2.layout;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.jr.ob.JSON;
 import com.fasterxml.jackson.jr.ob.JSONComposer;
 import com.fasterxml.jackson.jr.ob.comp.ArrayComposer;
 import com.fasterxml.jackson.jr.ob.comp.ComposerBase;
 import com.fasterxml.jackson.jr.ob.comp.ObjectComposer;
 import com.sap.hcp.cf.log4j2.converter.api.Log4jContextFieldSupplier;
-import com.sap.hcp.cf.log4j2.layout.supppliers.BaseFieldSupplier;
-import com.sap.hcp.cf.log4j2.layout.supppliers.EventContextFieldSupplier;
 import com.sap.hcp.cf.log4j2.layout.supppliers.LogEventUtilities;
-import com.sap.hcp.cf.log4j2.layout.supppliers.RequestRecordFieldSupplier;
 import com.sap.hcp.cf.logging.common.Fields;
 import com.sap.hcp.cf.logging.common.converter.LineWriter;
 import com.sap.hcp.cf.logging.common.converter.StacktraceLines;
 import com.sap.hcp.cf.logging.common.serialization.ContextFieldConverter;
 import com.sap.hcp.cf.logging.common.serialization.ContextFieldSupplier;
+import com.sap.hcp.cf.logging.common.serialization.ContextFieldSupplierServiceLoader;
 import com.sap.hcp.cf.logging.common.serialization.JsonSerializationException;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.StringLayout;
@@ -28,10 +25,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * A {@link StringLayout} implementation that encodes an {@link LogEvent} as a JSON object.
@@ -56,48 +52,62 @@ public final class JsonPatternLayout extends AbstractStringLayout {
 
     private static final String NEWLINE = "\n";
     private final ContextFieldConverter contextFieldConverter;
-    private List<Log4jContextFieldSupplier> log4jContextFieldSuppliers = new ArrayList<>();
-    private List<ContextFieldSupplier> contextFieldSuppliers = new ArrayList<>();
-    private int maxStacktraceSize;
+    private final List<Log4jContextFieldSupplier> log4jContextFieldSuppliers;
+    private final List<ContextFieldSupplier> contextFieldSuppliers;
+    private final int maxStacktraceSize;
 
-    private boolean sendDefaultValues;
+    private final boolean sendDefaultValues;
 
-    private JSON json;
+    private final JSON json;
 
-    protected JsonPatternLayout(Charset charset, boolean sendDefaultValues, int maxStacktraceSize,
-                                String jsonBuilderClass, CustomFieldElement[] customFieldMdcKeys,
-                                Log4jContextFieldSupplierElement[] log4jContextFieldSupplierElements,
-                                ContextFieldSupplierElement[] contextFieldSupplierElements) {
+    private JsonPatternLayout(Charset charset, boolean sendDefaultValues, int maxStacktraceSize,
+                              String jsonBuilderClass, CustomFieldElement[] customFieldMdcKeys,
+                              Log4jContextFieldSupplierElement[] log4jContextFieldSupplierElements,
+                              ContextFieldSupplierElement[] contextFieldSupplierElements) {
         super(charset);
         this.sendDefaultValues = sendDefaultValues;
         this.maxStacktraceSize = maxStacktraceSize > 0 ? maxStacktraceSize : 55 * 1024;
         this.contextFieldConverter = contextFieldConverter(sendDefaultValues, customFieldMdcKeys);
         this.json = createJson(jsonBuilderClass);
-        this.log4jContextFieldSuppliers.add(new BaseFieldSupplier());
-        this.log4jContextFieldSuppliers.add(new EventContextFieldSupplier());
-        this.log4jContextFieldSuppliers.add(new RequestRecordFieldSupplier());
-        if (log4jContextFieldSupplierElements != null) {
-            for (Log4jContextFieldSupplierElement current: log4jContextFieldSupplierElements) {
-                try {
-                    Log4jContextFieldSupplier instance =
-                            createInstance(current.getSupplierClass(), Log4jContextFieldSupplier.class);
-                    log4jContextFieldSuppliers.add(instance);
-                } catch (ReflectiveOperationException cause) {
-                    LOGGER.warn("Cannot register Log4jContextFieldSupplier.", cause);
-                }
-            }
+        this.log4jContextFieldSuppliers =
+                getContextFieldSuppliers(log4jContextFieldSupplierElements, Log4jContextFieldSupplier.class);
+        this.contextFieldSuppliers = getContextFieldSuppliers(contextFieldSupplierElements, ContextFieldSupplier.class);
+    }
+
+    private static <E extends ElementSupplier, S extends ContextFieldSupplier> List<S> getContextFieldSuppliers(
+            E[] elements, Class<S> supplierClass) {
+        Stream<S> configSuppliers = loadContextFieldSuppliersFromConfig(elements, mapElementTo(supplierClass));
+        return ContextFieldSupplierServiceLoader.addFieldSuppliers(configSuppliers, supplierClass);
+    }
+
+    private static <E extends ElementSupplier, S extends ContextFieldSupplier> Stream<S> loadContextFieldSuppliersFromConfig(
+            E[] elements, Function<E, S> mapper) {
+        if (elements == null || elements.length == 0) {
+            return Stream.empty();
         }
-        if (contextFieldSupplierElements != null) {
-            for (ContextFieldSupplierElement current: contextFieldSupplierElements) {
-                try {
-                    ContextFieldSupplier instance =
-                            createInstance(current.getSupplierClass(), ContextFieldSupplier.class);
-                    contextFieldSuppliers.add(instance);
-                } catch (ReflectiveOperationException cause) {
-                    LOGGER.warn("Cannot register ContextFieldSupplier.", cause);
-                }
+        return Stream.of(elements).map(mapper).filter(Objects::nonNull);
+    }
+
+    private static <T extends ElementSupplier, R extends ContextFieldSupplier> Function<T, R> mapElementTo(
+            Class<R> clazz) {
+        return e -> {
+            try {
+                return mapElementTo(e.getSupplierClass(), clazz);
+            } catch (ReflectiveOperationException cause) {
+                LOGGER.warn("Cannot register ContextFieldSupplier <" + clazz.getSimpleName() + ">.", cause);
+                return null;
             }
-        }
+        };
+    }
+
+    // for testing
+    List<ContextFieldSupplier> getContextFieldSuppliers() {
+        return contextFieldSuppliers;
+    }
+
+    // for testing
+    List<Log4jContextFieldSupplier> getLog4jContextFieldSuppliers() {
+        return log4jContextFieldSuppliers;
     }
 
     @PluginFactory
@@ -125,7 +135,7 @@ public final class JsonPatternLayout extends AbstractStringLayout {
         }
         try {
 
-            return createInstance(jsonBuilderClass, JSON.Builder.class).build();
+            return mapElementTo(jsonBuilderClass, JSON.Builder.class).build();
         } catch (ReflectiveOperationException cause) {
             LOGGER.warn("Cannot register JsonBuilder, using default.", cause);
             return JSON.std;
@@ -145,7 +155,7 @@ public final class JsonPatternLayout extends AbstractStringLayout {
         return new ContextFieldConverter(sendDefaultValues, customFieldMdcKeyNames, retainFieldMdcKeyNames);
     }
 
-    private static <T> T createInstance(String className, Class<T> interfaceClass) throws ReflectiveOperationException {
+    private static <T> T mapElementTo(String className, Class<T> interfaceClass) throws ReflectiveOperationException {
         ClassLoader classLoader = JsonPatternLayout.class.getClassLoader();
         Class<? extends T> clazz = classLoader.loadClass(className).asSubclass(interfaceClass);
         return clazz.getDeclaredConstructor().newInstance();
@@ -169,8 +179,7 @@ public final class JsonPatternLayout extends AbstractStringLayout {
         }
     }
 
-    private <P extends ComposerBase> void addMarkers(ObjectComposer<P> oc, LogEvent event)
-            throws IOException, JsonProcessingException {
+    private <P extends ComposerBase> void addMarkers(ObjectComposer<P> oc, LogEvent event) throws IOException {
         if (sendDefaultValues || event.getMarker() != null) {
             ArrayComposer<ObjectComposer<P>> ac = oc.startArrayField(Fields.CATEGORIES);
             addMarker(ac, event.getMarker());
@@ -198,8 +207,7 @@ public final class JsonPatternLayout extends AbstractStringLayout {
         return contextFields;
     }
 
-    private <P extends ComposerBase> void addStacktrace(ObjectComposer<P> oc, LogEvent event)
-            throws IOException, JsonProcessingException {
+    private <P extends ComposerBase> void addStacktrace(ObjectComposer<P> oc, LogEvent event) throws IOException {
         if (event.getThrown() != null) {
             LineWriter lw = new LineWriter();
             event.getThrown().printStackTrace(new PrintWriter(lw));
