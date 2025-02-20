@@ -1,0 +1,3 @@
+com.sap.hcp.cf.logback.encoder.BaseFieldSupplier
+com.sap.hcp.cf.logback.encoder.EventContextFieldSupplier
+com.sap.hcp.cf.logback.encoder.RequestRecordFieldSupplier

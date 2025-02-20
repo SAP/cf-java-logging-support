@@ -76,7 +76,7 @@ public final class JsonPatternLayout extends AbstractStringLayout {
 
     private static <E extends ElementSupplier, S extends ContextFieldSupplier> List<S> getContextFieldSuppliers(
             E[] elements, Class<S> supplierClass) {
-        Stream<S> configSuppliers = loadContextFieldSuppliersFromConfig(elements, mapElementTo(supplierClass));
+        Stream<S> configSuppliers = loadContextFieldSuppliersFromConfig(elements, createInstance(supplierClass));
         return ContextFieldSupplierServiceLoader.addFieldSuppliers(configSuppliers, supplierClass);
     }
 
@@ -88,11 +88,11 @@ public final class JsonPatternLayout extends AbstractStringLayout {
         return Stream.of(elements).map(mapper).filter(Objects::nonNull);
     }
 
-    private static <T extends ElementSupplier, R extends ContextFieldSupplier> Function<T, R> mapElementTo(
+    private static <T extends ElementSupplier, R extends ContextFieldSupplier> Function<T, R> createInstance(
             Class<R> clazz) {
         return e -> {
             try {
-                return mapElementTo(e.getSupplierClass(), clazz);
+                return createInstance(e.getSupplierClass(), clazz);
             } catch (ReflectiveOperationException cause) {
                 LOGGER.warn("Cannot register ContextFieldSupplier <" + clazz.getSimpleName() + ">.", cause);
                 return null;
@@ -135,7 +135,7 @@ public final class JsonPatternLayout extends AbstractStringLayout {
         }
         try {
 
-            return mapElementTo(jsonBuilderClass, JSON.Builder.class).build();
+            return createInstance(jsonBuilderClass, JSON.Builder.class).build();
         } catch (ReflectiveOperationException cause) {
             LOGGER.warn("Cannot register JsonBuilder, using default.", cause);
             return JSON.std;
@@ -155,7 +155,7 @@ public final class JsonPatternLayout extends AbstractStringLayout {
         return new ContextFieldConverter(sendDefaultValues, customFieldMdcKeyNames, retainFieldMdcKeyNames);
     }
 
-    private static <T> T mapElementTo(String className, Class<T> interfaceClass) throws ReflectiveOperationException {
+    private static <T> T createInstance(String className, Class<T> interfaceClass) throws ReflectiveOperationException {
         ClassLoader classLoader = JsonPatternLayout.class.getClassLoader();
         Class<? extends T> clazz = classLoader.loadClass(className).asSubclass(interfaceClass);
         return clazz.getDeclaredConstructor().newInstance();
