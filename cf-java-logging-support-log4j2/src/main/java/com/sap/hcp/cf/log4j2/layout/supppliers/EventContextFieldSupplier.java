@@ -10,6 +10,11 @@ public class EventContextFieldSupplier extends AbstractContextFieldSupplier<LogE
         implements Log4jContextFieldSupplier {
 
     @Override
+    public int order() {
+        return Log4jContextFieldSupplier.CONTEXT_FIELDS;
+    }
+
+    @Override
     protected Map<String, String> getContextMap(LogEvent event) {
         return event.getContextData().toMap();
     }

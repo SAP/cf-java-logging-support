@@ -6,9 +6,9 @@ import org.apache.logging.log4j.core.config.plugins.PluginBuilderAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginBuilderFactory;
 
 @Plugin(name = "contextFieldSupplier", category = Node.CATEGORY, printObject = true)
-public class ContextFieldSupplierElement {
+public class ContextFieldSupplierElement implements ElementSupplier {
 
-    private String supplierClass;
+    private final String supplierClass;
 
     public ContextFieldSupplierElement(Builder builder) {
         this.supplierClass = builder.clazz;
@@ -19,6 +19,7 @@ public class ContextFieldSupplierElement {
         return new Builder();
     }
 
+    @Override
     public String getSupplierClass() {
         return supplierClass;
     }

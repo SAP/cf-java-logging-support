@@ -13,6 +13,11 @@ import java.util.Map;
 public class BaseFieldSupplier implements Log4jContextFieldSupplier {
 
     @Override
+    public int order() {
+        return Log4jContextFieldSupplier.BASE_FIELDS;
+    }
+
+    @Override
     public Map<String, Object> map(LogEvent event) {
         Map<String, Object> fields = new HashMap<>(6);
         fields.put(Fields.WRITTEN_AT, getIsoTs(event));

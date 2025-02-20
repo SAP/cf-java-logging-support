@@ -8,6 +8,11 @@ public class RequestRecordFieldSupplier extends AbstractRequestRecordFieldSuppli
         implements Log4jContextFieldSupplier {
 
     @Override
+    public int order() {
+        return Log4jContextFieldSupplier.REQUEST_FIELDS;
+    }
+
+    @Override
     protected boolean isRequestLog(LogEvent event) {
         return LogEventUtilities.isRequestLog(event);
     }

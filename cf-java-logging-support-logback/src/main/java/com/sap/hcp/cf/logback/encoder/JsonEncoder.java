@@ -31,6 +31,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static com.sap.hcp.cf.logging.common.serialization.ContextFieldSupplierServiceLoader.addFieldSuppliers;
+
 /**
  * An {@link Encoder} implementation that encodes an {@link ILoggingEvent} as a JSON object.
  * <p>
@@ -61,9 +63,6 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
     private ContextFieldConverter contextFieldConverter;
 
     public JsonEncoder() {
-        logbackContextFieldSuppliers.add(new BaseFieldSupplier());
-        logbackContextFieldSuppliers.add(new EventContextFieldSupplier());
-        logbackContextFieldSuppliers.add(new RequestRecordFieldSupplier());
     }
 
     /**
@@ -212,6 +211,12 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
         }
     }
 
+    // for testing
+
+    List<LogbackContextFieldSupplier> getLogbackContextFieldSuppliers() {
+        return logbackContextFieldSuppliers;
+    }
+
     /**
      * <p>
      * Use this class to to provide additional context fields, e.g. from the environment. The provided classes are
@@ -236,15 +241,19 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
         }
     }
 
+    // for testing
+    List<ContextFieldSupplier> getContextFieldSuppliers() {
+        return contextFieldSuppliers;
+    }
+
     @Override
     public void start() {
         this.json = new JSON(jsonBuilder);
         this.contextFieldConverter =
                 new ContextFieldConverter(sendDefaultValues, customFieldMdcKeyNames, retainFieldMdcKeyNames);
-        this.contextFieldSuppliers =
-                ContextFieldSuppliersServiceLoader.addSpiContextFieldSuppliers(contextFieldSuppliers);
+        this.contextFieldSuppliers = addFieldSuppliers(contextFieldSuppliers.stream(), ContextFieldSupplier.class);
         this.logbackContextFieldSuppliers =
-                ContextFieldSuppliersServiceLoader.addSpiLogbackContextFieldSuppliers(logbackContextFieldSuppliers);
+                addFieldSuppliers(logbackContextFieldSuppliers.stream(), LogbackContextFieldSupplier.class);
         super.start();
     }
 

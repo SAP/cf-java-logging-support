@@ -1,2 +1,1 @@
-com.sap.hcp.cf.logback.encoder.ContextFieldSuppliersServiceLoaderTest$FirstContextFieldSupplier
-com.sap.hcp.cf.logback.encoder.ContextFieldSuppliersServiceLoaderTest$SecondContextFieldSupplier
+com.sap.hcp.cf.logback.encoder.JsonEncoderTest$SpiContextFieldSupplier
