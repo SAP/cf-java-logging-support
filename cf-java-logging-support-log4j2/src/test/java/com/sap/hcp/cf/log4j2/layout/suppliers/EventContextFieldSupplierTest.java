@@ -1,7 +1,6 @@
 package com.sap.hcp.cf.log4j2.layout.suppliers;
 
 import com.sap.hcp.cf.log4j2.converter.api.Log4jContextFieldSupplier;
-import com.sap.hcp.cf.log4j2.layout.supppliers.EventContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.customfields.CustomField;
 import org.apache.logging.log4j.core.LogEvent;
 import org.junit.jupiter.api.Test;

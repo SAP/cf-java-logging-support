@@ -151,4 +151,22 @@ public class TestAppLog {
         LOGGER.info(jsonMsg);
         assertLastEventMessage(console).isEqualTo(jsonMsg);
     }
+
+    @Test
+    void testKeyValuePairs(ConsoleOutput console) {
+        LOGGER.atInfo().addKeyValue(CUSTOM_FIELD_KEY, SOME_VALUE).addKeyValue(RETAINED_FIELD_KEY, SOME_OTHER_VALUE)
+              .addKeyValue(SOME_KEY, SOME_VALUE).log(TEST_MESSAGE);
+
+        assertLastEventMessage(console).isEqualTo(TEST_MESSAGE);
+        assertLastEventCustomFields(console) //
+                                             .anySatisfy(e -> assertCustomField(e).hasKey(CUSTOM_FIELD_KEY)
+                                                                                  .hasValue(SOME_VALUE)
+                                                                                  .hasIndex(CUSTOM_FIELD_INDEX))
+                                             .anySatisfy(e -> assertCustomField(e).hasKey(RETAINED_FIELD_KEY)
+                                                                                  .hasValue(SOME_OTHER_VALUE)
+                                                                                  .hasIndex(RETAINED_FIELD_INDEX));
+        assertLastEventFields(console).containsEntry(RETAINED_FIELD_KEY, SOME_OTHER_VALUE);
+        assertLastEventFields(console).containsEntry(SOME_KEY, SOME_VALUE);
+    }
+
 }

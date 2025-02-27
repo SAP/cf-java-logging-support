@@ -1,9 +1,9 @@
 package com.sap.hcp.cf.log4j2.layout;
 
 import com.sap.hcp.cf.log4j2.converter.api.Log4jContextFieldSupplier;
-import com.sap.hcp.cf.log4j2.layout.supppliers.BaseFieldSupplier;
-import com.sap.hcp.cf.log4j2.layout.supppliers.EventContextFieldSupplier;
-import com.sap.hcp.cf.log4j2.layout.supppliers.RequestRecordFieldSupplier;
+import com.sap.hcp.cf.log4j2.layout.suppliers.BaseFieldSupplier;
+import com.sap.hcp.cf.log4j2.layout.suppliers.EventContextFieldSupplier;
+import com.sap.hcp.cf.log4j2.layout.suppliers.RequestRecordFieldSupplier;
 import com.sap.hcp.cf.logging.common.serialization.ContextFieldSupplier;
 import org.apache.logging.log4j.core.LogEvent;
 import org.junit.jupiter.api.Test;

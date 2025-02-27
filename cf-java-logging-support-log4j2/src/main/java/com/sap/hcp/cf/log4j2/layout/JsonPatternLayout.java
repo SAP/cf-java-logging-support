@@ -6,7 +6,7 @@ import com.fasterxml.jackson.jr.ob.comp.ArrayComposer;
 import com.fasterxml.jackson.jr.ob.comp.ComposerBase;
 import com.fasterxml.jackson.jr.ob.comp.ObjectComposer;
 import com.sap.hcp.cf.log4j2.converter.api.Log4jContextFieldSupplier;
-import com.sap.hcp.cf.log4j2.layout.supppliers.LogEventUtilities;
+import com.sap.hcp.cf.log4j2.layout.suppliers.LogEventUtilities;
 import com.sap.hcp.cf.logging.common.Fields;
 import com.sap.hcp.cf.logging.common.converter.LineWriter;
 import com.sap.hcp.cf.logging.common.converter.StacktraceLines;
