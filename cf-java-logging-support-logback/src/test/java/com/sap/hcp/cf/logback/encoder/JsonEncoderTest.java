@@ -34,6 +34,7 @@ class JsonEncoderTest {
         assertThat(ENCODER.getLogbackContextFieldSuppliers()).map(Object::getClass).map(Class::getName)
                                                              .containsExactly(BaseFieldSupplier.class.getName(),
                                                                               EventContextFieldSupplier.class.getName(),
+                                                                              KeyValuePairsFieldSupplier.class.getName(),
                                                                               RequestRecordFieldSupplier.class.getName(),
                                                                               SampleLogbackContextFieldSupplier.class.getName(),
                                                                               SpiLogbackContextFieldSupplier.class.getName());
