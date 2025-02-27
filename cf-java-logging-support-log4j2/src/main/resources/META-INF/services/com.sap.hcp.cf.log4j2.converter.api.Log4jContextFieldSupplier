@@ -1,0 +1,3 @@
+com.sap.hcp.cf.log4j2.layout.supppliers.BaseFieldSupplier
+com.sap.hcp.cf.log4j2.layout.supppliers.EventContextFieldSupplier
+com.sap.hcp.cf.log4j2.layout.supppliers.RequestRecordFieldSupplier
