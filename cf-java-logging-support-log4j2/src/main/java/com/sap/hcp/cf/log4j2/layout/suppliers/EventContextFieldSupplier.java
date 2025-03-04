@@ -1,4 +1,4 @@
-package com.sap.hcp.cf.log4j2.layout.supppliers;
+package com.sap.hcp.cf.log4j2.layout.suppliers;
 
 import com.sap.hcp.cf.log4j2.converter.api.Log4jContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.serialization.AbstractContextFieldSupplier;
