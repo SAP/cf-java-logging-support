@@ -12,7 +12,7 @@ public class CustomMetricsConfigurationFactory {
         new GsonBuilder().registerTypeAdapter(long.class, new LongIntervalGsonTypeAdapter()).create();
 
     public static CustomMetricsConfiguration create() {
-        return create(System.getenv());
+        return create(SystemGetEnvWrapper.getenv());
     }
 
     public static CustomMetricsConfiguration create(Map<String, String> env) {

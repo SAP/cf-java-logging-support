@@ -5,8 +5,9 @@ import static com.sap.hcp.cf.logging.common.customfields.CustomField.customField
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -60,9 +61,10 @@ public class TestCustomFields extends AbstractTest {
                                                                     CUSTOM_FIELD_INDEX));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullKey() {
-        customField(null, SOME_VALUE);
+        assertThrows(IllegalArgumentException.class, () ->
+            customField(null, SOME_VALUE));
     }
 
     @Test

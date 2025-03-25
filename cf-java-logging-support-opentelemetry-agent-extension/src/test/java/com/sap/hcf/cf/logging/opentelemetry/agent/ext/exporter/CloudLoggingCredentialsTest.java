@@ -2,7 +2,7 @@ package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
 import io.pivotal.cfenv.core.CfCredentials;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -10,8 +10,8 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CloudLoggingCredentialsTest {
 
@@ -44,7 +44,7 @@ public class CloudLoggingCredentialsTest {
         Map<String, Object> credData = getValidCredData();
         CfCredentials cfCredentials = new CfCredentials(credData);
         CloudLoggingCredentials credentials = PARSER.parse(cfCredentials);
-        assertTrue("Credentials should be valid", credentials.validate());
+        assertTrue(credentials.validate(), "Credentials should be valid");
     }
 
     @Test
@@ -53,7 +53,7 @@ public class CloudLoggingCredentialsTest {
         credData.remove("ingest-otlp-endpoint");
         CfCredentials cfCredentials = new CfCredentials(credData);
         CloudLoggingCredentials credentials = PARSER.parse(cfCredentials);
-        assertFalse("Credentials should be invalid", credentials.validate());
+        assertFalse(credentials.validate(), "Credentials should be invalid");
     }
 
     @Test
@@ -62,7 +62,7 @@ public class CloudLoggingCredentialsTest {
         credData.remove("ingest-otlp-key");
         CfCredentials cfCredentials = new CfCredentials(credData);
         CloudLoggingCredentials credentials = PARSER.parse(cfCredentials);
-        assertFalse("Credentials should be invalid", credentials.validate());
+        assertFalse(credentials.validate(), "Credentials should be invalid");
     }
 
     @Test
@@ -71,7 +71,7 @@ public class CloudLoggingCredentialsTest {
         credData.remove("ingest-otlp-cert");
         CfCredentials cfCredentials = new CfCredentials(credData);
         CloudLoggingCredentials credentials = PARSER.parse(cfCredentials);
-        assertFalse("Credentials should be invalid", credentials.validate());
+        assertFalse(credentials.validate(), "Credentials should be invalid");
     }
 
     @Test
@@ -80,7 +80,7 @@ public class CloudLoggingCredentialsTest {
         credData.remove("server-ca");
         CfCredentials cfCredentials = new CfCredentials(credData);
         CloudLoggingCredentials credentials = PARSER.parse(cfCredentials);
-        assertFalse("Credentials should be invalid", credentials.validate());
+        assertFalse(credentials.validate(), "Credentials should be invalid");
     }
 
     @Test

@@ -1,13 +1,14 @@
 package com.sap.hcp.cf.logging.common.converter;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class LineWriterTest {
 
@@ -29,11 +30,13 @@ public class LineWriterTest {
         assertThat(lines.getLines(), contains("first line", "second line"));
     }
 
-    @Test(expected = IndexOutOfBoundsException.class)
-    public void readNonexistentEntry() throws IOException {
-        LineWriter lines = new LineWriter();
-        lines.close();
-        lines.getLines().get(10);
+    @Test
+    public void readNonexistentEntry() {
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            LineWriter lines = new LineWriter();
+            lines.close();
+            lines.getLines().get(10);
+        });
     }
 
     @Test
