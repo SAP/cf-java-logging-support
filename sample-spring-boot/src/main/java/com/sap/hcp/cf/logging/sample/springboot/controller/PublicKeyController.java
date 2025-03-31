@@ -1,7 +1,6 @@
 package com.sap.hcp.cf.logging.sample.springboot.controller;
 
-import com.sap.hcp.cf.logging.sample.springboot.keystore.TokenKeyProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.sap.hcp.cf.logging.sample.springboot.service.DynamicLogLevelAlgorithmProvider;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,12 +14,6 @@ import java.util.Base64;
 @RestController
 public class PublicKeyController {
 
-    private TokenKeyProvider keyProvider;
-
-    public PublicKeyController(@Autowired TokenKeyProvider keyProvider) {
-        this.keyProvider = keyProvider;
-    }
-
     /**
      * Returns the public key in Base64 encoding used to sign the JWTs created by the {@link TokenController}.
      *
@@ -28,8 +21,7 @@ public class PublicKeyController {
      */
     @GetMapping("/publickey")
     public String getPublicKey() {
-        String keyId = keyProvider.getPrivateKeyId();
-        RSAPublicKey publicKey = keyProvider.getPublicKeyById(keyId);
+        RSAPublicKey publicKey = (RSAPublicKey) DynamicLogLevelAlgorithmProvider.getKeyPair().getPublic();
         return Base64.getEncoder().encodeToString(publicKey.getEncoded());
     }
 

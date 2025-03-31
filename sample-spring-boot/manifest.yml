@@ -6,8 +6,11 @@ applications:
   - name: logging-sample-app
     instances: 1
     path: target/sample-app-spring-boot-3.8.2.jar
+    buildpack: sap_java_buildpack
     env:
       # Set LOG_*: true to activate logging of respective field
       LOG_SENSITIVE_CONNECTION_DATA: false
       LOG_REMOTE_USER: false
       LOG_REFERER: false
+      JBP_CONFIG_COMPONENTS: "jres: ['com.sap.xs.java.buildpack.jre.SAPMachineJRE']"
+      JBP_CONFIG_SAP_MACHINE_JRE: '{  use_offline_repository: false, version: 21.+ }'

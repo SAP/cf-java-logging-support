@@ -1,11 +1,4 @@
 ---
-keystore:
-  token:
-    type: jks
-    location: "classpath:token_keystore.jks"
-    password: ${keystore.token.store_password}
-    keyAlias: ${keystore.token.key_alias}
-    keyPassword: ${keystore.token.key_password}
 defaults:
   token:
     expiration: P2D

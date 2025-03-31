@@ -126,6 +126,8 @@
         <java-jwt.version>3.19.4</java-jwt.version>
         <jackson-databind.version>2.13.4.1</jackson-databind.version>
         <httpclient.version>4.5.14</httpclient.version>
+        <servlet.api.version>5.0.0</servlet.api.version>
+        <jetty.version>11.0.14</jetty.version>
     </properties>
 
     <modules>
@@ -133,6 +135,7 @@
         <module>cf-java-logging-support-logback</module>
         <module>cf-java-logging-support-log4j2</module>
         <module>cf-java-logging-support-servlet</module>
+        <module>cf-java-logging-support-servlet-dynlog-jwt</module>
         <module>cf-java-logging-support-opentelemetry-agent-extension</module>
         <module>sample-spring-boot</module>
     </modules>

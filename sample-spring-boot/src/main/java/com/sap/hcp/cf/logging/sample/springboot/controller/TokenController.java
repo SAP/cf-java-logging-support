@@ -23,9 +23,9 @@ public class TokenController {
 
     private static final Logger LOG = LoggerFactory.getLogger(TokenController.class);
 
-    private Clock clock;
-    private TokenGenerator generator;
-    private TokenDefaultsConfiguration defaults;
+    private final Clock clock;
+    private final TokenGenerator generator;
+    private final TokenDefaultsConfiguration defaults;
 
     public TokenController(@Autowired Clock clock, @Autowired TokenGenerator generator,
                            @Autowired TokenDefaultsConfiguration defaults) {

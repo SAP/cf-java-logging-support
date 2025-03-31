@@ -81,6 +81,11 @@
             <artifactId>cf-java-logging-support-servlet</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.sap.hcp.cf.logging</groupId>
+            <artifactId>cf-java-logging-support-servlet-dynlog-jwt</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- OpenTelemetry Instrumentation -->
         <dependency>
@@ -98,6 +103,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sap.hcp.cf.logging</groupId>
+            <artifactId>cf-java-logging-support-servlet-dynlog-jwt</artifactId>
+            <version>3.8.2</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -129,44 +140,6 @@
     </build>
 
     <profiles>
-        <profile>
-            <id>initialze-keystore</id>
-            <activation>
-                <file>
-                    <missing>${basedir}/target/generated-resources/keystore/token_keystore.jks</missing>
-                </file>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>keytool-maven-plugin</artifactId>
-                        <version>${keytool.plugin.version}</version>
-                        <executions>
-                            <execution>
-                                <id>create-key-pair</id>
-                                <goals>
-                                    <goal>generateKeyPair</goal>
-                                </goals>
-                                <phase>generate-resources</phase>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <keystore>${basedir}/target/generated-resources/keystore/token_keystore.jks</keystore>
-                            <storepass>${keystore.token.store_password}</storepass>
-                            <keypass>${keystore.token.key_password}</keypass>
-                            <alias>${keystore.token.key_alias}</alias>
-                            <dname>${keystore.token.dname}</dname>
-                            <sigalg>SHA256withRSA</sigalg>
-                            <ext></ext>
-                            <validity>100</validity>
-                            <keyalg>RSA</keyalg>
-                            <keysize>2048</keysize>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <profile>
             <id>logback</id>
             <activation>
