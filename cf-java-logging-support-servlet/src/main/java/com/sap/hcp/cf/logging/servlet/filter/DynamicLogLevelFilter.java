@@ -1,121 +1,77 @@
 package com.sap.hcp.cf.logging.servlet.filter;
 
-import com.sap.hcp.cf.logging.servlet.dynlog.DynLogEnvironment;
-import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelConfiguration;
-import com.sap.hcp.cf.logging.servlet.dynlog.DynamicLogLevelProcessor;
+import com.sap.hcp.cf.logging.common.helper.DynamicLogLevelHelper;
+import com.sap.hcp.cf.logging.servlet.dynlog.api.DynamicLogLevelConfiguration;
+import com.sap.hcp.cf.logging.servlet.dynlog.api.DynamicLogLevelProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.lang3.concurrent.ConcurrentException;
-import org.apache.commons.lang3.concurrent.ConcurrentInitializer;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * <p>
- * The {@link DynamicLogLevelFilter} provides an adapter to an {@link DynamicLogLevelProcessor}. It extracts the JWT
- * from the HTTP header and hands it over to the {@link DynamicLogLevelProcessor} for verification and modification of
- * the MDC.
- * </p>
- *
- * <p>
- * Setup and processing of these tokens can be changed with own implementations of {@link DynamicLogLevelConfiguration}
- * and {@link DynamicLogLevelProcessor}. For integration provide a subclass of {@link DynamicLogLevelFilter} and
- * overwrite {@link DynamicLogLevelFilter#getConfiguration()} and {@link DynamicLogLevelFilter#getProcessor()}.
- * Alternatively you can use the different constructors to provide a custom configuration and processor
- * </p>
+ * The {@link DynamicLogLevelFilter} provides an adapter to all registered {@link DynamicLogLevelProvider}. For each
+ * incoming HTTP requests it calls the providers to obtain a {@link DynamicLogLevelConfiguration} which is applied to
+ * the MDC. These parameters are evaluated by the logging filters for Logback and Log4j2.
  */
 public class DynamicLogLevelFilter extends AbstractLoggingFilter {
 
+    private static final Set<String> ALLOWED_DYNAMIC_LOGLEVELS =
+            new HashSet<>(Arrays.asList("TRACE", "DEBUG", "INFO", "WARN", "ERROR"));
+
     private static final Logger LOG = LoggerFactory.getLogger(DynamicLogLevelFilter.class);
 
-    private ConcurrentInitializer<DynamicLogLevelConfiguration> configuration;
-    private ConcurrentInitializer<DynamicLogLevelProcessor> processor;
-
-    /**
-     * Provides dynamic log levels by reading the configuration from environment variables and using the default
-     * {@link DynamicLogLevelProcessor}.
-     */
     public DynamicLogLevelFilter() {
-        this(() -> new DynLogEnvironment());
-    }
-
-    /**
-     * Provides dynamic log levels by using the given configuration and the default {@link DynamicLogLevelProcessor}.
-     *
-     * @param configuration
-     *         a {@link ConcurrentInitializer} for the configuration, you can use a lambda: {@code () -> config}
-     */
-    public DynamicLogLevelFilter(ConcurrentInitializer<DynamicLogLevelConfiguration> configuration) {
-        this.configuration = configuration;
-        this.processor = new LazyInitializer<DynamicLogLevelProcessor>() {
-
-            @Override
-            protected DynamicLogLevelProcessor initialize() throws ConcurrentException {
-                return getConfiguration().map(DynamicLogLevelConfiguration::getRsaPublicKey)
-                                         .map(DynamicLogLevelProcessor::new).orElse(null);
-            }
-        };
-    }
-
-    /**
-     * Provides dynamic log levels by using the given configuration and processor.
-     *
-     * @param configuration
-     *         a {@link ConcurrentInitializer} for the configuration, you can use a lambda: {@code () -> config}
-     * @param processor
-     *         a {@link ConcurrentInitializer} for the processor, you can use a lambda: {@code () -> processor}
-     */
-    public DynamicLogLevelFilter(ConcurrentInitializer<DynamicLogLevelConfiguration> configuration,
-                                 ConcurrentInitializer<DynamicLogLevelProcessor> processor) {
-        this.configuration = configuration;
-        this.processor = processor;
-    }
-
-    /**
-     * Get the current {@link DynamicLogLevelConfiguration}. Overload this method for customization when you cannot use
-     * the constructors.
-     *
-     * @return an {@link Optional} of the current configuration
-     */
-    protected Optional<DynamicLogLevelConfiguration> getConfiguration() {
-        try {
-            return Optional.ofNullable(configuration.get());
-        } catch (ConcurrentException cause) {
-            LOG.debug("Cannot initialize dynamic log level environment. Will continue without this feature", cause);
-            return Optional.empty();
-        }
-    }
-
-    /**
-     * Get the current {@link DynamicLogLevelProcessor}. Overload this method for customization when you cannot use the
-     * constructors.
-     *
-     * @return an {@link Optional} of the current processor
-     */
-    protected Optional<DynamicLogLevelProcessor> getProcessor() {
-        try {
-            return Optional.ofNullable(processor.get());
-        } catch (ConcurrentException cause) {
-            LOG.debug("Cannot initialize dynamic log level processor. Will continue without this feature", cause);
-        }
-        return Optional.empty();
     }
 
     @Override
     protected void beforeFilter(HttpServletRequest request, HttpServletResponse response) {
-        getProcessor().ifPresent(processor -> extractHeader(request).ifPresent(processor::copyDynamicLogLevelToMDC));
+        for (DynamicLogLevelProvider provider: getDynamicLogLevelProviders()) {
+            var config = provider.apply(request);
+            if (isValid(config)) {
+                MDC.put(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_KEY, config.level());
+                if (config.packages() != null) {
+                    MDC.put(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_PREFIXES, config.packages());
+                }
+                return;
+            } else {
+                LOG.trace("Invalid dynamic log level token encountered.");
+            }
+
+        }
     }
 
-    private Optional<String> extractHeader(HttpServletRequest request) {
-        return getConfiguration().map(cfg -> cfg.getDynLogHeaderValue(request));
+    private static boolean isValid(DynamicLogLevelConfiguration config) {
+        if (config == null || config == DynamicLogLevelConfiguration.EMPTY) {
+            return false;
+        }
+        return config.level() != null && ALLOWED_DYNAMIC_LOGLEVELS.contains(config.level());
     }
 
     @Override
     protected void cleanup(HttpServletRequest request, HttpServletResponse response) {
-        getProcessor().ifPresent(DynamicLogLevelProcessor::removeDynamicLogLevelFromMDC);
+        MDC.remove(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_KEY);
+        MDC.remove(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_PREFIXES);
+    }
+
+    private static class DynamicLogLevelProvidersHolder {
+        static final Set<DynamicLogLevelProvider> providers = loadProviders();
+
+        private static Set<DynamicLogLevelProvider> loadProviders() {
+            return ServiceLoader.load(DynamicLogLevelProvider.class).stream().map(ServiceLoader.Provider::get)
+                                .collect(Collectors.toSet());
+        }
+    }
+
+    // package-private for testing
+    static Set<DynamicLogLevelProvider> getDynamicLogLevelProviders() {
+        return DynamicLogLevelProvidersHolder.providers;
     }
 
 }

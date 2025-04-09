@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 /**
  * <p>
- * THe {@link RequestLoggingFilter} extracts information from HTTP requests and can create request logs. It will read
+ * The {@link RequestLoggingFilter} extracts information from HTTP requests and can create request logs. It will read
  * several HTTP Headers and store them in the SLF4J MDC, so that all log messages created during request handling will
  * have those additional fields. It will also instrument the request to generate a request log containing metrics such
  * as request and response sizes and response time. This instrumentation can be disabled by denying logs from

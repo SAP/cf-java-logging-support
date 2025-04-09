@@ -1,11 +1,12 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>cf-java-logging-support-servlet</artifactId>
+    <artifactId>cf-java-logging-support-servlet-dynlog-jwt</artifactId>
     <packaging>jar</packaging>
 
-    <name>cf-java-logging-support-servlet</name>
     <parent>
         <groupId>com.sap.hcp.cf.logging</groupId>
         <artifactId>cf-java-logging-support-parent</artifactId>
@@ -13,14 +14,12 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <maven-dependency-plugin.version>3.5.0</maven-dependency-plugin.version>
-        <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
-        <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
-    </properties>
-
     <dependencies>
-        <!-- servlet api -->
+        <dependency>
+            <groupId>com.sap.hcp.cf.logging</groupId>
+            <artifactId>cf-java-logging-support-servlet</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
@@ -28,9 +27,22 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>${java-jwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-databind.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.sap.hcp.cf.logging</groupId>
             <artifactId>cf-java-logging-support-core</artifactId>
+            <type>test-jar</type>
             <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <!-- we need our logback implementation for testing! -->
         <dependency>
@@ -46,26 +58,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson-databind.version}</version>
-        </dependency>
-
-        <!-- testing -->
-        <dependency>
-            <groupId>com.sap.hcp.cf.logging</groupId>
-            <artifactId>cf-java-logging-support-core</artifactId>
-            <type>test-jar</type>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>${jetty.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
             <version>${jetty.version}</version>
@@ -77,6 +69,12 @@
             <version>${httpclient.version}</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>uk.org.webcompere</groupId>
+            <artifactId>system-stubs-jupiter</artifactId>
+            <version>2.1.7</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
 </project>
