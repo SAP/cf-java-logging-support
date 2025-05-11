@@ -22,15 +22,16 @@
             <configuration>
               <filters>
                 <filter>
-                  <artifact>io.pivotal.cfenv:java-cfenv</artifact>
+                  <artifact>io.opentelemetry.contrib:opentelemetry-cloudfoundry-resources</artifact>
                   <includes>
-                    <include>io/pivotal/cfenv/**</include>
+                    <include>io/opentelemetry/contrib/cloudfoundry/resources/CloudFoundryResource.class</include>
                   </includes>
                 </filter>
               </filters>
               <artifactSet>
                 <excludes>
                   <exclude>io.opentelemetry</exclude>
+                  <exclude>io.opentelemetry.semconv</exclude>
                   <exclude>com.fasterxml.jackson.core</exclude>
                   <exclude>com.squareup.okhttp3</exclude>
                   <exclude>com.squareup.okio</exclude>
@@ -69,6 +70,24 @@
       <artifactId>opentelemetry-exporter-otlp</artifactId>
       <version>1.31.0</version>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.18.2</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>uk.org.webcompere</groupId>
+      <artifactId>system-stubs-junit4</artifactId>
+      <version>2.1.8</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>system-stubs-core</artifactId>
+          <groupId>uk.org.webcompere</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

@@ -1,9 +1,9 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryServiceInstance;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.metrics.ConfigurableMetricExporterProvider;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import io.pivotal.cfenv.core.CfService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,7 +14,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -31,7 +30,7 @@ import static org.mockito.Mockito.when;
 public class CloudLoggingMetricsExporterProviderTest {
 
     @Mock
-    private Function<ConfigProperties, Stream<CfService>> servicesProvider;
+    private Function<ConfigProperties, Stream<CloudFoundryServiceInstance>> servicesProvider;
 
     @Mock
     private CloudLoggingCredentials.Parser credentialParser;
@@ -55,10 +54,11 @@ public class CloudLoggingMetricsExporterProviderTest {
 
     @Test
     public void canLoadViaSPI() {
-        ServiceLoader<ConfigurableMetricExporterProvider> loader = ServiceLoader.load(ConfigurableMetricExporterProvider.class);
+        ServiceLoader<ConfigurableMetricExporterProvider> loader =
+                ServiceLoader.load(ConfigurableMetricExporterProvider.class);
         Stream<ConfigurableMetricExporterProvider> providers = StreamSupport.stream(loader.spliterator(), false);
         assertTrue(CloudLoggingMetricsExporterProvider.class.getName() + " not loaded via SPI",
-                providers.anyMatch(p -> p instanceof CloudLoggingMetricsExporterProvider));
+                   providers.anyMatch(p -> p instanceof CloudLoggingMetricsExporterProvider));
     }
 
     @Test
@@ -71,8 +71,7 @@ public class CloudLoggingMetricsExporterProviderTest {
 
     @Test
     public void registersNoopExporterWithInvalidBindings() {
-        CfService genericCfService = new CfService(Collections.emptyMap());
-        when(servicesProvider.apply(config)).thenReturn(Stream.of(genericCfService));
+        when(servicesProvider.apply(config)).thenReturn(Stream.of(CloudFoundryServiceInstance.builder().build()));
         CloudLoggingCredentials cloudLoggingCredentials = mock(CloudLoggingCredentials.class);
         when(credentialParser.parse(any())).thenReturn(cloudLoggingCredentials);
         when(cloudLoggingCredentials.validate()).thenReturn(false);
@@ -83,8 +82,8 @@ public class CloudLoggingMetricsExporterProviderTest {
 
     @Test
     public void registersExportersWithValidBindings() throws IOException {
-        CfService genericCfService = new CfService(Collections.emptyMap());
-        CfService cloudLoggingService = new CfService(Collections.emptyMap());
+        CloudFoundryServiceInstance genericCfService = CloudFoundryServiceInstance.builder().build();
+        CloudFoundryServiceInstance cloudLoggingService = CloudFoundryServiceInstance.builder().build();
         when(servicesProvider.apply(config)).thenReturn(Stream.of(genericCfService, cloudLoggingService));
         CloudLoggingCredentials invalidCredentials = mock(CloudLoggingCredentials.class);
         when(invalidCredentials.validate()).thenReturn(false);
@@ -97,7 +96,8 @@ public class CloudLoggingMetricsExporterProviderTest {
         when(credentialParser.parse(any())).thenReturn(invalidCredentials).thenReturn(validCredentials);
         MetricExporter exporter = exporterProvider.createExporter(config);
         assertThat(exporter, is(notNullValue()));
-        assertThat(exporter.toString(), both(containsString("OtlpGrpcMetricExporter")).and(containsString("https://otlp-example.sap")));
+        assertThat(exporter.toString(),
+                   both(containsString("OtlpGrpcMetricExporter")).and(containsString("https://otlp-example.sap")));
     }
 
 }

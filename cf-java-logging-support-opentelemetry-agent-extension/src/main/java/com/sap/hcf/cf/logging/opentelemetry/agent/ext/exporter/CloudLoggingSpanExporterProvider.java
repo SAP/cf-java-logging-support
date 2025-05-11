@@ -1,5 +1,6 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryServiceInstance;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudLoggingServicesProvider;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
@@ -7,8 +8,6 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSpanExporterProvider;
 import io.opentelemetry.sdk.common.export.RetryPolicy;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-import io.pivotal.cfenv.core.CfCredentials;
-import io.pivotal.cfenv.core.CfService;
 
 import java.time.Duration;
 import java.util.List;
@@ -21,14 +20,15 @@ public class CloudLoggingSpanExporterProvider implements ConfigurableSpanExporte
 
     private static final Logger LOG = Logger.getLogger(CloudLoggingSpanExporterProvider.class.getName());
 
-    private final Function<ConfigProperties, Stream<CfService>> servicesProvider;
+    private final Function<ConfigProperties, Stream<CloudFoundryServiceInstance>> servicesProvider;
     private final CloudLoggingCredentials.Parser credentialParser;
 
     public CloudLoggingSpanExporterProvider() {
         this(config -> new CloudLoggingServicesProvider(config).get(), CloudLoggingCredentials.parser());
     }
 
-    CloudLoggingSpanExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider, CloudLoggingCredentials.Parser credentialParser) {
+    CloudLoggingSpanExporterProvider(Function<ConfigProperties, Stream<CloudFoundryServiceInstance>> serviceProvider,
+                                     CloudLoggingCredentials.Parser credentialParser) {
         this.servicesProvider = serviceProvider;
         this.credentialParser = credentialParser;
     }
@@ -50,27 +50,23 @@ public class CloudLoggingSpanExporterProvider implements ConfigurableSpanExporte
 
     @Override
     public SpanExporter createExporter(ConfigProperties config) {
-        List<SpanExporter> exporters = servicesProvider.apply(config)
-                .map(svc -> createExporter(config, svc))
-                .filter(exp -> !(exp instanceof NoopSpanExporter))
-                .collect(Collectors.toList());
+        List<SpanExporter> exporters = servicesProvider.apply(config).map(svc -> createExporter(config, svc))
+                                                       .filter(exp -> !(exp instanceof NoopSpanExporter))
+                                                       .collect(Collectors.toList());
         return SpanExporter.composite(exporters);
     }
 
-    private SpanExporter createExporter(ConfigProperties config, CfService service) {
+    private SpanExporter createExporter(ConfigProperties config, CloudFoundryServiceInstance service) {
         LOG.info("Creating span exporter for service binding " + service.getName() + " (" + service.getLabel() + ")");
-        CfCredentials cfCredentials = service.getCredentials();
-        CloudLoggingCredentials credentials = credentialParser.parse(cfCredentials);
+        CloudLoggingCredentials credentials = credentialParser.parse(service.getCredentials());
         if (!credentials.validate()) {
             return NoopSpanExporter.getInstance();
         }
 
         OtlpGrpcSpanExporterBuilder builder = OtlpGrpcSpanExporter.builder();
-        builder.setEndpoint(credentials.getEndpoint())
-                .setCompression(getCompression(config))
-                .setClientTls(credentials.getClientKey(), credentials.getClientCert())
-                .setTrustedCertificates(credentials.getServerCert())
-                .setRetryPolicy(RetryPolicy.getDefault());
+        builder.setEndpoint(credentials.getEndpoint()).setCompression(getCompression(config))
+               .setClientTls(credentials.getClientKey(), credentials.getClientCert())
+               .setTrustedCertificates(credentials.getServerCert()).setRetryPolicy(RetryPolicy.getDefault());
 
         Duration timeOut = getTimeOut(config);
         if (timeOut != null) {

@@ -2,8 +2,6 @@ package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
-import io.pivotal.cfenv.core.CfEnv;
-import io.pivotal.cfenv.core.CfService;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -26,7 +24,7 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
     private final CloudLoggingServicesProvider cloudLoggingServicesProvider;
 
     public CloudLoggingBindingPropertiesSupplier() {
-        this(new CloudLoggingServicesProvider(getDefaultProperties(), new CloudFoundryServicesAdapter(new CfEnv())));
+        this(new CloudLoggingServicesProvider(getDefaultProperties(), new CloudFoundryServicesAdapter()));
     }
 
     CloudLoggingBindingPropertiesSupplier(CloudLoggingServicesProvider cloudLoggingServicesProvider) {
@@ -56,21 +54,19 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
     }
 
     /**
-     * Scans service bindings, both managed and user-provided for Cloud Logging.
-     * Managed services require the label "cloud-logging" to be considered.
-     * Services will be selected by the tag "Cloud Logging".
-     * User-provided services will be preferred over managed service instances.
+     * Scans service bindings, both managed and user-provided for Cloud Logging. Managed services require the label
+     * "cloud-logging" to be considered. Services will be selected by the tag "Cloud Logging". User-provided services
+     * will be preferred over managed service instances.
      *
      * @return The pre-configured connection properties for the OpenTelemetry SDK.
      */
     @Override
     public Map<String, String> get() {
-        return cloudLoggingServicesProvider.get()
-                .findFirst()
-                .map(this::createEndpointConfiguration).orElseGet(Collections::emptyMap);
+        return cloudLoggingServicesProvider.get().findFirst().map(this::createEndpointConfiguration)
+                                           .orElseGet(Collections::emptyMap);
     }
 
-    private Map<String, String> createEndpointConfiguration(CfService svc) {
+    private Map<String, String> createEndpointConfiguration(CloudFoundryServiceInstance svc) {
         LOG.config("Using service " + svc.getName() + " (" + svc.getLabel() + ")");
 
         String endpoint = svc.getCredentials().getString(OTLP_ENDPOINT);

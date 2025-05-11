@@ -1,11 +1,11 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
-import io.pivotal.cfenv.core.CfCredentials;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryCredentials;
 
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
-class CloudLoggingCredentials {
+public class CloudLoggingCredentials {
 
     private static final Logger LOG = Logger.getLogger(CloudLoggingCredentials.class.getName());
 
@@ -16,7 +16,6 @@ class CloudLoggingCredentials {
     private static final String CRED_OTLP_CLIENT_CERT = "ingest-otlp-cert";
     private static final String CRED_OTLP_SERVER_CERT = "server-ca";
     private static final String CLOUD_LOGGING_ENDPOINT_PREFIX = "https://";
-
 
     private String endpoint;
     private byte[] clientKey;
@@ -30,8 +29,12 @@ class CloudLoggingCredentials {
         return PARSER;
     }
 
-    private static byte[] getPEMBytes(CfCredentials credentials, String key) {
+    private static byte[] getPEMBytes(CloudFoundryCredentials credentials, String key) {
         String raw = credentials.getString(key);
+        return getPEMBytes(raw);
+    }
+
+    private static byte[] getPEMBytes(String raw) {
         return raw == null ? null : raw.trim().replace("\\n", "\n").getBytes(StandardCharsets.UTF_8);
     }
 
@@ -45,22 +48,26 @@ class CloudLoggingCredentials {
 
     public boolean validate() {
         if (isBlank(endpoint)) {
-            LOG.warning("Credential \"" + CRED_OTLP_ENDPOINT + "\" not found. Skipping cloud-logging exporter configuration");
+            LOG.warning(
+                    "Credential \"" + CRED_OTLP_ENDPOINT + "\" not found. Skipping cloud-logging exporter configuration");
             return false;
         }
 
         if (isNullOrEmpty(clientKey)) {
-            LOG.warning("Credential \"" + CRED_OTLP_CLIENT_KEY + "\" not found. Skipping cloud-logging exporter configuration");
+            LOG.warning(
+                    "Credential \"" + CRED_OTLP_CLIENT_KEY + "\" not found. Skipping cloud-logging exporter configuration");
             return false;
         }
 
         if (isNullOrEmpty(clientCert)) {
-            LOG.warning("Credential \"" + CRED_OTLP_CLIENT_CERT + "\" not found. Skipping cloud-logging exporter configuration");
+            LOG.warning(
+                    "Credential \"" + CRED_OTLP_CLIENT_CERT + "\" not found. Skipping cloud-logging exporter configuration");
             return false;
         }
 
         if (isNullOrEmpty(serverCert)) {
-            LOG.warning("Credential \"" + CRED_OTLP_SERVER_CERT + "\" not found. Skipping cloud-logging exporter configuration");
+            LOG.warning(
+                    "Credential \"" + CRED_OTLP_SERVER_CERT + "\" not found. Skipping cloud-logging exporter configuration");
             return false;
         }
         return true;
@@ -83,7 +90,7 @@ class CloudLoggingCredentials {
     }
 
     static class Parser {
-        CloudLoggingCredentials parse(CfCredentials cfCredentials) {
+        CloudLoggingCredentials parse(CloudFoundryCredentials cfCredentials) {
             CloudLoggingCredentials parsed = new CloudLoggingCredentials();
             String rawEndpoint = cfCredentials.getString(CRED_OTLP_ENDPOINT);
             parsed.endpoint = isBlank(rawEndpoint) ? null : CLOUD_LOGGING_ENDPOINT_PREFIX + rawEndpoint;

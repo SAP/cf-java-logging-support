@@ -1,9 +1,10 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryCredentials;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryServiceInstance;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.metrics.ConfigurableMetricExporterProvider;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import io.pivotal.cfenv.core.CfService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,9 +16,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -33,7 +31,7 @@ import static org.mockito.Mockito.when;
 public class DynatraceMetricsExporterProviderTest {
 
     @Mock
-    private Function<ConfigProperties, CfService> servicesProvider;
+    private Function<ConfigProperties, CloudFoundryServiceInstance> servicesProvider;
 
     @Mock
     private ConfigProperties config;
@@ -43,7 +41,8 @@ public class DynatraceMetricsExporterProviderTest {
 
     @Before
     public void setUp() {
-        when(config.getString("otel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name")).thenReturn("ingest-token");
+        when(config.getString("otel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name")).thenReturn(
+                "ingest-token");
         when(config.getString(any(), any())).thenAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -55,10 +54,11 @@ public class DynatraceMetricsExporterProviderTest {
 
     @Test
     public void canLoadViaSPI() {
-        ServiceLoader<ConfigurableMetricExporterProvider> loader = ServiceLoader.load(ConfigurableMetricExporterProvider.class);
+        ServiceLoader<ConfigurableMetricExporterProvider> loader =
+                ServiceLoader.load(ConfigurableMetricExporterProvider.class);
         Stream<ConfigurableMetricExporterProvider> providers = StreamSupport.stream(loader.spliterator(), false);
         assertTrue(DynatraceMetricsExporterProviderTest.class.getName() + " not loaded via SPI",
-                providers.anyMatch(p -> p instanceof DynatraceMetricsExporterProvider));
+                   providers.anyMatch(p -> p instanceof DynatraceMetricsExporterProvider));
     }
 
     @Test
@@ -71,8 +71,16 @@ public class DynatraceMetricsExporterProviderTest {
 
     @Test
     public void registersNoopExporterWithInvalidBindings() {
-        CfService genericCfService = new CfService(Collections.emptyMap());
-        Mockito.when(servicesProvider.apply(config)).thenReturn(genericCfService);
+        Mockito.when(servicesProvider.apply(config)).thenReturn(CloudFoundryServiceInstance.builder().build());
+        MetricExporter exporter = exporterProvider.createExporter(config);
+        assertThat(exporter, is(notNullValue()));
+        assertThat(exporter.toString(), containsString("Noop"));
+    }
+
+    @Test
+    public void registersNoopExporterWithInvalidBindingsFromEmptyCredentials() {
+        Mockito.when(servicesProvider.apply(config)).thenReturn(
+                CloudFoundryServiceInstance.builder().credentials(CloudFoundryCredentials.builder().build()).build());
         MetricExporter exporter = exporterProvider.createExporter(config);
         assertThat(exporter, is(notNullValue()));
         assertThat(exporter.toString(), containsString("Noop"));
@@ -80,19 +88,15 @@ public class DynatraceMetricsExporterProviderTest {
 
     @Test
     public void registersExportersWithValidBindings() throws IOException {
-        Map<String, Object> credentials = new HashMap<String, Object>() {{
-            put("apiurl", "https://example.dt/api");
-            put("ingest-token", "secret");
-        }};
-        CfService dynatraceService = new CfService(new HashMap<String, Object>() {{
-            put("name", "test-dt");
-            put("label", "dynatrace");
-            put("credentials", credentials);
-        }});
-        when(servicesProvider.apply(config)).thenReturn(dynatraceService);
+        CloudFoundryServiceInstance dynatraceServiceInstance =
+                CloudFoundryServiceInstance.builder().name("test-dt").label("dynatrace").credentials(
+                        CloudFoundryCredentials.builder().add("apiurl", "https://example.dt/api")
+                                               .add("ingest-token", "secret").build()).build();
+        when(servicesProvider.apply(config)).thenReturn(dynatraceServiceInstance);
         MetricExporter exporter = exporterProvider.createExporter(config);
         assertThat(exporter, is(notNullValue()));
-        assertThat(exporter.toString(), both(containsString("OtlpHttpMetricExporter")).and(containsString("https://example.dt/api/v2/otlp/v1/metrics,")));
+        assertThat(exporter.toString(), both(containsString("OtlpHttpMetricExporter")).and(
+                containsString("https://example.dt/api/v2/otlp/v1/metrics,")));
     }
 
 }

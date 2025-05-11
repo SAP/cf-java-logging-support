@@ -1,5 +1,6 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryServiceInstance;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudLoggingServicesProvider;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporterBuilder;
@@ -7,7 +8,6 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.logs.ConfigurableLogRecordExporterProvider;
 import io.opentelemetry.sdk.common.export.RetryPolicy;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
-import io.pivotal.cfenv.core.CfService;
 
 import java.time.Duration;
 import java.util.List;
@@ -20,14 +20,15 @@ public class CloudLoggingLogsExporterProvider implements ConfigurableLogRecordEx
 
     private static final Logger LOG = Logger.getLogger(CloudLoggingLogsExporterProvider.class.getName());
 
-    private final Function<ConfigProperties, Stream<CfService>> servicesProvider;
+    private final Function<ConfigProperties, Stream<CloudFoundryServiceInstance>> servicesProvider;
     private final CloudLoggingCredentials.Parser credentialParser;
 
     public CloudLoggingLogsExporterProvider() {
         this(config -> new CloudLoggingServicesProvider(config).get(), CloudLoggingCredentials.parser());
     }
 
-    CloudLoggingLogsExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider, CloudLoggingCredentials.Parser credentialParser) {
+    CloudLoggingLogsExporterProvider(Function<ConfigProperties, Stream<CloudFoundryServiceInstance>> serviceProvider,
+                                     CloudLoggingCredentials.Parser credentialParser) {
         this.servicesProvider = serviceProvider;
         this.credentialParser = credentialParser;
     }
@@ -49,14 +50,13 @@ public class CloudLoggingLogsExporterProvider implements ConfigurableLogRecordEx
 
     @Override
     public LogRecordExporter createExporter(ConfigProperties config) {
-        List<LogRecordExporter> exporters = servicesProvider.apply(config)
-                .map(svc -> createExporter(config, svc))
-                .filter(exp -> !(exp instanceof NoopLogRecordExporter))
-                .collect(Collectors.toList());
+        List<LogRecordExporter> exporters = servicesProvider.apply(config).map(svc -> createExporter(config, svc))
+                                                            .filter(exp -> !(exp instanceof NoopLogRecordExporter))
+                                                            .collect(Collectors.toList());
         return LogRecordExporter.composite(exporters);
     }
 
-    private LogRecordExporter createExporter(ConfigProperties config, CfService service) {
+    private LogRecordExporter createExporter(ConfigProperties config, CloudFoundryServiceInstance service) {
         LOG.info("Creating logs exporter for service binding " + service.getName() + " (" + service.getLabel() + ")");
         CloudLoggingCredentials credentials = credentialParser.parse(service.getCredentials());
         if (!credentials.validate()) {
@@ -64,11 +64,9 @@ public class CloudLoggingLogsExporterProvider implements ConfigurableLogRecordEx
         }
 
         OtlpGrpcLogRecordExporterBuilder builder = OtlpGrpcLogRecordExporter.builder();
-        builder.setEndpoint(credentials.getEndpoint())
-                .setCompression(getCompression(config))
-                .setClientTls(credentials.getClientKey(), credentials.getClientCert())
-                .setTrustedCertificates(credentials.getServerCert())
-                .setRetryPolicy(RetryPolicy.getDefault());
+        builder.setEndpoint(credentials.getEndpoint()).setCompression(getCompression(config))
+               .setClientTls(credentials.getClientKey(), credentials.getClientCert())
+               .setTrustedCertificates(credentials.getServerCert()).setRetryPolicy(RetryPolicy.getDefault());
 
         Duration timeOut = getTimeOut(config);
         if (timeOut != null) {

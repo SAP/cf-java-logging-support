@@ -1,7 +1,6 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
-import io.pivotal.cfenv.core.CfService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +27,7 @@ public class CloudLoggingServicesProviderTest {
     private CloudFoundryServicesAdapter adapter;
 
     @Mock
-    private CfService mockService;
+    private CloudFoundryServiceInstance mockService;
 
     @Before
     public void setUp() throws Exception {
@@ -53,7 +52,8 @@ public class CloudLoggingServicesProviderTest {
         CloudLoggingServicesProvider provider = new CloudLoggingServicesProvider(config, adapter);
 
         assertThat(provider.get().collect(toList()), contains(mockService));
-        verify(adapter).stream(asList("unknown-label", "not-cloud-logging"), Collections.singletonList("Cloud Logging"));
+        verify(adapter).stream(asList("unknown-label", "not-cloud-logging"),
+                               Collections.singletonList("Cloud Logging"));
     }
 
     @Test
@@ -64,7 +64,8 @@ public class CloudLoggingServicesProviderTest {
         CloudLoggingServicesProvider provider = new CloudLoggingServicesProvider(emptyProperties, adapter);
 
         assertThat(provider.get().collect(toList()), contains(mockService));
-        verify(adapter).stream(asList("user-provided", "cloud-logging"), Collections.singletonList("NOT Cloud Logging"));
+        verify(adapter).stream(asList("user-provided", "cloud-logging"),
+                               Collections.singletonList("NOT Cloud Logging"));
     }
 
 }
