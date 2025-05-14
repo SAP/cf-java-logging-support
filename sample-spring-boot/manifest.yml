@@ -5,7 +5,7 @@ applications:
 #
 - name: logging-sample-app
   instances: 1
-  path: target/sample-app-spring-boot-3.8.4.jar
+  path: target/sample-app-spring-boot-3.8.5.jar
   env:
 # Set LOG_*: true to activate logging of respective field
     LOG_SENSITIVE_CONNECTION_DATA: false
