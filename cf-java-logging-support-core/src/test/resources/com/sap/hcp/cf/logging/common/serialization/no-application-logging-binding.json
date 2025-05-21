@@ -1,0 +1,18 @@
+{
+  "some-service": [
+    {
+      "binding_guid": "24c86662-7eb8-47c1-b1e2-119fe60afd7e",
+      "binding_name": null,
+      "credentials": {},
+      "instance_guid": "b0bd2718-ef8d-4680-a445-571dd44860d5",
+      "instance_name": "no-application-logging-binding",
+      "label": "some-service",
+      "name": "no-application-logging-binding",
+      "plan": "unknown",
+      "provider": null,
+      "syslog_drain_url": null,
+      "tags": [],
+      "volume_mounts": []
+    }
+  ]
+}

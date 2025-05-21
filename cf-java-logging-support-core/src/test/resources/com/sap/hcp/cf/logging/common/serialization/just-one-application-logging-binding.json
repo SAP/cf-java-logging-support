@@ -1,0 +1,18 @@
+{
+  "application-logs": [
+    {
+      "binding_guid": "6090559d-b8af-486c-bd10-51d99dfabb0d",
+      "binding_name": null,
+      "credentials": {},
+      "instance_guid": "9aabb70c-f7c0-4a2d-bf4e-223c55f04e15",
+      "instance_name": "just-one-application-logging-binding",
+      "label": "application-logs",
+      "name": "just-one-application-logging-binding",
+      "plan": "lite",
+      "provider": null,
+      "syslog_drain_url": null,
+      "tags": [],
+      "volume_mounts": []
+    }
+  ]
+}
