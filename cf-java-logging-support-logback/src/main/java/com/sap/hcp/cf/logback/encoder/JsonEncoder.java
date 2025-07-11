@@ -21,7 +21,6 @@ import com.sap.hcp.cf.logging.common.converter.LineWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.jr.ob.JSON;
 import com.fasterxml.jackson.jr.ob.JSON.Builder;
@@ -76,6 +75,19 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
         logbackContextFieldSuppliers.add(new BaseFieldSupplier());
         logbackContextFieldSuppliers.add(new EventContextFieldSupplier());
         logbackContextFieldSuppliers.add(new RequestRecordFieldSupplier());
+    }
+
+    /**
+     * Creates a new encoder instance in the {@code started} state, with default settings. 
+     * This means that the encoder is ready to encode log events once this method returns.
+     * 
+     * @return a new {@link JsonEncoder} instance in the started state
+     */
+    public static JsonEncoder createStarted() {
+        JsonEncoder encoder = new JsonEncoder();
+        encoder.start();
+
+        return encoder;
     }
 
     /**
@@ -286,7 +298,11 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
         return getJson(event).getBytes(charset);
     }
 
-    private String getJson(ILoggingEvent event) {
+    public String getJson(ILoggingEvent event) {
+        if(!isStarted()) {
+            throw new IllegalStateException("Encoder is not started. Please call start() before encoding.");
+        }
+
         try (StringWriter writer = new StringWriter()) {
             ObjectComposer<JSONComposer<OutputStream>> oc = json.composeTo(writer).startObject();
             addMarkers(oc, event);
