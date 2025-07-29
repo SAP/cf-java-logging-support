@@ -23,7 +23,7 @@ public class CloudFoundryResourceCustomizerTest {
     @Test
     void emptyResourceWithNullResource() {
         CloudFoundryResourceCustomizer customizer = new CloudFoundryResourceCustomizer();
-        Resource resource = customizer.apply(null, DefaultConfigProperties.create(new HashMap<>()));
+        Resource resource = customizer.apply(null, DefaultConfigProperties.createFromMap(new HashMap<>()));
         assertTrue(resource.getAttributes().isEmpty());
     }
 
@@ -31,7 +31,7 @@ public class CloudFoundryResourceCustomizerTest {
     void emptyResourceWhenNotInCf() {
         CloudFoundryResourceCustomizer customizer = new CloudFoundryResourceCustomizer();
         Resource resource =
-                customizer.apply(Resource.builder().build(), DefaultConfigProperties.create(new HashMap<>()));
+                customizer.apply(Resource.builder().build(), DefaultConfigProperties.createFromMap(new HashMap<>()));
         assertTrue(resource.getAttributes().isEmpty());
     }
 
@@ -42,7 +42,8 @@ public class CloudFoundryResourceCustomizerTest {
         properties.put("otel.javaagent.extension.sap.cf.resource.enabled", "false");
 
         CloudFoundryResourceCustomizer customizer = new CloudFoundryResourceCustomizer();
-        Resource resource = customizer.apply(Resource.builder().build(), DefaultConfigProperties.create(properties));
+        Resource resource =
+                customizer.apply(Resource.builder().build(), DefaultConfigProperties.createFromMap(properties));
         assertTrue(resource.getAttributes().isEmpty());
     }
 
@@ -51,7 +52,7 @@ public class CloudFoundryResourceCustomizerTest {
 
         CloudFoundryResourceCustomizer customizer = new CloudFoundryResourceCustomizer();
         Resource resource =
-                customizer.apply(DEFAULT_CF_RESOURCE, DefaultConfigProperties.create(Collections.emptyMap()));
+                customizer.apply(DEFAULT_CF_RESOURCE, DefaultConfigProperties.createFromMap(Collections.emptyMap()));
         assertStringAttribute(resource, "service.name").isEqualTo("test-application");
         assertStringAttribute(resource, "sap.cf.app_name").isEqualTo("test-application");
         assertStringAttribute(resource, "sap.cf.app_id").isEqualTo("test-app-id");
@@ -69,7 +70,7 @@ public class CloudFoundryResourceCustomizerTest {
         HashMap<String, String> config = new HashMap<String, String>() {{
             put("otel.javaagent.extension.sap.cf.resource.format", "opentelemetry");
         }};
-        Resource resource = customizer.apply(DEFAULT_CF_RESOURCE, DefaultConfigProperties.create(config));
+        Resource resource = customizer.apply(DEFAULT_CF_RESOURCE, DefaultConfigProperties.createFromMap(config));
 
         assertEquals(DEFAULT_CF_RESOURCE, resource);
     }
