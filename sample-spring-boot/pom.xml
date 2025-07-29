@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.sap.hcp.cf.logging</groupId>
         <artifactId>cf-java-logging-support-parent</artifactId>
-        <version>3.8.5</version>
+        <version>3.8.6</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
