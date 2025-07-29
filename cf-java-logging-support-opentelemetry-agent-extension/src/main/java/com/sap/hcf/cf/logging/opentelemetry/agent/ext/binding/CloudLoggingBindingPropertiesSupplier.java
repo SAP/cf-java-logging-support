@@ -36,7 +36,7 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
         defaults.put("com.sap.otel.extension.cloud-logging.label", "cloud-logging");
         defaults.put("com.sap.otel.extension.cloud-logging.tag", "Cloud Logging");
         defaults.put("otel.javaagent.extension.sap.cf.binding.user-provided.label", "user-provided");
-        return DefaultConfigProperties.create(defaults);
+        return DefaultConfigProperties.createFromMap(defaults);
     }
 
     private static boolean isBlank(String text) {
