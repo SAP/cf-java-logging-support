@@ -147,6 +147,7 @@
         <java-jwt.version>4.4.0</java-jwt.version>
         <jackson-databind.version>2.18.2</jackson-databind.version>
         <httpclient.version>4.5.14</httpclient.version>
+        <springboot.version>3.4.5</springboot.version>
     </properties>
 
     <modules>
