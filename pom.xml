@@ -128,6 +128,7 @@
         <httpclient.version>4.5.14</httpclient.version>
         <servlet.api.version>5.0.0</servlet.api.version>
         <jetty.version>11.0.14</jetty.version>
+        <sonatype.plugin.version>0.8.0</sonatype.plugin.version>
     </properties>
 
     <modules>
@@ -229,7 +230,7 @@
     </build>
     <profiles>
         <profile>
-            <id>ossrh</id>
+            <id>central</id>
             <build>
                 <plugins>
                     <plugin>
@@ -239,7 +240,7 @@
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
-                                <phase>validate</phase>
+                                <phase>package</phase>
                                 <goals>
                                     <goal>jar-no-fork</goal>
                                 </goals>
@@ -273,6 +274,15 @@
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${sonatype.plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
