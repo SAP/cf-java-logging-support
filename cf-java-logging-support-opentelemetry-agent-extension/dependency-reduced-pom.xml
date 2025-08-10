@@ -3,7 +3,7 @@
   <parent>
     <artifactId>cf-java-logging-support-parent</artifactId>
     <groupId>com.sap.hcp.cf.logging</groupId>
-    <version>3.8.4</version>
+    <version>3.8.6</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>cf-java-logging-support-opentelemetry-agent-extension</artifactId>
@@ -56,19 +56,19 @@
     <dependency>
       <groupId>io.opentelemetry</groupId>
       <artifactId>opentelemetry-sdk-common</artifactId>
-      <version>1.31.0</version>
+      <version>1.52.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>io.opentelemetry</groupId>
       <artifactId>opentelemetry-sdk-extension-autoconfigure</artifactId>
-      <version>1.31.0</version>
+      <version>1.52.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>io.opentelemetry</groupId>
       <artifactId>opentelemetry-exporter-otlp</artifactId>
-      <version>1.31.0</version>
+      <version>1.52.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -76,6 +76,22 @@
       <artifactId>jackson-core</artifactId>
       <version>2.18.2</version>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>4.9.3</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>okio</artifactId>
+          <groupId>com.squareup.okio</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>kotlin-stdlib</artifactId>
+          <groupId>org.jetbrains.kotlin</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>uk.org.webcompere</groupId>
@@ -169,6 +185,6 @@
   <properties>
     <maven.compiler.target>11</maven.compiler.target>
     <maven.compiler.source>11</maven.compiler.source>
-    <opentelemetry.sdk.version>1.31.0</opentelemetry.sdk.version>
+    <opentelemetry.sdk.version>1.52.0</opentelemetry.sdk.version>
   </properties>
 </project>

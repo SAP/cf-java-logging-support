@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.sap.hcp.cf.logging</groupId>
 		<artifactId>cf-java-monitoring-custom-metrics-clients</artifactId>
-		<version>3.8.5</version>
+		<version>3.8.6</version>
 	</parent>
 
 	<artifactId>cf-custom-metrics-clients-core</artifactId>
