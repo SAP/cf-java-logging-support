@@ -164,7 +164,7 @@ If you have a [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCata
 ```bash
 cf service-key cls test \
 | tail -n +2 \
-| jq '.credentials | {"ingest-otlp-endpoint":."ingest-otlp-endpoint", "ingest-otlp-cert":."ingest-otlp-cert", "ingest-otlp-key":."ingest-otlp-key", "server-ca":."server-ca"}' \
+| jq '.credentials' \
 > ups.json
 ```
 
