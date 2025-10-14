@@ -158,8 +158,9 @@ The extension requires four fields in the user-provided service credentials and 
 | `ingest-otlp-key` | The mTLS client key in PCKS#8 format. Line breaks as `\n`. |
 | `ingest-otlp-cert`| The mTLS client certificate in PEM format matching the client key. Line breaks as `\n`. |
 | `server-ca` | The trusted mTLS server certificate in PEM format. Line breaks as `\n`. |
+| `"dashboards-endpoint` | The dashboards enpoint. It will be prefixed with `https://`. |
 
-If you have a [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging) service key, you can generate the required JSON file with jq:
+If you have a [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging) service key, you can generate the required JSON file inlcuding all credentials of the orignial key with jq:
 
 ```bash
 cf service-key cls test \
