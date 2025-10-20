@@ -5,7 +5,7 @@ applications:
   #
   - name: logging-sample-app
     instances: 1
-    path: target/sample-app-spring-boot-3.8.2.jar
+    path: target/sample-app-spring-boot-4.0.0-RC1.jar
     buildpack: sap_java_buildpack
     env:
       # Set LOG_*: true to activate logging of respective field

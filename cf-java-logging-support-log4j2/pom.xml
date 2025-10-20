@@ -11,7 +11,7 @@
         <relativePath>../pom.xml</relativePath>
         <groupId>com.sap.hcp.cf.logging</groupId>
         <artifactId>cf-java-logging-support-parent</artifactId>
-        <version>3.8.2</version>
+        <version>4.0.0-RC1</version>
     </parent>
 
     <dependencies>
@@ -68,6 +68,16 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <log.generate.application.logging.custom.fields>true
+                        </log.generate.application.logging.custom.fields>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>

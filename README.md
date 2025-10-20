@@ -15,46 +15,58 @@ git remote set-head origin -a
 
 ## Summary
 
-This is a collection of support libraries for Java applications (Java 11 and above) that serves three main purposes: 
+This is a collection of support libraries for Java applications (Java 11 and above) that serves three main purposes:
 
-1. Provide means to emit *structured application log messages* 
-2. Instrument parts of your application stack to *collect request metrics* 
+1. Provide means to emit *structured application log messages*
+2. Instrument parts of your application stack to *collect request metrics*
 3. Allow auto-configuration of OpenTelemetry exporters.
 
 The libraries started out to support applications running on Cloud Foundry.
 This integration has become optional.
 The library can be used in any runtime environment such as Kubernetes or Kyma.
 
-When we say structured, we actually mean in JSON format. 
-In that sense, it shares ideas with [logstash-logback-encoder](https://github.com/logstash/logstash-logback-encoder), but takes a simpler approach as we want to ensure that these structured messages adhere to standardized formats. 
-With such standardized formats in place, it becomes much easier to ingest, process and search such messages in log analysis stacks such as [ELK](https://www.elastic.co/webinars/introduction-elk-stack).
+When we say structured, we actually mean in JSON format.
+In that sense, it shares ideas with [logstash-logback-encoder](https://github.com/logstash/logstash-logback-encoder),
+but takes a simpler approach as we want to ensure that these structured messages adhere to standardized formats.
+With such standardized formats in place, it becomes much easier to ingest, process and search such messages in log
+analysis stacks such as [ELK](https://www.elastic.co/webinars/introduction-elk-stack).
 
-If you're interested in the specifications of these standardized formats, you may want to have a closer look at the `fields.yml` files in the [beats folder](./cf-java-logging-support-core/beats).
+If you're interested in the specifications of these standardized formats, you may want to have a closer look at the
+`fields.yml` files in the [beats folder](./cf-java-logging-support-core/beats).
 
-While [logstash-logback-encoder](https://github.com/logstash/logstash-logback-encoder) is tied to [logback](http://logback.qos.ch/), we've tried to keep implementation neutral and have implemented the core functionality on top of [slf4j](http://www.slf4j.org/), but provided implementations for both [logback](http://logback.qos.ch/) and [log4j2](http://logging.apache.org/log4j/2.x/) (and we're open to contributions that would support other implementations).
+While [logstash-logback-encoder](https://github.com/logstash/logstash-logback-encoder) is tied
+to [logback](http://logback.qos.ch/), we've tried to keep implementation neutral and have implemented the core
+functionality on top of [slf4j](http://www.slf4j.org/), but provided implementations for
+both [logback](http://logback.qos.ch/) and [log4j2](http://logging.apache.org/log4j/2.x/) (and we're open to
+contributions that would support other implementations).
 
-The instrumentation part is currently focusing on providing [request filters for Java Servlets](http://www.oracle.com/technetwork/java/filters-137243.html), but again, we're open to contributions for other APIs and frameworks.
-
+The instrumentation part is currently focusing on
+providing [request filters for Java Servlets](http://www.oracle.com/technetwork/java/filters-137243.html), but again,
+we're open to contributions for other APIs and frameworks.
 
 Lastly, there is also a project on [node.js logging support](https://github.com/SAP/cf-nodejs-logging-support).
 
 ## Features and dependencies
 
-As you can see from the structure of this repository, we're not providing one *uber* JAR that contains everything, but provide each feature separately. We also try to stay away from wiring up too many dependencies by tagging almost all of them as *provided.* As a consequence, it's your task to get all runtime dependencies resolved in your application POM file.
+As you can see from the structure of this repository, we're not providing one *uber* JAR that contains everything, but
+provide each feature separately. We also try to stay away from wiring up too many dependencies by tagging almost all of
+them as *provided.* As a consequence, it's your task to get all runtime dependencies resolved in your application POM
+file.
 
 All in all, you should do the following:
 
 1. Make up your mind which features you actually need.
 2. Adjust your Maven dependencies accordingly.
 3. Pick your favorite logging implementation.
-And
+   And
 4. Adjust your logging configuration accordingly.
 
-Let's say you want to make use of the *servlet filter* feature, then you need to add the following dependency to your POM with property `cf-logging-version` referring to the latest nexus version (currently `3.8.2`):
+Let's say you want to make use of the *servlet filter* feature, then you need to add the following dependency to your
+POM with property `cf-logging-version` referring to the latest nexus version (currently `4.0.0-RC1`):
 
 ```xml
 <properties>
-	<cf-logging-version>3.8.2</cf-logging-version>
+	<cf-logging-version>4.0.0-RC1</cf-logging-version>
 </properties>
 ```
 
@@ -67,16 +79,20 @@ Let's say you want to make use of the *servlet filter* feature, then you need to
 </dependency>
 ```
 
-This feature only depends on the servlet API which you have included in your POM anyhow. You can find more information about the *servlet filter* feature (like e.g. how to adjust the web.xml) in the [Wiki](https://github.com/SAP/cf-java-logging-support/wiki/Instrumenting-Servlets).
+This feature only depends on the servlet API which you have included in your POM anyhow. You can find more information
+about the *servlet filter* feature (like e.g. how to adjust the web.xml) in
+the [Wiki](https://github.com/SAP/cf-java-logging-support/wiki/Instrumenting-Servlets).
 
 ## Implementation variants and logging configurations
 
-The *core* feature (on which all other features rely) is just using the `org.slf4j` API, but to actually get logs written, you need to pick an implementation feature. As stated above, we have two implementations:
+The *core* feature (on which all other features rely) is just using the `org.slf4j` API, but to actually get logs
+written, you need to pick an implementation feature. As stated above, we have two implementations:
 
 * `cf-java-logging-support-logback` based on [logback](http://logback.qos.ch/), and
 * `cf-java-logging-support-log4j2` based on [log4j2](http://logging.apache.org/log4j/2.x/).
 
-Again, we don't include dependencies to those implementation backends ourselves, so you need to provide the corresponding dependencies in your POM file:
+Again, we don't include dependencies to those implementation backends ourselves, so you need to provide the
+corresponding dependencies in your POM file:
 
 *Using logback:*
 
@@ -114,7 +130,9 @@ Again, we don't include dependencies to those implementation backends ourselves,
 </dependency>
 ```
 
-As they have slightly differ in configuration, you again will need to do that yourself. But we hope that we've found an easy way to accomplish that. The one thing you have to do is pick our *encoder* in your `logback.xml` if you're using `logback` or our `layout` in your `log4j2.xml`if you're using `log4j2`.
+As they have slightly differ in configuration, you again will need to do that yourself. But we hope that we've found an
+easy way to accomplish that. The one thing you have to do is pick our *encoder* in your `logback.xml` if you're using
+`logback` or our `layout` in your `log4j2.xml`if you're using `log4j2`.
 
 Here are the minimal configurations you'd need:
 
@@ -179,7 +197,8 @@ Stacktraces can be logged within one log message. Further details can be found
 ## Sample Applications
 
 In order to illustrate how the different features are used, this repository includes one sample application:
-  * a Spring Boot implementation in the [./sample-spring-boot folder](./sample-spring-boot)
+
+* a Spring Boot implementation in the [./sample-spring-boot folder](./sample-spring-boot)
 
 ## Documentation
 
@@ -187,4 +206,6 @@ More info on the actual implementation can be found in the [Wiki](https://github
 
 ## Licensing
 
-Please see our [LICENSE](LICENSE) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available via the [REUSE](https://api.reuse.software/info/github.com/SAP/cf-java-logging-support) tool.
+Please see our [LICENSE](LICENSE) for copyright and license information. Detailed information including third-party
+components and their licensing/copyright information is available via
+the [REUSE](https://api.reuse.software/info/github.com/SAP/cf-java-logging-support) tool.
