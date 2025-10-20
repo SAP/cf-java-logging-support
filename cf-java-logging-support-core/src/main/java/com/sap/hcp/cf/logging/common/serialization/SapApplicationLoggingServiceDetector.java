@@ -14,7 +14,13 @@ public class SapApplicationLoggingServiceDetector {
 
     private static final String VCAP_SERVICES = "VCAP_SERVICES";
     private static final String SAP_APPLICATION_LOGGING_LABEL = "application-logs";
-    private static final Logger LOG = LoggerFactory.getLogger(SapApplicationLoggingServiceDetector.class);
+    private static final String OVERRIDE_PROPERTY_NAME =
+            Environment.LOG_GENERATE_APPLICATION_LOGGING_CUSTOM_FIELDS.toLowerCase().replace("_", ".");
+
+    // Provide logger after constructor ran to give logging backend time for initialization
+    private static Logger logger() {
+        return LoggerFactory.getLogger(SapApplicationLoggingServiceDetector.class);
+    }
 
     private boolean boundToSapApplicationLogging;
 
@@ -24,15 +30,17 @@ public class SapApplicationLoggingServiceDetector {
 
     SapApplicationLoggingServiceDetector(Environment environment) {
         this(environment.getVariable(Environment.VCAP_SERRVICES));
-        String overrideString = environment.getVariable(Environment.LOG_GENERATE_APPLICATION_LOGGING_CUSTOM_FIELDS);
-        if (Boolean.parseBoolean(overrideString)) {
+        String overrideEnvironment =
+                environment.getVariable(Environment.LOG_GENERATE_APPLICATION_LOGGING_CUSTOM_FIELDS);
+        String overrideProperty = System.getProperty(OVERRIDE_PROPERTY_NAME);
+        if (Boolean.parseBoolean(overrideEnvironment) || Boolean.parseBoolean(overrideProperty)) {
             this.boundToSapApplicationLogging = true;
         }
     }
 
     SapApplicationLoggingServiceDetector(String vcapServicesJson) {
         if (vcapServicesJson == null) {
-            LOG.debug("No Cloud Foundry environment variable " + VCAP_SERVICES + " found.");
+            logger().debug("No Cloud Foundry environment variable " + VCAP_SERVICES + " found.");
             return;
         }
         try (JsonParser parser = new JsonFactory().createParser(vcapServicesJson)) {
