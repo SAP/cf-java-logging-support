@@ -113,7 +113,7 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
 
         CloudFoundryCredentials credentials = cfService.getCredentials();
         if (credentials == null) {
-            LOG.warning("No credentials found Skipping dynatrace exporter configuration");
+            LOG.warning("No credentials found. Skipping dynatrace exporter configuration.");
             return NoopMetricExporter.getInstance();
         }
         String apiUrl = credentials.getString(CRED_DYNATRACE_APIURL);
