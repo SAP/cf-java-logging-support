@@ -47,7 +47,7 @@ class CloudFoundryServicesAdapter {
      */
     Stream<CloudFoundryServiceInstance> stream(List<String> serviceLabels, List<String> serviceTags) {
         if (vcapServicesJson == null) {
-            LOG.info("No environment variable " + VCAP_SERVICES + "found. Skipping service binding detection.");
+            LOG.info("No environment variable " + VCAP_SERVICES + " found. Skipping service binding detection.");
             return Stream.empty();
         }
         try (JsonParser parser = new JsonFactory().createParser(vcapServicesJson)) {
