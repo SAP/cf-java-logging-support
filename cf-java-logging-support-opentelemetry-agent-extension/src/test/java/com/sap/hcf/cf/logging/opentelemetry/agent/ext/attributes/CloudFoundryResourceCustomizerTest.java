@@ -21,6 +21,13 @@ public class CloudFoundryResourceCustomizerTest {
                     .put("cloudfoundry.space.name", "test-space").build();
 
     @Test
+    void emptyResourceWithNullResource() {
+        CloudFoundryResourceCustomizer customizer = new CloudFoundryResourceCustomizer();
+        Resource resource = customizer.apply(null, DefaultConfigProperties.create(new HashMap<>()));
+        assertTrue(resource.getAttributes().isEmpty());
+    }
+
+    @Test
     void emptyResourceWhenNotInCf() {
         CloudFoundryResourceCustomizer customizer = new CloudFoundryResourceCustomizer();
         Resource resource =

@@ -38,7 +38,12 @@ public class CloudFoundryResourceCustomizer implements BiFunction<Resource, Conf
             return Resource.empty();
         }
 
-        if (resource == null || resource.getAttributes().isEmpty()) {
+        if (resource == null) {
+            LOG.config("Not running in CF. Cannot obtain CF resource.");
+            return Resource.empty();
+        }
+
+        if (resource.getAttributes().isEmpty()) {
             LOG.config("Not running in CF. Cannot obtain CF resource attributes.");
             return resource;
         }
