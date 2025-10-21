@@ -1,8 +1,6 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
-import io.pivotal.cfenv.core.CfEnv;
-import io.pivotal.cfenv.core.CfService;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -10,16 +8,16 @@ import java.util.function.Supplier;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
-public class DynatraceServiceProvider implements Supplier<CfService> {
+public class DynatraceServiceProvider implements Supplier<CloudFoundryServiceInstance> {
 
     private static final String DEFAULT_USER_PROVIDED_LABEL = "user-provided";
     private static final String DEFAULT_DYNATRACE_LABEL = "dynatrace";
     private static final String DEFAULT_DYNATRACE_TAG = "dynatrace";
 
-    private final CfService service;
+    private final CloudFoundryServiceInstance service;
 
     public DynatraceServiceProvider(ConfigProperties config) {
-        this(config, new CloudFoundryServicesAdapter(new CfEnv()));
+        this(config, new CloudFoundryServicesAdapter());
     }
 
     DynatraceServiceProvider(ConfigProperties config, CloudFoundryServicesAdapter adapter) {
@@ -42,7 +40,7 @@ public class DynatraceServiceProvider implements Supplier<CfService> {
     }
 
     @Override
-    public CfService get() {
+    public CloudFoundryServiceInstance get() {
         return service;
     }
 }

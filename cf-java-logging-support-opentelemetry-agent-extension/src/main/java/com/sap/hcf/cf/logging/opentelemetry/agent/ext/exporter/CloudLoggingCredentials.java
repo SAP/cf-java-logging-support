@@ -1,11 +1,11 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
-import io.pivotal.cfenv.core.CfCredentials;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryCredentials;
 
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
-class CloudLoggingCredentials {
+public class CloudLoggingCredentials {
 
     private static final Logger LOG = Logger.getLogger(CloudLoggingCredentials.class.getName());
 
@@ -29,8 +29,12 @@ class CloudLoggingCredentials {
         return PARSER;
     }
 
-    private static byte[] getPEMBytes(CfCredentials credentials, String key) {
+    private static byte[] getPEMBytes(CloudFoundryCredentials credentials, String key) {
         String raw = credentials.getString(key);
+        return getPEMBytes(raw);
+    }
+
+    private static byte[] getPEMBytes(String raw) {
         return raw == null ? null : raw.trim().replace("\\n", "\n").getBytes(StandardCharsets.UTF_8);
     }
 
@@ -86,7 +90,7 @@ class CloudLoggingCredentials {
     }
 
     static class Parser {
-        CloudLoggingCredentials parse(CfCredentials cfCredentials) {
+        CloudLoggingCredentials parse(CloudFoundryCredentials cfCredentials) {
             CloudLoggingCredentials parsed = new CloudLoggingCredentials();
             String rawEndpoint = cfCredentials.getString(CRED_OTLP_ENDPOINT);
             parsed.endpoint = isBlank(rawEndpoint) ? null : CLOUD_LOGGING_ENDPOINT_PREFIX + rawEndpoint;

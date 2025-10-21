@@ -1,7 +1,6 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
-import io.pivotal.cfenv.core.CfService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +25,7 @@ public class DynatraceServicesProviderTest {
     private CloudFoundryServicesAdapter adapter;
 
     @Mock
-    private CfService mockService;
+    private CloudFoundryServiceInstance mockService;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -34,7 +33,7 @@ public class DynatraceServicesProviderTest {
     }
 
     @Test
-    public void defaultLabelsAndTags() {
+    void defaultLabelsAndTags() {
         DefaultConfigProperties emptyProperties = DefaultConfigProperties.createFromMap(Collections.emptyMap());
         DynatraceServiceProvider provider = new DynatraceServiceProvider(emptyProperties, adapter);
 
@@ -43,7 +42,7 @@ public class DynatraceServicesProviderTest {
     }
 
     @Test
-    public void customLabel() {
+    void customLabel() {
         Map<String, String> properties =
                 Map.ofEntries(entry("otel.javaagent.extension.sap.cf.binding.dynatrace.label", "not-dynatrace"),
                               entry("otel.javaagent.extension.sap.cf.binding.user-provided.label", "unknown-label"));
@@ -55,7 +54,7 @@ public class DynatraceServicesProviderTest {
     }
 
     @Test
-    public void customTag() {
+    void customTag() {
         Map<String, String> properties =
                 Map.ofEntries(entry("otel.javaagent.extension.sap.cf.binding.dynatrace.tag", "NOT dynatrace"));
         DefaultConfigProperties emptyProperties = DefaultConfigProperties.createFromMap(properties);

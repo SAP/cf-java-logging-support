@@ -1,7 +1,6 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
-import io.pivotal.cfenv.core.CfService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,15 +25,15 @@ public class CloudLoggingServicesProviderTest {
     private CloudFoundryServicesAdapter adapter;
 
     @Mock
-    private CfService mockService;
+    private CloudFoundryServiceInstance mockService;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         when(adapter.stream(anyList(), anyList())).thenReturn(Stream.of(mockService));
     }
 
     @Test
-    public void defaultLabelsAndTags() {
+    void defaultLabelsAndTags() {
         DefaultConfigProperties emptyProperties = DefaultConfigProperties.createFromMap(Collections.emptyMap());
         CloudLoggingServicesProvider provider = new CloudLoggingServicesProvider(emptyProperties, adapter);
 
@@ -43,7 +42,7 @@ public class CloudLoggingServicesProviderTest {
     }
 
     @Test
-    public void customLabel() {
+    void customLabel() {
         Map<String, String> properties =
                 Map.ofEntries(entry("otel.javaagent.extension.sap.cf.binding.cloud-logging.label", "not-cloud-logging"),
                               entry("otel.javaagent.extension.sap.cf.binding.user-provided.label", "unknown-label"));
@@ -56,7 +55,7 @@ public class CloudLoggingServicesProviderTest {
     }
 
     @Test
-    public void customTag() {
+    void customTag() {
         Map<String, String> properties =
                 Map.ofEntries(entry("otel.javaagent.extension.sap.cf.binding.cloud-logging.tag", "NOT Cloud Logging"));
         DefaultConfigProperties emptyProperties = DefaultConfigProperties.createFromMap(properties);
