@@ -1,5 +1,7 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryCredentials;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryServiceInstance;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.DynatraceServiceProvider;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
@@ -14,7 +16,6 @@ import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector;
 import io.opentelemetry.sdk.metrics.export.DefaultAggregationSelector;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.internal.aggregator.AggregationUtil;
-import io.pivotal.cfenv.core.CfService;
 
 import java.time.Duration;
 import java.util.Locale;
@@ -29,13 +30,13 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
     public static final String DT_APIURL_METRICS_SUFFIX = "/v2/otlp/v1/metrics";
     private static final Logger LOG = Logger.getLogger(DynatraceMetricsExporterProvider.class.getName());
     private static final AggregationTemporalitySelector ALWAYS_DELTA = instrumentType -> AggregationTemporality.DELTA;
-    private final Function<ConfigProperties, CfService> serviceProvider;
+    private final Function<ConfigProperties, CloudFoundryServiceInstance> serviceProvider;
 
     public DynatraceMetricsExporterProvider() {
         this(config -> new DynatraceServiceProvider(config).get());
     }
 
-    public DynatraceMetricsExporterProvider(Function<ConfigProperties, CfService> serviceProvider) {
+    public DynatraceMetricsExporterProvider(Function<ConfigProperties, CloudFoundryServiceInstance> serviceProvider) {
         this.serviceProvider = serviceProvider;
     }
 
@@ -101,7 +102,7 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
 
     @Override
     public MetricExporter createExporter(ConfigProperties config) {
-        CfService cfService = serviceProvider.apply(config);
+        CloudFoundryServiceInstance cfService = serviceProvider.apply(config);
         if (cfService == null) {
             LOG.info("No dynatrace service binding found. Skipping metrics exporter registration.");
             return NoopMetricExporter.getInstance();
@@ -110,7 +111,12 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
         LOG.info(
                 "Creating metrics exporter for service binding " + cfService.getName() + " (" + cfService.getLabel() + ")");
 
-        String apiUrl = cfService.getCredentials().getString(CRED_DYNATRACE_APIURL);
+        CloudFoundryCredentials credentials = cfService.getCredentials();
+        if (credentials == null) {
+            LOG.warning("No credentials found. Skipping dynatrace exporter configuration.");
+            return NoopMetricExporter.getInstance();
+        }
+        String apiUrl = credentials.getString(CRED_DYNATRACE_APIURL);
         if (isBlank(apiUrl)) {
             LOG.warning(
                     "Credential \"" + CRED_DYNATRACE_APIURL + "\" not found. Skipping dynatrace exporter configuration");
@@ -122,7 +128,7 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
                     "Configuration \"otel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name\" not found. Skipping dynatrace exporter configuration");
             return NoopMetricExporter.getInstance();
         }
-        String apiToken = cfService.getCredentials().getString(tokenName);
+        String apiToken = credentials.getString(tokenName);
         if (isBlank(apiUrl)) {
             LOG.warning("Credential \"" + tokenName + "\" not found. Skipping dynatrace exporter configuration");
             return NoopMetricExporter.getInstance();

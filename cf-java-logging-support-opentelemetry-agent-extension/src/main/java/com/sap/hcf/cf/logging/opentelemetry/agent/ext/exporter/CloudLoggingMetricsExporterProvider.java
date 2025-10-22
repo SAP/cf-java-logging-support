@@ -1,5 +1,6 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryServiceInstance;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudLoggingServicesProvider;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
@@ -13,8 +14,6 @@ import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector;
 import io.opentelemetry.sdk.metrics.export.DefaultAggregationSelector;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.internal.aggregator.AggregationUtil;
-import io.pivotal.cfenv.core.CfCredentials;
-import io.pivotal.cfenv.core.CfService;
 
 import java.time.Duration;
 import java.util.List;
@@ -30,14 +29,14 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
 
     private static final Logger LOG = Logger.getLogger(CloudLoggingMetricsExporterProvider.class.getName());
 
-    private final Function<ConfigProperties, Stream<CfService>> servicesProvider;
+    private final Function<ConfigProperties, Stream<CloudFoundryServiceInstance>> servicesProvider;
     private final CloudLoggingCredentials.Parser credentialParser;
 
     public CloudLoggingMetricsExporterProvider() {
         this(config -> new CloudLoggingServicesProvider(config).get(), CloudLoggingCredentials.parser());
     }
 
-    CloudLoggingMetricsExporterProvider(Function<ConfigProperties, Stream<CfService>> serviceProvider,
+    CloudLoggingMetricsExporterProvider(Function<ConfigProperties, Stream<CloudFoundryServiceInstance>> serviceProvider,
                                         CloudLoggingCredentials.Parser credentialParser) {
         this.servicesProvider = serviceProvider;
         this.credentialParser = credentialParser;
@@ -106,11 +105,10 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
                                              getDefaultAggregationSelector(config));
     }
 
-    private MetricExporter createExporter(ConfigProperties config, CfService service) {
+    private MetricExporter createExporter(ConfigProperties config, CloudFoundryServiceInstance service) {
         LOG.info(
                 "Creating metrics exporter for service binding " + service.getName() + " (" + service.getLabel() + ")");
-        CfCredentials cfCredentials = service.getCredentials();
-        CloudLoggingCredentials credentials = credentialParser.parse(cfCredentials);
+        CloudLoggingCredentials credentials = credentialParser.parse(service.getCredentials());
         if (!credentials.validate()) {
             return NoopMetricExporter.getInstance();
         }

@@ -1,0 +1,19 @@
+{
+  "application_id": "test-app-id",
+  "application_name": "test-application",
+  "application_uris": [
+    "test-application.example.com"
+  ],
+  "cf_api": "https://api.cf.example.com",
+  "limits": {
+    "fds": 256
+  },
+  "instance_index": 42,
+  "organization_id": "test-org-id",
+  "organization_name": "test-org",
+  "process_id": "test-process-id",
+  "process_type": "test-process-type",
+  "space_id": "test-space-id",
+  "space_name": "test-space",
+  "users": null
+}

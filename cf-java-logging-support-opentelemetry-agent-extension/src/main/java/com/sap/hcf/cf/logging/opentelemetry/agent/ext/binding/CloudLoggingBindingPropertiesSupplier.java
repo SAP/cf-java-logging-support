@@ -2,8 +2,6 @@ package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
-import io.pivotal.cfenv.core.CfEnv;
-import io.pivotal.cfenv.core.CfService;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -26,7 +24,7 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
     private final CloudLoggingServicesProvider cloudLoggingServicesProvider;
 
     public CloudLoggingBindingPropertiesSupplier() {
-        this(new CloudLoggingServicesProvider(getDefaultProperties(), new CloudFoundryServicesAdapter(new CfEnv())));
+        this(new CloudLoggingServicesProvider(getDefaultProperties(), new CloudFoundryServicesAdapter()));
     }
 
     CloudLoggingBindingPropertiesSupplier(CloudLoggingServicesProvider cloudLoggingServicesProvider) {
@@ -68,7 +66,7 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
                                            .orElseGet(Collections::emptyMap);
     }
 
-    private Map<String, String> createEndpointConfiguration(CfService svc) {
+    private Map<String, String> createEndpointConfiguration(CloudFoundryServiceInstance svc) {
         LOG.config("Using service " + svc.getName() + " (" + svc.getLabel() + ")");
 
         String endpoint = svc.getCredentials().getString(OTLP_ENDPOINT);

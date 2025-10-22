@@ -1,9 +1,10 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryCredentials;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryServiceInstance;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.metrics.ConfigurableMetricExporterProvider;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import io.pivotal.cfenv.core.CfService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,14 +16,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mock.Strictness.LENIENT;
 import static org.mockito.Mockito.any;
@@ -32,7 +30,7 @@ import static org.mockito.Mockito.when;
 public class DynatraceMetricsExporterProviderTest {
 
     @Mock
-    private Function<ConfigProperties, CfService> servicesProvider;
+    private Function<ConfigProperties, CloudFoundryServiceInstance> servicesProvider;
 
     @Mock(strictness = LENIENT)
     private ConfigProperties config;
@@ -41,7 +39,7 @@ public class DynatraceMetricsExporterProviderTest {
     private DynatraceMetricsExporterProvider exporterProvider;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(config.getString("otel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name")).thenReturn(
                 "ingest-token");
         when(config.getString(any(), any())).thenAnswer(new Answer<Object>() {
@@ -54,7 +52,7 @@ public class DynatraceMetricsExporterProviderTest {
     }
 
     @Test
-    public void canLoadViaSPI() {
+    void canLoadViaSPI() {
         ServiceLoader<ConfigurableMetricExporterProvider> loader =
                 ServiceLoader.load(ConfigurableMetricExporterProvider.class);
         Stream<ConfigurableMetricExporterProvider> providers = StreamSupport.stream(loader.spliterator(), false);
@@ -63,7 +61,7 @@ public class DynatraceMetricsExporterProviderTest {
     }
 
     @Test
-    public void registersNoopExporterWithoutBindings() {
+    void registersNoopExporterWithoutBindings() {
         when(servicesProvider.apply(config)).thenReturn(null);
         MetricExporter exporter = exporterProvider.createExporter(config);
         assertThat(exporter).isNotNull();
@@ -71,21 +69,29 @@ public class DynatraceMetricsExporterProviderTest {
     }
 
     @Test
-    public void registersNoopExporterWithInvalidBindings() {
-        CfService genericCfService = new CfService(Collections.emptyMap());
-        Mockito.when(servicesProvider.apply(config)).thenReturn(genericCfService);
+    void registersNoopExporterWithInvalidBindings() {
+        Mockito.when(servicesProvider.apply(config)).thenReturn(CloudFoundryServiceInstance.builder().build());
         MetricExporter exporter = exporterProvider.createExporter(config);
         assertThat(exporter).isNotNull();
         assertThat(exporter.toString()).containsSubsequence("Noop");
     }
 
     @Test
-    public void registersExportersWithValidBindings() throws IOException {
-        Map<String, Object> credentials =
-                Map.ofEntries(entry("apiurl", "https://example.dt/api"), entry("ingest-token", "secret"));
-        CfService dynatraceService = new CfService(Map.ofEntries(entry("name", "test-dt"), entry("label", "dynatrace"),
-                                                                 entry("credentials", credentials)));
-        when(servicesProvider.apply(config)).thenReturn(dynatraceService);
+    void registersNoopExporterWithInvalidBindingsFromEmptyCredentials() {
+        Mockito.when(servicesProvider.apply(config)).thenReturn(
+                CloudFoundryServiceInstance.builder().credentials(CloudFoundryCredentials.builder().build()).build());
+        MetricExporter exporter = exporterProvider.createExporter(config);
+        assertThat(exporter).isNotNull();
+        assertThat(exporter.toString()).containsSubsequence("Noop");
+    }
+
+    @Test
+    void registersExportersWithValidBindings() throws IOException {
+        CloudFoundryServiceInstance dynatraceServiceInstance =
+                CloudFoundryServiceInstance.builder().name("test-dt").label("dynatrace").credentials(
+                        CloudFoundryCredentials.builder().add("apiurl", "https://example.dt/api")
+                                               .add("ingest-token", "secret").build()).build();
+        when(servicesProvider.apply(config)).thenReturn(dynatraceServiceInstance);
         MetricExporter exporter = exporterProvider.createExporter(config);
         assertThat(exporter).isNotNull();
         assertThat(exporter.toString()).containsSubsequence("OtlpHttpMetricExporter")

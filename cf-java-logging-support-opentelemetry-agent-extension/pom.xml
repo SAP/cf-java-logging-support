@@ -55,9 +55,20 @@
             <artifactId>opentelemetry-exporter-otlp</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.pivotal.cfenv</groupId>
-            <artifactId>java-cfenv</artifactId>
-            <version>2.5.0</version>
+            <groupId>io.opentelemetry.contrib</groupId>
+            <artifactId>opentelemetry-cloudfoundry-resources</artifactId>
+            <version>1.46.0-alpha</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson-jr.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.org.webcompere</groupId>
+            <artifactId>system-stubs-jupiter</artifactId>
+            <version>2.1.8</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -76,15 +87,18 @@
                         <configuration>
                             <filters>
                                 <filter>
-                                    <artifact>io.pivotal.cfenv:java-cfenv</artifact>
+                                    <artifact>io.opentelemetry.contrib:opentelemetry-cloudfoundry-resources</artifact>
                                     <includes>
-                                        <include>io/pivotal/cfenv/**</include>
+                                        <include>
+                                            io/opentelemetry/contrib/cloudfoundry/resources/CloudFoundryResource.class
+                                        </include>
                                     </includes>
                                 </filter>
                             </filters>
                             <artifactSet>
                                 <excludes>
                                     <exclude>io.opentelemetry</exclude>
+                                    <exclude>io.opentelemetry.semconv</exclude>
                                     <exclude>com.fasterxml.jackson.core</exclude>
                                     <exclude>com.squareup.okhttp3</exclude>
                                     <exclude>com.squareup.okio</exclude>

@@ -1,13 +1,11 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
-import io.pivotal.cfenv.core.CfCredentials;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryCredentials;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
-import static java.util.Map.entry;
+import static com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryCredentials.builder;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CloudLoggingCredentialsTest {
@@ -23,62 +21,57 @@ public class CloudLoggingCredentialsTest {
 
     private static final CloudLoggingCredentials.Parser PARSER = CloudLoggingCredentials.parser();
 
-    private static Map<String, Object> getValidCredData() {
-        return new HashMap<>(Map.ofEntries(entry("ingest-otlp-endpoint", "test-endpoint"),
-                                           entry("ingest-otlp-cert", VALID_CLIENT_CERT),
-                                           entry("ingest-otlp-key", VALID_CLIENT_KEY),
-                                           entry("server-ca", VALID_SERVER_CERT)));
-    }
-
     @Test
-    public void validCredentials() {
-        Map<String, Object> credData = getValidCredData();
-        CfCredentials cfCredentials = new CfCredentials(credData);
-        CloudLoggingCredentials credentials = PARSER.parse(cfCredentials);
+    void validCredentials() {
+        CloudFoundryCredentials.Builder builder =
+                builder().add("ingest-otlp-endpoint", "test-endpoint").add("ingest-otlp-cert", VALID_CLIENT_CERT)
+                         .add("ingest-otlp-key", VALID_CLIENT_KEY).add("server-ca", VALID_SERVER_CERT);
+        CloudLoggingCredentials credentials = PARSER.parse(builder.build());
         assertThat(credentials.validate()).isTrue();
     }
 
     @Test
-    public void missingEndpoint() {
-        Map<String, Object> credData = getValidCredData();
-        credData.remove("ingest-otlp-endpoint");
-        CfCredentials cfCredentials = new CfCredentials(credData);
-        CloudLoggingCredentials credentials = PARSER.parse(cfCredentials);
+    void missingEndpoint() {
+        CloudFoundryCredentials.Builder builder =
+                builder().add("ingest-otlp-cert", VALID_CLIENT_CERT).add("ingest-otlp-key", VALID_CLIENT_KEY)
+                         .add("server-ca", VALID_SERVER_CERT);
+        CloudLoggingCredentials credentials = PARSER.parse(builder.build());
         assertThat(credentials.validate()).isFalse();
     }
 
     @Test
-    public void missingClientKey() {
-        Map<String, Object> credData = getValidCredData();
-        credData.remove("ingest-otlp-key");
-        CfCredentials cfCredentials = new CfCredentials(credData);
-        CloudLoggingCredentials credentials = PARSER.parse(cfCredentials);
+    void missingClientKey() {
+        CloudFoundryCredentials.Builder builder =
+                builder().add("ingest-otlp-endpoint", "test-endpoint").add("ingest-otlp-cert", VALID_CLIENT_CERT)
+                         .add("server-ca", VALID_SERVER_CERT);
+        CloudLoggingCredentials credentials = PARSER.parse(builder.build());
         assertThat(credentials.validate()).isFalse();
     }
 
     @Test
-    public void missingClientCert() {
-        Map<String, Object> credData = getValidCredData();
-        credData.remove("ingest-otlp-cert");
-        CfCredentials cfCredentials = new CfCredentials(credData);
-        CloudLoggingCredentials credentials = PARSER.parse(cfCredentials);
+    void missingClientCert() {
+        CloudFoundryCredentials.Builder builder =
+                builder().add("ingest-otlp-endpoint", "test-endpoint").add("ingest-otlp-key", VALID_CLIENT_KEY)
+                         .add("server-ca", VALID_SERVER_CERT);
+        CloudLoggingCredentials credentials = PARSER.parse(builder.build());
         assertThat(credentials.validate()).isFalse();
     }
 
     @Test
-    public void missingServerCert() {
-        Map<String, Object> credData = getValidCredData();
-        credData.remove("server-ca");
-        CfCredentials cfCredentials = new CfCredentials(credData);
-        CloudLoggingCredentials credentials = PARSER.parse(cfCredentials);
+    void missingServerCert() {
+        CloudFoundryCredentials.Builder builder =
+                builder().add("ingest-otlp-endpoint", "test-endpoint").add("ingest-otlp-cert", VALID_CLIENT_CERT)
+                         .add("ingest-otlp-key", VALID_CLIENT_KEY);
+        CloudLoggingCredentials credentials = PARSER.parse(builder.build());
         assertThat(credentials.validate()).isFalse();
     }
 
     @Test
-    public void parsesCorrectly() {
-        Map<String, Object> credData = getValidCredData();
-        CfCredentials cfCredentials = new CfCredentials(credData);
-        CloudLoggingCredentials credentials = PARSER.parse(cfCredentials);
+    void parsesCorrectly() {
+        CloudFoundryCredentials.Builder builder =
+                builder().add("ingest-otlp-endpoint", "test-endpoint").add("ingest-otlp-cert", VALID_CLIENT_CERT)
+                         .add("ingest-otlp-key", VALID_CLIENT_KEY).add("server-ca", VALID_SERVER_CERT);
+        CloudLoggingCredentials credentials = PARSER.parse(builder.build());
         assertThat(credentials.getEndpoint()).isEqualTo("https://test-endpoint");
         assertThat(new String(credentials.getClientCert(), StandardCharsets.UTF_8)).isEqualTo(VALID_CLIENT_CERT.trim());
         assertThat(new String(credentials.getClientKey(), StandardCharsets.UTF_8)).isEqualTo(VALID_CLIENT_KEY.trim());

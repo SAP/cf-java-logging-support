@@ -110,6 +110,12 @@
             <version>4.0.0-RC1</version>
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.sap.cloud.environment.servicebinding</groupId>
+            <artifactId>java-sap-vcap-services</artifactId>
+            <version>0.21.0</version>
+        </dependency>
     </dependencies>
 
     <build>
