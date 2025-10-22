@@ -5,7 +5,7 @@ applications:
 #
 - name: logging-sample-app
   instances: 1
-  buildpack: sap_java_buildpack
+  buildpack: java_buildpack
   memory: 256M
   path: target/logging-sample-app-3.8.6.war
   env:
