@@ -5,6 +5,7 @@ updates:
     schedule:
       interval: "daily"
     target-branch: "main"
+    open-pull-requests-limit: 10
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
