@@ -3,7 +3,7 @@ name: Maven Verify
 on:
   pull_request:
     branches:
-      - main
+      #      - main
       - release-4
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
       - name: Build with Maven
         run: mvn verify
 
-  build-releas-4:
+  build-release-4:
     if: github.base_ref == 'release-4'
     runs-on: ubuntu-latest
     steps:
