@@ -18,7 +18,7 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <opentelemetry.sdk.version>1.52.0</opentelemetry.sdk.version>
+        <opentelemetry.sdk.version>1.55.0-alpha</opentelemetry.sdk.version>
     </properties>
 
     <dependencyManagement>
@@ -33,7 +33,7 @@
             <dependency>
                 <groupId>io.opentelemetry</groupId>
                 <artifactId>opentelemetry-bom-alpha</artifactId>
-                <version>${opentelemetry.sdk.version}-alpha</version>
+                <version>${opentelemetry.sdk.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
