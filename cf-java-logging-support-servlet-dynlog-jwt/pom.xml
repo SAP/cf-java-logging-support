@@ -7,6 +7,7 @@
     <artifactId>cf-java-logging-support-servlet-dynlog-jwt</artifactId>
     <packaging>jar</packaging>
 
+    <name>cf-java-logging-support-servlet-dynlog-jwt</name>
     <parent>
         <groupId>com.sap.hcp.cf.logging</groupId>
         <artifactId>cf-java-logging-support-parent</artifactId>
