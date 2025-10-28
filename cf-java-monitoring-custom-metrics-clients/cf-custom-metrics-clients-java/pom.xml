@@ -14,7 +14,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<dropwizard.version>3.2.6</dropwizard.version>
+		<dropwizard.version>4.2.37</dropwizard.version>
 	</properties>
 
 	<dependencies>
