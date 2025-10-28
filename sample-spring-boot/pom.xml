@@ -15,7 +15,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.boot.version>3.2.2</spring.boot.version>
+        <spring.boot.version>3.5.7</spring.boot.version>
         <keytool.plugin.version>1.5</keytool.plugin.version>
         <keystore.token.store_password>0bzhBRNUXBR5
         </keystore.token.store_password>
