@@ -18,7 +18,7 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <opentelemetry.sdk.version>1.52.0</opentelemetry.sdk.version>
+        <opentelemetry.sdk.version>1.55.0</opentelemetry.sdk.version>
     </properties>
 
     <dependencyManagement>
@@ -74,6 +74,12 @@
             <groupId>uk.org.webcompere</groupId>
             <artifactId>system-stubs-jupiter</artifactId>
             <version>2.1.8</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>1.9.23</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
