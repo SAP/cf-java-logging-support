@@ -57,7 +57,7 @@
         <dependency>
             <groupId>io.opentelemetry.contrib</groupId>
             <artifactId>opentelemetry-cloudfoundry-resources</artifactId>
-            <version>1.46.0-alpha</version>
+            <version>1.51.0-alpha</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
