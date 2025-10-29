@@ -126,7 +126,7 @@
         <jackson-databind.version>2.13.4.1</jackson-databind.version>
         <httpclient.version>4.5.14</httpclient.version>
         <servlet.api.version>5.0.0</servlet.api.version>
-        <jetty.version>11.0.14</jetty.version>
+        <jetty.version>11.0.26</jetty.version>
         <sonatype.plugin.version>0.8.0</sonatype.plugin.version>
     </properties>
 
