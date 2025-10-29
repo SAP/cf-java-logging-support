@@ -117,7 +117,7 @@
         <assertj.version>3.27.6</assertj.version>
         <junit.version>5.12.2</junit.version>
         <mockito.version>5.10.0</mockito.version>
-        <jmh.version>1.36</jmh.version>
+        <jmh.version>1.37</jmh.version>
         <surefire.plugin.version>2.22.2</surefire.plugin.version>
         <exec.plugin.version>3.6.2</exec.plugin.version>
         <javadoc.plugin.version>3.5.0</javadoc.plugin.version>
