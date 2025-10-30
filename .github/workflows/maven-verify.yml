@@ -18,6 +18,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-17-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-17-
       - name: Build with Maven
         run: mvn -B -ntp -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn clean verify
   build-release-3:
@@ -30,6 +37,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-11-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-11-
       - name: Clean with Maven
         run: mvn clean
       - name: Build with Maven
