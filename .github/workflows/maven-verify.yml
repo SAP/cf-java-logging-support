@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-main:
-    if: github.base_ref == 'main'
+    if: github.event.pull_request.base_ref == 'main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +21,7 @@ jobs:
       - name: Build with Maven
         run: mvn -B -ntp -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn clean verify
   build-release-3:
-    if: github.base_ref == 'release-3'
+    if: github.event.pull_request.base_ref == 'release-3'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
