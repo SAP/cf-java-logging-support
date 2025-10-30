@@ -121,7 +121,7 @@
         <surefire.plugin.version>2.22.2</surefire.plugin.version>
         <exec.plugin.version>3.6.2</exec.plugin.version>
         <javadoc.plugin.version>3.12.0</javadoc.plugin.version>
-        <gpg.plugin.version>1.6</gpg.plugin.version>
+        <gpg.plugin.version>3.2.8</gpg.plugin.version>
         <java-jwt.version>3.19.4</java-jwt.version>
         <jackson-databind.version>2.20.0</jackson-databind.version>
         <httpclient.version>4.5.14</httpclient.version>
