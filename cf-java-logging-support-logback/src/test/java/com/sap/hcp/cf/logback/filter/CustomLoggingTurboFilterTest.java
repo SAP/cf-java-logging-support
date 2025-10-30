@@ -1,8 +1,9 @@
 package com.sap.hcp.cf.logback.filter;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verifyZeroInteractions;
-
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.core.spi.FilterReply;
+import com.sap.hcp.cf.logging.common.helper.DynamicLogLevelHelper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,11 +13,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.MDC;
 import org.slf4j.Marker;
 
-import com.sap.hcp.cf.logging.common.helper.DynamicLogLevelHelper;
-
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.core.spi.FilterReply;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CustomLoggingTurboFilterTest {
@@ -38,6 +36,7 @@ public class CustomLoggingTurboFilterTest {
         filter = new CustomLoggingTurboFilter();
         params = new Object[] { param };
         format = "format";
+        MDC.clear();
     }
 
     @After
