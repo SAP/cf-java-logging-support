@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "hourly"
+    target-branch: "main"
+    labels:
+      - "dependencies"
+      - "main-branch"
+    open-pull-requests-limit: 10
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "release-3"
+    labels:
+      - "dependencies"
+      - "release-3"
