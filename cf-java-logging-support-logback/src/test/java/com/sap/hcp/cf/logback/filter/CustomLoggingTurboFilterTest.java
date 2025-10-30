@@ -5,6 +5,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.core.spi.FilterReply;
 import com.sap.hcp.cf.logging.common.helper.DynamicLogLevelHelper;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.MDC;
@@ -24,8 +25,9 @@ public class CustomLoggingTurboFilterTest {
 
     private final Logger logger = Mockito.mock(Logger.class);
 
+    @BeforeEach
     @AfterEach
-    public void teardown() {
+    public void clear() {
         MDC.clear();
     }
 
