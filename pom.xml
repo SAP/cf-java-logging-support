@@ -123,7 +123,7 @@
         <javadoc.plugin.version>3.5.0</javadoc.plugin.version>
         <gpg.plugin.version>1.6</gpg.plugin.version>
         <java-jwt.version>3.19.4</java-jwt.version>
-        <jackson-databind.version>2.13.4.1</jackson-databind.version>
+        <jackson-databind.version>2.20.0</jackson-databind.version>
         <httpclient.version>4.5.14</httpclient.version>
         <servlet.api.version>6.1.0</servlet.api.version>
         <jetty.version>11.0.26</jetty.version>
