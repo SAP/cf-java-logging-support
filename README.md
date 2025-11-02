@@ -63,17 +63,16 @@ All in all, you should do the following:
 4. Adjust your logging configuration accordingly.
 
 Let's say you want to make use of the *servlet filter* feature, then you need to add the following dependency to your
-POM with property `cf-logging-version` referring to the latest nexus version (currently `4.0.0-RC1`):
+POM with property `cf-logging-version` referring to the latest nexus version (currently `4.0.0-RC2`):
 
 ```xml
 
 <properties>
-    <cf-logging-version>4.0.0-RC1</cf-logging-version>
+    <cf-logging-version>4.0.0-RC2</cf-logging-version>
 </properties>
 ```
 
 ``` xml
-
 <dependency>
   <groupId>com.sap.hcp.cf.logging</groupId>
   <artifactId>cf-java-logging-support-servlet</artifactId>
@@ -108,7 +107,7 @@ corresponding dependencies in your POM file:
 <dependency>
   	<groupId>ch.qos.logback</groupId>
    	<artifactId>logback-classic</artifactId>
-   	<version>1.2.11</version>
+   	<version>1.5.20</version>
  </dependency>
 ```
 
@@ -123,12 +122,12 @@ corresponding dependencies in your POM file:
 <dependency>
 	<groupId>org.apache.logging.log4j</groupId>
 	<artifactId>log4j-slf4j-impl</artifactId>
-	<version>2.20.0</version>
+	<version>2.25.2</version>
 </dependency>
 	<dependency>
 	<groupId>org.apache.logging.log4j</groupId>
 	<artifactId>log4j-core</artifactId>
-	<version>2.20.0</version>
+	<version>2.25.2</version>
 </dependency>
 ```
 
