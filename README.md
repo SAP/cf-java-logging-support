@@ -3,15 +3,16 @@
 [![Build Status](https://travis-ci.com/SAP/cf-java-logging-support.svg?branch=master)](https://travis-ci.com/SAP/cf-java-logging-support)
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP/cf-java-logging-support)](https://api.reuse.software/info/github.com/SAP/cf-java-logging-support)
 
-**Note: The default branch has been renamed from master to main.**
-Please execute on your local repository:
+**Warning: The `main` branch was force-pushed on October 30th, 2025.**
 
+If you cloned or checked out this repository before that date, you may encounter issues when pulling new changes. To
+resolve this, reset your local `main` branch to match the remote:
+
+```shell
+git fetch origin git checkout main git reset --hard origin/main
 ```
-git branch -m master main
-git fetch origin
-git branch -u origin/main main
-git remote set-head origin -a
-```
+
+**Caution:** This will discard any local changes on your `main` branch.
 
 ## Summary
 
@@ -65,8 +66,9 @@ Let's say you want to make use of the *servlet filter* feature, then you need to
 POM with property `cf-logging-version` referring to the latest nexus version (currently `4.0.0-RC1`):
 
 ```xml
+
 <properties>
-	<cf-logging-version>4.0.0-RC1</cf-logging-version>
+    <cf-logging-version>4.0.0-RC1</cf-logging-version>
 </properties>
 ```
 
