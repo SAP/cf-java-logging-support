@@ -9,7 +9,8 @@ If you cloned or checked out this repository before that date, you may encounter
 resolve this, reset your local `main` branch to match the remote:
 
 ```shell
-git fetch origin git checkout main git reset --hard origin/main
+git fetch origin
+git checkout main git reset --hard origin/main
 ```
 
 **Caution:** This will discard any local changes on your `main` branch.
