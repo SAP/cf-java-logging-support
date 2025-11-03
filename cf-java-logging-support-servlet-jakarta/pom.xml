@@ -17,7 +17,7 @@
 	<properties>
 		<servlet.api.version>5.0.0</servlet.api.version>
 		<maven-dependency-plugin.version>3.5.0</maven-dependency-plugin.version>
-		<build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+		<build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
 		<maven-antrun-plugin.version>3.2.0</maven-antrun-plugin.version>
 		<jetty.version>11.0.24</jetty.version>
 	</properties>
