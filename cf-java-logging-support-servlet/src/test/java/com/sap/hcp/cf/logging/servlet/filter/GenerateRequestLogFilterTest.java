@@ -22,9 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.util.Enumeration;
+import java.util.List;
 
 import static java.util.Collections.enumeration;
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -140,7 +140,7 @@ public class GenerateRequestLogFilterTest {
 
         @Override
         public Enumeration<String> getInitParameterNames() {
-            return enumeration(singletonList("wrapRequest"));
+            return enumeration(List.of("wrapRequest"));
         }
     }
 }

@@ -6,9 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -82,14 +80,14 @@ public class CloudFoundryServicesAdapterTest {
     @Test
     void filtersBySingleLabel() {
         List<CloudFoundryServiceInstance> services =
-                DEFAULT_ADAPTER.stream(singletonList("managed-find-me-service"), emptyList()).collect(toList());
+                DEFAULT_ADAPTER.stream(List.of("managed-find-me-service"), emptyList()).collect(toList());
         assertServiceNames(services).containsExactlyInAnyOrder("managed-find-me1", "managed-find-me2", "managed-other");
     }
 
     @Test
     void priotizesByServiceLabel() {
         List<CloudFoundryServiceInstance> services =
-                DEFAULT_ADAPTER.stream(asList("user-provided", "managed-find-me-service"), emptyList())
+                DEFAULT_ADAPTER.stream(List.of("user-provided", "managed-find-me-service"), emptyList())
                                .collect(toList());
         assertServiceNames(services).containsExactly("ups-find-me1", "ups-find-me2", "ups-other", "managed-find-me1",
                                                      "managed-find-me2", "managed-other");
@@ -98,7 +96,7 @@ public class CloudFoundryServicesAdapterTest {
     @Test
     void filtersBySingleTag() {
         List<CloudFoundryServiceInstance> services =
-                DEFAULT_ADAPTER.stream(emptyList(), singletonList("Find Me!")).collect(toList());
+                DEFAULT_ADAPTER.stream(emptyList(), List.of("Find Me!")).collect(toList());
         assertServiceNames(services).containsExactlyInAnyOrder("managed-find-me1", "managed-find-me2", "managed-other1",
                                                                "ups-find-me1", "ups-find-me2");
     }
@@ -106,7 +104,7 @@ public class CloudFoundryServicesAdapterTest {
     @Test
     void standardUseCase() {
         List<CloudFoundryServiceInstance> services =
-                DEFAULT_ADAPTER.stream(asList("user-provided", "managed-find-me-service"), singletonList("Find Me!"))
+                DEFAULT_ADAPTER.stream(List.of("user-provided", "managed-find-me-service"), List.of("Find Me!"))
                                .collect(toList());
         assertServiceNames(services).containsExactly("ups-find-me1", "ups-find-me2", "managed-find-me1",
                                                      "managed-find-me2");

@@ -5,9 +5,6 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-
 public class DynatraceServiceProvider implements Supplier<CloudFoundryServiceInstance> {
 
     private static final String DEFAULT_USER_PROVIDED_LABEL = "user-provided";
@@ -21,8 +18,8 @@ public class DynatraceServiceProvider implements Supplier<CloudFoundryServiceIns
     }
 
     DynatraceServiceProvider(ConfigProperties config, CloudFoundryServicesAdapter adapter) {
-        List<String> serviceLabels = asList(getUserProvidedLabel(config), getDynatraceLabel(config));
-        List<String> serviceTags = singletonList(getDynatraceTag(config));
+        List<String> serviceLabels = List.of(getUserProvidedLabel(config), getDynatraceLabel(config));
+        List<String> serviceTags = List.of(getDynatraceTag(config));
         this.service = adapter.stream(serviceLabels, serviceTags).findFirst().orElse(null);
     }
 

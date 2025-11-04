@@ -8,10 +8,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -38,7 +38,7 @@ public class CloudLoggingServicesProviderTest {
         CloudLoggingServicesProvider provider = new CloudLoggingServicesProvider(emptyProperties, adapter);
 
         assertThat(provider.get()).containsExactly(mockService);
-        verify(adapter).stream(asList("user-provided", "cloud-logging"), Collections.singletonList("Cloud Logging"));
+        verify(adapter).stream(List.of("user-provided", "cloud-logging"), List.of("Cloud Logging"));
     }
 
     @Test
@@ -50,8 +50,7 @@ public class CloudLoggingServicesProviderTest {
         CloudLoggingServicesProvider provider = new CloudLoggingServicesProvider(config, adapter);
 
         assertThat(provider.get()).containsExactly(mockService);
-        verify(adapter).stream(asList("unknown-label", "not-cloud-logging"),
-                               Collections.singletonList("Cloud Logging"));
+        verify(adapter).stream(List.of("unknown-label", "not-cloud-logging"), List.of("Cloud Logging"));
     }
 
     @Test
@@ -62,8 +61,7 @@ public class CloudLoggingServicesProviderTest {
         CloudLoggingServicesProvider provider = new CloudLoggingServicesProvider(emptyProperties, adapter);
 
         assertThat(provider.get()).containsExactly(mockService);
-        verify(adapter).stream(asList("user-provided", "cloud-logging"),
-                               Collections.singletonList("NOT Cloud Logging"));
+        verify(adapter).stream(List.of("user-provided", "cloud-logging"), List.of("NOT Cloud Logging"));
     }
 
 }

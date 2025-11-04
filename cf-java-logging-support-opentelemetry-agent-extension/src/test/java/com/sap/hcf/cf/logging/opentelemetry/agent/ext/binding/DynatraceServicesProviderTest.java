@@ -8,10 +8,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -38,7 +38,7 @@ public class DynatraceServicesProviderTest {
         DynatraceServiceProvider provider = new DynatraceServiceProvider(emptyProperties, adapter);
 
         assertThat(provider.get()).isEqualTo(mockService);
-        verify(adapter).stream(asList("user-provided", "dynatrace"), Collections.singletonList("dynatrace"));
+        verify(adapter).stream(List.of("user-provided", "dynatrace"), List.of("dynatrace"));
     }
 
     @Test
@@ -50,7 +50,7 @@ public class DynatraceServicesProviderTest {
         DynatraceServiceProvider provider = new DynatraceServiceProvider(config, adapter);
 
         assertThat(provider.get()).isEqualTo(mockService);
-        verify(adapter).stream(asList("unknown-label", "not-dynatrace"), Collections.singletonList("dynatrace"));
+        verify(adapter).stream(List.of("unknown-label", "not-dynatrace"), List.of("dynatrace"));
     }
 
     @Test
@@ -61,7 +61,7 @@ public class DynatraceServicesProviderTest {
         DynatraceServiceProvider provider = new DynatraceServiceProvider(emptyProperties, adapter);
 
         assertThat(provider.get()).isEqualTo(mockService);
-        verify(adapter).stream(asList("user-provided", "dynatrace"), Collections.singletonList("NOT dynatrace"));
+        verify(adapter).stream(List.of("user-provided", "dynatrace"), List.of("NOT dynatrace"));
     }
 
 }

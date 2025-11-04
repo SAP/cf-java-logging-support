@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 public class CloudLoggingServicesProvider implements Supplier<Stream<CloudFoundryServiceInstance>> {
@@ -23,8 +21,8 @@ public class CloudLoggingServicesProvider implements Supplier<Stream<CloudFoundr
     }
 
     CloudLoggingServicesProvider(ConfigProperties config, CloudFoundryServicesAdapter adapter) {
-        List<String> serviceLabels = asList(getUserProvidedLabel(config), getCloudLoggingLabel(config));
-        List<String> serviceTags = singletonList(getCloudLoggingTag(config));
+        List<String> serviceLabels = List.of(getUserProvidedLabel(config), getCloudLoggingLabel(config));
+        List<String> serviceTags = List.of(getCloudLoggingTag(config));
         this.services = adapter.stream(serviceLabels, serviceTags).collect(toList());
     }
 
