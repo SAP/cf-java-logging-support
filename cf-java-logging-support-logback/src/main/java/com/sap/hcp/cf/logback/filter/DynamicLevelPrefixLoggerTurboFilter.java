@@ -5,7 +5,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
 import com.sap.hcp.cf.logging.common.helper.DynamicLogLevelHelper;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
 import org.slf4j.Marker;
 
@@ -23,7 +22,7 @@ public class DynamicLevelPrefixLoggerTurboFilter extends TurboFilter {
 
     private boolean checkPackages(final Logger logger) {
         final String logLevelPackages = MDC.get(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_PREFIXES);
-        if (StringUtils.isNotBlank(logLevelPackages)) {
+        if (isNotBlank(logLevelPackages)) {
             for (String current: logLevelPackages.split(",")) {
                 if (logger.getName().startsWith(current)) {
                     return true;
@@ -31,6 +30,10 @@ public class DynamicLevelPrefixLoggerTurboFilter extends TurboFilter {
             }
         }
         return false;
+    }
+
+    private static boolean isNotBlank(String string) {
+        return string != null && !string.isBlank();
     }
 
 }
