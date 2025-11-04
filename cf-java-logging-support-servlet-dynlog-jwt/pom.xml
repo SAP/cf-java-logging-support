@@ -16,7 +16,7 @@
     </parent>
 
     <properties>
-        <java-jwt.version>3.19.4</java-jwt.version>
+        <java-jwt.version>4.5.0</java-jwt.version>
     </properties>
 
     <dependencies>
