@@ -15,6 +15,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <properties>
+        <java-jwt.version>3.19.4</java-jwt.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.sap.hcp.cf.logging</groupId>
@@ -31,11 +35,6 @@
             <groupId>com.auth0</groupId>
             <artifactId>java-jwt</artifactId>
             <version>${java-jwt.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson-databind.version}</version>
         </dependency>
 
         <dependency>
