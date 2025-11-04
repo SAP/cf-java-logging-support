@@ -108,7 +108,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Runtime dependencies (aligned with Spring Boot 3.5.7) -->
-        <jackson-jr.version>2.19.2</jackson-jr.version>
+        <jackson.version>2.19.2</jackson.version>
         <slf4j.version>2.0.17</slf4j.version>
         <logback.version>1.5.20</logback.version>
         <log4j2.version>2.24.3</log4j2.version>
@@ -144,6 +144,18 @@
         <module>cf-java-logging-support-opentelemetry-agent-extension</module>
         <module>sample-spring-boot</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- unit test related -->
