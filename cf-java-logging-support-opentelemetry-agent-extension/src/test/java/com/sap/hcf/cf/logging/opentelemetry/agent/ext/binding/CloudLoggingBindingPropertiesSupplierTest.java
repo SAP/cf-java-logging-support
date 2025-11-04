@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -29,7 +28,7 @@ public class CloudLoggingBindingPropertiesSupplierTest {
 
     private static final Map<String, Object> BINDING =
             Map.ofEntries(entry("label", "user-provided"), entry("name", "test-name"),
-                          entry("tags", Collections.singletonList("Cloud Logging")), entry("credentials", CREDENTIALS));
+                          entry("tags", List.of("Cloud Logging")), entry("credentials", CREDENTIALS));
 
     @Mock
     private CloudLoggingServicesProvider servicesProvider;

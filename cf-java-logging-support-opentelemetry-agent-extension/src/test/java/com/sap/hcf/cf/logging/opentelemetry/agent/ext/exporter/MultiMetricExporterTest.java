@@ -10,10 +10,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -32,7 +31,7 @@ public class MultiMetricExporterTest {
     @Test
     public void returnsSingleExporterOnOneEntryExporterList() {
         MetricExporter exporter = mock(MetricExporter.class);
-        assertThat(MultiMetricExporter.composite(singletonList(exporter), null, null)).isSameAs(exporter);
+        assertThat(MultiMetricExporter.composite(List.of(exporter), null, null)).isSameAs(exporter);
     }
 
     @Test
@@ -43,7 +42,7 @@ public class MultiMetricExporterTest {
         MetricExporter exporter2 = mock(MetricExporter.class);
         when(exporter2.export(metrics)).thenReturn(CompletableResultCode.ofSuccess());
 
-        MetricExporter metricExporter = MultiMetricExporter.composite(asList(exporter1, exporter2), null, null);
+        MetricExporter metricExporter = MultiMetricExporter.composite(List.of(exporter1, exporter2), null, null);
         metricExporter.export(metrics);
 
         verify(exporter1).export(metrics);
@@ -57,7 +56,7 @@ public class MultiMetricExporterTest {
         MetricExporter exporter2 = mock(MetricExporter.class);
         when(exporter2.flush()).thenReturn(CompletableResultCode.ofSuccess());
 
-        MetricExporter metricExporter = MultiMetricExporter.composite(asList(exporter1, exporter2), null, null);
+        MetricExporter metricExporter = MultiMetricExporter.composite(List.of(exporter1, exporter2), null, null);
         metricExporter.flush();
 
         verify(exporter1).flush();
@@ -71,7 +70,7 @@ public class MultiMetricExporterTest {
         MetricExporter exporter2 = mock(MetricExporter.class);
         when(exporter2.shutdown()).thenReturn(CompletableResultCode.ofSuccess());
 
-        MetricExporter metricExporter = MultiMetricExporter.composite(asList(exporter1, exporter2), null, null);
+        MetricExporter metricExporter = MultiMetricExporter.composite(List.of(exporter1, exporter2), null, null);
         metricExporter.shutdown();
 
         verify(exporter1).shutdown();
@@ -86,7 +85,7 @@ public class MultiMetricExporterTest {
         AggregationTemporalitySelector aggregationTemporalitySelector = mock(AggregationTemporalitySelector.class);
 
         MetricExporter metricExporter =
-                MultiMetricExporter.composite(asList(exporter1, exporter2), aggregationTemporalitySelector, null);
+                MultiMetricExporter.composite(List.of(exporter1, exporter2), aggregationTemporalitySelector, null);
         metricExporter.getAggregationTemporality(InstrumentType.OBSERVABLE_GAUGE);
 
         verify(aggregationTemporalitySelector).getAggregationTemporality(InstrumentType.OBSERVABLE_GAUGE);
@@ -100,7 +99,7 @@ public class MultiMetricExporterTest {
         DefaultAggregationSelector defaultAggregationSelector = mock(DefaultAggregationSelector.class);
 
         MetricExporter metricExporter =
-                MultiMetricExporter.composite(asList(exporter1, exporter2), null, defaultAggregationSelector);
+                MultiMetricExporter.composite(List.of(exporter1, exporter2), null, defaultAggregationSelector);
         metricExporter.getDefaultAggregation(InstrumentType.OBSERVABLE_GAUGE);
 
         verify(defaultAggregationSelector).getDefaultAggregation(InstrumentType.OBSERVABLE_GAUGE);
@@ -111,7 +110,7 @@ public class MultiMetricExporterTest {
         MetricExporter exporter1 = mock(MetricExporter.class);
         MetricExporter exporter2 = mock(MetricExporter.class);
 
-        MetricExporter metricExporter = MultiMetricExporter.composite(asList(exporter1, exporter2), null, null);
+        MetricExporter metricExporter = MultiMetricExporter.composite(List.of(exporter1, exporter2), null, null);
 
         metricExporter.getAggregationTemporality(InstrumentType.OBSERVABLE_GAUGE);
 
@@ -123,7 +122,7 @@ public class MultiMetricExporterTest {
         MetricExporter exporter1 = mock(MetricExporter.class);
         MetricExporter exporter2 = mock(MetricExporter.class);
 
-        MetricExporter metricExporter = MultiMetricExporter.composite(asList(exporter1, exporter2), null, null);
+        MetricExporter metricExporter = MultiMetricExporter.composite(List.of(exporter1, exporter2), null, null);
 
         metricExporter.getDefaultAggregation(InstrumentType.OBSERVABLE_GAUGE);
 
