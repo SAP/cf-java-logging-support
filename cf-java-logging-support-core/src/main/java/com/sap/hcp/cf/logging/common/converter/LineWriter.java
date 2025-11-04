@@ -1,7 +1,5 @@
 package com.sap.hcp.cf.logging.common.converter;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -12,7 +10,7 @@ public class LineWriter extends Writer {
 
     StringWriter sw = new StringWriter();
 
-    private List<String> lines = new LinkedList<String>();
+    private final List<String> lines = new LinkedList<String>();
 
     public LineWriter() {
     }
@@ -26,7 +24,7 @@ public class LineWriter extends Writer {
      */
     @Override
     public void write(String str, int off, int len) {
-        if (StringUtils.isNotBlank(str)) {
+        if (str != null && !str.isBlank()) {
             lines.add(str);
         }
     }

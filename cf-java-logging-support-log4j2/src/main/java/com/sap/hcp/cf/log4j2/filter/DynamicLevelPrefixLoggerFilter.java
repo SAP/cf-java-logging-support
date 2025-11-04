@@ -1,7 +1,6 @@
 package com.sap.hcp.cf.log4j2.filter;
 
 import com.sap.hcp.cf.logging.common.helper.DynamicLogLevelHelper;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.core.LogEvent;
@@ -32,7 +31,11 @@ public class DynamicLevelPrefixLoggerFilter extends AbstractFilter {
 
     private Level getDynamicLevel(LogEvent event) {
         String logLevel = getContextValue(event, DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_KEY);
-        return StringUtils.isNotBlank(logLevel) ? Level.getLevel(logLevel) : null;
+        return isNotBlank(logLevel) ? Level.getLevel(logLevel) : null;
+    }
+
+    private static boolean isNotBlank(String string) {
+        return string != null && !string.isBlank();
     }
 
     private String getContextValue(LogEvent event, String key) {
@@ -54,7 +57,7 @@ public class DynamicLevelPrefixLoggerFilter extends AbstractFilter {
     }
 
     private boolean checkPackages(String loggerFqcn, String logLevelPackages) {
-        if (StringUtils.isNotBlank(logLevelPackages)) {
+        if (isNotBlank(logLevelPackages)) {
             for (String current: logLevelPackages.split(",")) {
                 if (loggerFqcn.startsWith(current)) {
                     return true;
@@ -84,7 +87,7 @@ public class DynamicLevelPrefixLoggerFilter extends AbstractFilter {
 
     private Level getMdcLevel() {
         String mdcLevel = MDC.get(DynamicLogLevelHelper.MDC_DYNAMIC_LOG_LEVEL_KEY);
-        return StringUtils.isNotBlank(mdcLevel) ? Level.getLevel(mdcLevel) : null;
+        return isNotBlank(mdcLevel) ? Level.getLevel(mdcLevel) : null;
     }
 
     private String getMdcPackages() {

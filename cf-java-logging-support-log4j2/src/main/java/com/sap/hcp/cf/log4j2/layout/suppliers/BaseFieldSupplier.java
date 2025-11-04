@@ -3,7 +3,6 @@ package com.sap.hcp.cf.log4j2.layout.suppliers;
 import com.sap.hcp.cf.log4j2.converter.api.Log4jContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.Defaults;
 import com.sap.hcp.cf.logging.common.Fields;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
 
 import java.time.Instant;
@@ -32,11 +31,15 @@ public class BaseFieldSupplier implements Log4jContextFieldSupplier {
         if (event.getThrown() != null) {
             Throwable throwable = event.getThrown();
             fields.put(Fields.EXCEPTION_TYPE, throwable.getClass().getName());
-            if (StringUtils.isNotBlank(throwable.getMessage())) {
+            if (isNotBlank(throwable.getMessage())) {
                 fields.put(Fields.EXCEPTION_MESSAGE, throwable.getMessage());
             }
         }
         return fields;
+    }
+
+    private static boolean isNotBlank(String string) {
+        return string != null && !string.isBlank();
     }
 
     private String getIsoTs(LogEvent event) {

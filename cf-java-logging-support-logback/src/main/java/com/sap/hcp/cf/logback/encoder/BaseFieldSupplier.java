@@ -6,7 +6,6 @@ import com.sap.hcp.cf.logback.converter.api.LogbackContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.Defaults;
 import com.sap.hcp.cf.logging.common.Fields;
 import com.sap.hcp.cf.logging.common.Markers;
-import org.apache.commons.lang3.StringUtils;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -34,11 +33,15 @@ public class BaseFieldSupplier implements LogbackContextFieldSupplier {
         if (event.getThrowableProxy() != null && event.getThrowableProxy() instanceof ThrowableProxy) {
             Throwable throwable = ((ThrowableProxy) event.getThrowableProxy()).getThrowable();
             fields.put(Fields.EXCEPTION_TYPE, throwable.getClass().getName());
-            if (StringUtils.isNotBlank(throwable.getMessage())) {
+            if (isNotBlank(throwable.getMessage())) {
                 fields.put(Fields.EXCEPTION_MESSAGE, throwable.getMessage());
             }
         }
         return fields;
+    }
+
+    private static boolean isNotBlank(String string) {
+        return string != null && !string.isBlank();
     }
 
     private String now() {
