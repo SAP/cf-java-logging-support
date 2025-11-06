@@ -11,72 +11,12 @@
     <description>Supports the creation of structured log messages and the collection of request metrics for Java
         applications running on Cloud Foundry
     </description>
-    <developers>
-        <developer>
-            <id>WolfgangTheilmann</id>
-            <name>Wolfgang Theilmann</name>
-            <email>wolfgang.theilmann@sap.com</email>
-            <organization>SAP SE</organization>
-            <organizationUrl>https://github.com/SAP</organizationUrl>
-        </developer>
-        <developer>
-            <id>KarstenSchnitter</id>
-            <name>Karsten Schnitter</name>
-            <email>k.schnitter@sap.com</email>
-            <organization>SAP SE</organization>
-            <organizationUrl>https://github.com/SAP</organizationUrl>
-        </developer>
-        <developer>
-            <id>HariG</id>
-            <name>Hariharan Gandhi</name>
-            <email>hariharan.gandhi@sap.com</email>
-            <organization>SAP SE</organization>
-            <organizationUrl>https://github.com/SAP</organizationUrl>
-        </developer>
-        <developer>
-            <id>haraldfuchs</id>
-            <name>Harald Fuchs</name>
-            <email>harald.fuchs@sap.com</email>
-            <organization>SAP SE</organization>
-            <organizationUrl>https://github.com/SAP</organizationUrl>
-        </developer>
-        <developer>
-            <id>nicklas-dohrn</id>
-            <name>Nicklas Dohrn</name>
-            <email>nicklas.dohrn@sap.com</email>
-            <organization>SAP SE</organization>
-            <organizationUrl>https://github.com/SAP</organizationUrl>
-        </developer>
-        <developer>
-            <id>bgoerzig</id>
-            <name>Benny Goerzig</name>
-            <email>benny.goerzig@sap.com</email>
-            <organization>SAP SE</organization>
-            <organizationUrl>https://github.com/SAP</organizationUrl>
-        </developer>
-        <developer>
-            <id>juergen-walter</id>
-            <name>Juergen Walter</name>
-            <email>juergen.walter@sap.com</email>
-            <organization>SAP SE</organization>
-            <organizationUrl>https://github.com/SAP</organizationUrl>
-        </developer>
-        <developer>
-            <id>D070188</id>
-            <name>Xiaozhong Zhang</name>
-            <email>xiaozhong.zhang@sap.com</email>
-            <organization>SAP SE</organization>
-            <organizationUrl>https://github.com/SAP</organizationUrl>
-        </developer>
-        <developer>
-            <id>p-singh</id>
-            <name>Prabhjot Singh</name>
-            <email>prabhjot.singh02@sap.com</email>
-            <organization>SAP SE</organization>
-            <organizationUrl>https://github.com/SAP</organizationUrl>
-        </developer>
-    </developers>
 
+    <url>https://github.com/SAP/cf-java-logging-support</url>
+    <organization>
+        <name>SAP SE</name>
+        <url>https://www.sap.com</url>
+    </organization>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -85,7 +25,6 @@
         </license>
     </licenses>
 
-    <url>https://github.com/SAP/cf-java-logging-support</url>
 
     <scm>
         <connection>scm:git:git@github.com:SAP/cf-java-logging-support.git</connection>
