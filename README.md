@@ -64,12 +64,12 @@ All in all, you should do the following:
 4. Adjust your logging configuration accordingly.
 
 Let's say you want to make use of the *servlet filter* feature, then you need to add the following dependency to your
-POM with property `cf-logging-version` referring to the latest nexus version (currently `4.0.0-RC2`):
+POM with property `cf-logging-version` referring to the latest nexus version (currently `4.0.0`):
 
 ```xml
 
 <properties>
-    <cf-logging-version>4.0.0-RC2</cf-logging-version>
+    <cf-logging-version>4.0.0</cf-logging-version>
 </properties>
 ```
 

@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 public class CloudLoggingConfigurationCustomizerProvider implements AutoConfigurationCustomizerProvider {
 
     private static final Logger LOG = Logger.getLogger(CloudLoggingConfigurationCustomizerProvider.class.getName());
-    private static final String VERSION = "4.0.0-RC2";
+    private static final String VERSION = "4.0.0";
 
     @Override
     public void customize(AutoConfigurationCustomizer autoConfiguration) {
