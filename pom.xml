@@ -4,7 +4,7 @@
 
     <groupId>com.sap.hcp.cf.logging</groupId>
     <artifactId>cf-java-logging-support-parent</artifactId>
-    <version>4.0.0-RC2</version>
+    <version>4.0.0</version>
     <packaging>pom</packaging>
 
     <name>Cloud Foundry Java logging support components</name>
