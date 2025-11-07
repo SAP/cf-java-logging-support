@@ -25,6 +25,29 @@
         </license>
     </licenses>
 
+    <developers>
+        <developer>
+            <id>KarstenSchnitter</id>
+            <name>Karsten Schnitter</name>
+            <email>k.schnitter@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
+        <developer>
+            <id>WolfgangTheilmann</id>
+            <name>Wolfgang Theilmann</name>
+            <email>wolfgang.theilmann@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
+        <developer>
+            <id>HariG</id>
+            <name>Hariharan Gandhi</name>
+            <email>hariharan.gandhi@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
+    </developers>
 
     <scm>
         <connection>scm:git:git@github.com:SAP/cf-java-logging-support.git</connection>
