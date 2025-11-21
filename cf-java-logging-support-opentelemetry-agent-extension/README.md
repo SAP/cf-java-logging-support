@@ -137,7 +137,7 @@ java -javaagent:/path/to/opentelemetry-javaagent-<version>.jar \
      -Dotel.instrumentation.logback-appender.experimental.capture-code-attributes=true \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
      # Disable large resource attributes
-     -Dotel.experimental.resource.disabled-keys=process.command_line,process.command_args,process.executable.path
+     -Dotel.resource.disabled-keys=process.command_line,process.command_args,process.executable.path
 ```
 
 The [OpenTelemetry Java Instrumentation project](https://github.com/open-telemetry/opentelemetry-java-instrumentation) provides detailed documentation on the configuration properties for [Logback](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/logback/logback-appender-1.0/javaagent) and [Log4j](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/log4j/log4j-appender-2.17/javaagent).
