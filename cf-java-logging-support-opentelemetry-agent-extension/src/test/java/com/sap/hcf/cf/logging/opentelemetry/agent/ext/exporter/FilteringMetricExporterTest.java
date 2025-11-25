@@ -103,6 +103,38 @@ class FilteringMetricExporterTest {
         assertThat(exported.getValue()).containsExactlyInAnyOrder(includedMetric);
     }
 
+    @Test
+    void supportsWildcardsOnIncluded() {
+        ConfigProperties config = createConfig(MapEntry.entry("include.names", "incl*"));
+        try (MetricExporter exporter = FilteringMetricExporter.wrap(delegate).withConfig(config).build()) {
+            exporter.export(asList(includedMetric, excludedMetric, anotherMetric));
+        }
+        verify(delegate).export(exported.capture());
+        assertThat(exported.getValue()).containsExactlyInAnyOrder(includedMetric);
+    }
+
+    @Test
+    void supportsWildcardsOnEncluded() {
+        ConfigProperties config = createConfig(MapEntry.entry("exclude.names", "excl*"));
+        try (MetricExporter exporter = FilteringMetricExporter.wrap(delegate).withConfig(config).build()) {
+            exporter.export(asList(includedMetric, excludedMetric, anotherMetric));
+        }
+        verify(delegate).export(exported.capture());
+        assertThat(exported.getValue()).containsExactlyInAnyOrder(includedMetric, anotherMetric);
+    }
+
+    @Test
+    void supportsConfigPrefixes() {
+        ConfigProperties config = createConfig(MapEntry.entry("config.include.names", "included,excluded"),
+                                               MapEntry.entry("config.exclude.names", "excluded"));
+        try (MetricExporter exporter = FilteringMetricExporter.wrap(delegate).withConfig(config)
+                                                              .withPropertyPrefix("config").build()) {
+            exporter.export(asList(includedMetric, excludedMetric, anotherMetric));
+        }
+        verify(delegate).export(exported.capture());
+        assertThat(exported.getValue()).containsExactlyInAnyOrder(includedMetric);
+    }
+
     @SafeVarargs
     private static ConfigProperties createConfig(MapEntry<String, String>... entries) {
         HashMap<String, String> map = new HashMap<>();
