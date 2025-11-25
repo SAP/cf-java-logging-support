@@ -28,6 +28,10 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
 
     public static final String CRED_DYNATRACE_APIURL = "apiurl";
     public static final String DT_APIURL_METRICS_SUFFIX = "/v2/otlp/v1/metrics";
+
+    private static final String GENERIC_CONFIG_PREFIX = "otel.exporter.dynatrace.";
+    private static final String METRICS_CONFIG_PREFIX = "otel.exporter.dynatrace.metrics.";
+
     private static final Logger LOG = Logger.getLogger(DynatraceMetricsExporterProvider.class.getName());
     private static final AggregationTemporalitySelector ALWAYS_DELTA = instrumentType -> AggregationTemporality.DELTA;
     private final Function<ConfigProperties, CloudFoundryServiceInstance> serviceProvider;
@@ -41,17 +45,17 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
     }
 
     private static String getCompression(ConfigProperties config) {
-        String compression = config.getString("otel.exporter.dynatrace.metrics.compression");
-        return compression != null ? compression : config.getString("otel.exporter.dynatrace.compression", "gzip");
+        String compression = config.getString(METRICS_CONFIG_PREFIX + "compression");
+        return compression != null ? compression : config.getString(GENERIC_CONFIG_PREFIX + "compression", "gzip");
     }
 
     private static Duration getTimeOut(ConfigProperties config) {
-        Duration timeout = config.getDuration("otel.exporter.dynatrace.metrics.timeout");
-        return timeout != null ? timeout : config.getDuration("otel.exporter.dynatrace.timeout");
+        Duration timeout = config.getDuration(METRICS_CONFIG_PREFIX + "timeout");
+        return timeout != null ? timeout : config.getDuration(GENERIC_CONFIG_PREFIX + "timeout");
     }
 
     private static AggregationTemporalitySelector getAggregationTemporalitySelector(ConfigProperties config) {
-        String temporalityStr = config.getString("otel.exporter.dynatrace.metrics.temporality.preference");
+        String temporalityStr = config.getString(METRICS_CONFIG_PREFIX + "temporality.preference");
         if (temporalityStr == null) {
             return ALWAYS_DELTA;
         }
@@ -71,8 +75,7 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
     }
 
     private static DefaultAggregationSelector getDefaultAggregationSelector(ConfigProperties config) {
-        String defaultHistogramAggregation =
-                config.getString("otel.exporter.dynatrace.metrics.default.histogram.aggregation");
+        String defaultHistogramAggregation = config.getString(METRICS_CONFIG_PREFIX + "default.histogram.aggregation");
         if (defaultHistogramAggregation == null) {
             return DefaultAggregationSelector.getDefault()
                                              .with(InstrumentType.HISTOGRAM, Aggregation.defaultAggregation());
@@ -147,7 +150,9 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
 
         LOG.info(
                 "Created metrics exporter for service binding " + cfService.getName() + " (" + cfService.getLabel() + ")");
-        return builder.build();
+        MetricExporter exporter = builder.build();
+        return FilteringMetricExporter.wrap(exporter).withConfig(config).withPropertyPrefix(METRICS_CONFIG_PREFIX)
+                                      .build();
     }
 
 }
