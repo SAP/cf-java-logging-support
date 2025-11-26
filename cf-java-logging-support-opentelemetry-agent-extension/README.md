@@ -142,6 +142,21 @@ java -javaagent:/path/to/opentelemetry-javaagent-<version>.jar \
 
 The [OpenTelemetry Java Instrumentation project](https://github.com/open-telemetry/opentelemetry-java-instrumentation) provides detailed documentation on the configuration properties for [Logback](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/logback/logback-appender-1.0/javaagent) and [Log4j](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/log4j/log4j-appender-2.17/javaagent).
 
+### Filtering Metrics
+
+_This feature was introduced with version 4.1.0 of the extension._
+
+You can filter which metrics are exported to Cloud Logging or Dynatrace by name using the following properties:
+
+| Property                                                                                               | Description                                                                                                      |
+|--------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| `otel.exporter.cloud-logging.metrics.include.names` or `otel.exporter.dynatrace.metrics.include.names` | A comma-separated list of metric names to be forwarded. This may include a wildcard "*" at the end of the name. |    
+| `otel.exporter.cloud-logging.metrics.exclude.names` or `otel.exporter.dynatrace.metrics.exclude.names` | A comma-separated list of metric names to be rejected. This may include a wildcard "*" at the end of the name.  |    
+
+Note, that the `include` filter is applied before the `exclude` filter.
+That means, if a metric matches both filters, it will be excluded.
+The configuration applies to both the `cloud-logging` and `dynatrace` exporters independently.
+
 ## Using User-Provided Service Instances
 
 ### SAP Cloud Logging
