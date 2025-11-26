@@ -150,8 +150,8 @@ You can filter which metrics are exported to Cloud Logging or Dynatrace by name 
 
 | Property                                                                                               | Description                                                                                                      |
 |--------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
-| `otel.exporter.cloud-logging.metrics.include.names` or `otel.exporter.dynatrace.metrics.include.names` | A comma-separated list of metric names to be forwarded. This may include a wild card "*" at the end of the name. |    
-| `otel.exporter.cloud-logging.metrics.exclude.names` or `otel.exporter.dynatrace.metrics.exclude.names` | A comma-separated list of metric names to be rejected. This may include a wild card "*" at the end of the name.  |    
+| `otel.exporter.cloud-logging.metrics.include.names` or `otel.exporter.dynatrace.metrics.include.names` | A comma-separated list of metric names to be forwarded. This may include a wildcard "*" at the end of the name. |    
+| `otel.exporter.cloud-logging.metrics.exclude.names` or `otel.exporter.dynatrace.metrics.exclude.names` | A comma-separated list of metric names to be rejected. This may include a wildcard "*" at the end of the name.  |    
 
 Note, that the `include` filter is applied before the `exclude` filter.
 That means, if a metric matches both filters, it will be excluded.
