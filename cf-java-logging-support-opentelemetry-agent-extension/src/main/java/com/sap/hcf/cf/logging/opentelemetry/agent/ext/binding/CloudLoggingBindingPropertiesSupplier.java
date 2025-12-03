@@ -1,5 +1,6 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
+import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 
@@ -36,7 +37,9 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
         defaults.put("com.sap.otel.extension.cloud-logging.label", "cloud-logging");
         defaults.put("com.sap.otel.extension.cloud-logging.tag", "Cloud Logging");
         defaults.put("otel.javaagent.extension.sap.cf.binding.user-provided.label", "user-provided");
-        return DefaultConfigProperties.createFromMap(defaults);
+        ComponentLoader componentLoader =
+                ComponentLoader.forClassLoader(DefaultConfigProperties.class.getClassLoader());
+        return DefaultConfigProperties.create(defaults, componentLoader);
     }
 
     private static boolean isBlank(String text) {
