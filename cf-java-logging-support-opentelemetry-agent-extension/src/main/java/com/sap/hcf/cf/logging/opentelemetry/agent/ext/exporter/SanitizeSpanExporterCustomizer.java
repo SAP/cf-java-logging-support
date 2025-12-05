@@ -73,9 +73,9 @@ public class SanitizeSpanExporterCustomizer implements BiFunction<SpanExporter, 
 
         private final Attributes filteredAttributes;
 
-        protected SanitizedSpanData(SpanData delegate, Attributes filteredAttrinutes) {
+        protected SanitizedSpanData(SpanData delegate, Attributes filteredAttributes) {
             super(delegate);
-            this.filteredAttributes = filteredAttrinutes;
+            this.filteredAttributes = filteredAttributes;
         }
 
         @Override
