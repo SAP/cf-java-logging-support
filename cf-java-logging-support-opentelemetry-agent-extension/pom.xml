@@ -8,12 +8,56 @@
     <packaging>jar</packaging>
 
     <name>cf-java-logging-support-opentelemetry-agent-extension</name>
-
+    <description>OpenTelemetry Java Agent Extension for auto-configuration of SAP BTP services.</description>
     <parent>
         <artifactId>cf-java-logging-support-parent</artifactId>
         <groupId>com.sap.hcp.cf.logging</groupId>
-        <version>4.0.0</version>
+        <version>4.0.1</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
+
+    <url>https://github.com/SAP/cf-java-logging-support</url>
+    <organization>
+        <name>SAP SE</name>
+        <url>https://www.sap.com</url>
+    </organization>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>KarstenSchnitter</id>
+            <name>Karsten Schnitter</name>
+            <email>k.schnitter@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
+        <developer>
+            <id>WolfgangTheilmann</id>
+            <name>Wolfgang Theilmann</name>
+            <email>wolfgang.theilmann@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
+        <developer>
+            <id>HariG</id>
+            <name>Hariharan Gandhi</name>
+            <email>hariharan.gandhi@sap.com</email>
+            <organization>SAP SE</organization>
+            <organizationUrl>https://github.com/SAP</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:SAP/cf-java-logging-support.git</connection>
+        <developerConnection>scm:git:git@github.com:SAP/cf-java-logging-support.git</developerConnection>
+        <url>git@github.com:SAP/cf-java-logging-support.git</url>
+    </scm>
 
     <properties>
         <opentelemetry.sdk.version>1.55.0</opentelemetry.sdk.version>
