@@ -69,7 +69,7 @@ class ExtensionConfigurationsTest {
                          of(ExtensionConfigurations.RUNTIME.CLOUD_FOUNDRY.SERVICE.DYNATRACE.TAG,
                             "otel.javaagent.extension.sap.cf.binding.dynatrace.tag", "dt"),
                          of(ExtensionConfigurations.RUNTIME.CLOUD_FOUNDRY.SERVICE.DYNATRACE.TOKEN_NAME,
-                            "sap.dynatrace.cf.binding.metrics.token.name", "api-token"),
+                            "sap.dynatrace.cf.binding.token.name", "api-token"),
                          of(ExtensionConfigurations.RUNTIME.CLOUD_FOUNDRY.SERVICE.DYNATRACE.TOKEN_NAME,
                             "otel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name", "api-token"));
     }

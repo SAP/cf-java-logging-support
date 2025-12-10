@@ -253,7 +253,7 @@ public interface ExtensionConfigurations {
                                                                                                    .build();
 
                     ConfigProperty<String> TOKEN_NAME =
-                            stringValued("sap.dynatrace.cf.binding.metrics.token.name").withFallback(
+                            stringValued("sap.dynatrace.cf.binding.token.name").withFallback(
                                     DEPRECATED.RUNTIME.CLOUD_FOUNDRY.SERVICE.DYNATRACE.TOKEN_NAME_OTEL).build();
                 }
 

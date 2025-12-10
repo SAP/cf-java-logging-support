@@ -128,15 +128,15 @@ There is no custom network client provided by this extension.
 
 The extension itself can be configured by specifying the following system properties:
 
-| Property                                      | Default Value   | Comment                                                                                                                                         |
-|-----------------------------------------------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
-| `sap.cloud-logging.cf.binding.label.value`    | `cloud-logging` | The label of the managed service binding to bind to.                                                                                            |
-| `sap.cloud-logging.cf.binding.tag.value`      | `Cloud Logging` | The tag of any service binding (managed or user-provided) to bind to.                                                                           |
-| `sap.dynatrace.cf.binding.label.value`        | `dynatrace`     | The label of the managed service binding to bind to.                                                                                            |
-| `sap.dynatrace.cf.binding.tag.value`          | `dynatrace`     | The tag of any service binding (managed or user-provided) to bind to.                                                                           |
-| `sap.dynatrace.cf.binding.metrics.token.name` |                 | The name of the field containing the Dynatrace API token within the service binding credentials. This is required to send metrics to Dynatrace. |
-| `sap.cloudfoundry.otel.resources.enabled`     | `true`          | Whether to add CF resource attributes to all events.                                                                                            |
-| `sap.cloudfoundry.otel.resources.format`      | `SAP`           | The semantic convention to follow for the CF resource attributes.                                                                               |
+| Property                                   | Default Value   | Comment                                                                                                                                         |
+|--------------------------------------------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| `sap.cloud-logging.cf.binding.label.value` | `cloud-logging` | The label of the managed service binding to bind to.                                                                                            |
+| `sap.cloud-logging.cf.binding.tag.value`   | `Cloud Logging` | The tag of any service binding (managed or user-provided) to bind to.                                                                           |
+| `sap.dynatrace.cf.binding.label.value`     | `dynatrace`     | The label of the managed service binding to bind to.                                                                                            |
+| `sap.dynatrace.cf.binding.tag.value`       | `dynatrace`     | The tag of any service binding (managed or user-provided) to bind to.                                                                           |
+| `sap.dynatrace.cf.binding.token.name`      |                 | The name of the field containing the Dynatrace API token within the service binding credentials. This is required to send metrics to Dynatrace. |
+| `sap.cloudfoundry.otel.resources.enabled`  | `true`          | Whether to add CF resource attributes to all events.                                                                                            |
+| `sap.cloudfoundry.otel.resources.format`   | `SAP`           | The semantic convention to follow for the CF resource attributes. Supported values are `SAP` and `OTEL`.                                        |
 
 > Each property can also be provided as environment variable, e.g., `sap.cloud-logging.cf.binding.label.value` as
 `SAP.CLOUD-LOGGING.CF.BINDING.LABEL.VALUE`.
@@ -222,7 +222,7 @@ The following table summarizes all configuration properties provided by the exte
 | `sap.cloud-logging.cf.binding.tag.value`                            | The tag value used to identify managed Cloud Logging service bindings.                                                                                                                                                                                                                                                                        | `Cloud Logging`                             |
 | `sap.dynatrace.cf.binding.label.value`                              | The label value used to identify managed Dynatrace service bindings.                                                                                                                                                                                                                                                                          | `dynatrace`                                 |
 | `sap.dynatrace.cf.binding.tag.value`                                | The tag value used to identify managed Dynatrace service bindings.                                                                                                                                                                                                                                                                            | `dynatrace`                                 |
-| `sap.dynatrace.cf.binding.metrics.token.name`                       | The name of the field containing the Dynatrace API token within the service binding credentials.                                                                                                                                                                                                                                              |                                             |
+| `sap.dynatrace.cf.binding.token.name`                               | The name of the field containing the Dynatrace API token within the service binding credentials.                                                                                                                                                                                                                                              |                                             |
 
 ## Using User-Provided Service Instances
 
@@ -284,12 +284,12 @@ Do not forget to configure the name chosen for `<your_token_field>` via the resp
 
 ```sh
 java #... \
--Dsap.dynatrace.cf.binding.metrics.token.name=<your_token_field> \
+-Dsap.dynatrace.cf.binding.token.name=<your_token_field> \
 # ...
 
 # or
 
-SAP_DYNATRACE_CF_BINDING_METRICS_TOKEN_NAME=<your_token_field>
+SAP_DYNATRACE_CF_BINDING_TOKEN_NAME=<your_token_field>
 java #...
 ```
 
