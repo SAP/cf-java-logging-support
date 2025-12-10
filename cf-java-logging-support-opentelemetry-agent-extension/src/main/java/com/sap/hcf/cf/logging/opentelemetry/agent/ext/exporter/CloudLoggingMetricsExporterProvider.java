@@ -2,6 +2,7 @@ package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryServiceInstance;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudLoggingServicesProvider;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.EXPORTER;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -27,7 +28,6 @@ import static io.opentelemetry.sdk.metrics.Aggregation.explicitBucketHistogram;
 
 public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricExporterProvider {
 
-    private static final String GENERIC_CONFIG_PREFIX = "otel.exporter.cloud-logging.";
     private static final String METRICS_CONFIG_PREFIX = "otel.exporter.cloud-logging.metrics.";
     private static final Logger LOG = Logger.getLogger(CloudLoggingMetricsExporterProvider.class.getName());
 
@@ -45,21 +45,15 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
     }
 
     private static String getCompression(ConfigProperties config) {
-        String compression = config.getString(METRICS_CONFIG_PREFIX + "compression");
-        return compression != null ? compression : config.getString(GENERIC_CONFIG_PREFIX + "compression", "gzip");
+        return EXPORTER.CLOUD_LOGGING.METRICS.COMPRESSION.getValue(config);
     }
 
     private static Duration getTimeOut(ConfigProperties config) {
-        Duration timeout = config.getDuration(METRICS_CONFIG_PREFIX + "timeout");
-        return timeout != null ? timeout : config.getDuration(GENERIC_CONFIG_PREFIX + "timeout");
+        return EXPORTER.CLOUD_LOGGING.METRICS.TIMEOUT.getValue(config);
     }
 
     private static AggregationTemporalitySelector getAggregationTemporalitySelector(ConfigProperties config) {
-        String temporalityStr = config.getString(METRICS_CONFIG_PREFIX + "temporality.preference");
-        if (temporalityStr == null) {
-            return AggregationTemporalitySelector.alwaysCumulative();
-        }
-        AggregationTemporalitySelector temporalitySelector;
+        String temporalityStr = EXPORTER.CLOUD_LOGGING.METRICS.TEMPORALITY_PREFERENCE.getValue(config);
         switch (temporalityStr.toLowerCase(Locale.ROOT)) {
         case "cumulative":
             return AggregationTemporalitySelector.alwaysCumulative();
@@ -73,7 +67,8 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
     }
 
     private static DefaultAggregationSelector getDefaultAggregationSelector(ConfigProperties config) {
-        String defaultHistogramAggregation = config.getString(METRICS_CONFIG_PREFIX + "default.histogram.aggregation");
+        String defaultHistogramAggregation =
+                EXPORTER.CLOUD_LOGGING.METRICS.DEFAULT_HISTOGRAM_AGGREGATION.getValue(config);
         if (defaultHistogramAggregation == null) {
             return DefaultAggregationSelector.getDefault()
                                              .with(InstrumentType.HISTOGRAM, Aggregation.defaultAggregation());
@@ -104,9 +99,9 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
                                                          .collect(Collectors.toList());
         MetricExporter exporter = MultiMetricExporter.composite(exporters, getAggregationTemporalitySelector(config),
                                                                 getDefaultAggregationSelector(config));
-        exporter = FilteringMetricExporter.wrap(exporter).withConfig(config).withPropertyPrefix(METRICS_CONFIG_PREFIX)
-                                          .build();
-        return exporter;
+        return FilteringMetricExporter.wrap(exporter).withConfig(config)
+                                      .withIncludedNames(EXPORTER.CLOUD_LOGGING.METRICS.INCLUDE_NAMES)
+                                      .withExcludedNames(EXPORTER.CLOUD_LOGGING.METRICS.EXCLUDE_NAMES).build();
     }
 
     private MetricExporter createExporter(ConfigProperties config, CloudFoundryServiceInstance service) {
