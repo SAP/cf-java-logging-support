@@ -3,6 +3,8 @@ package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryCredentials;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryServiceInstance;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.DynatraceServiceProvider;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.DEPRECATED;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.EXPORTER;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -45,21 +47,15 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
     }
 
     private static String getCompression(ConfigProperties config) {
-        String compression = config.getString(METRICS_CONFIG_PREFIX + "compression");
-        return compression != null ? compression : config.getString(GENERIC_CONFIG_PREFIX + "compression", "gzip");
+        return EXPORTER.DYNATRACE.METRICS.COMPRESSION.getValue(config);
     }
 
     private static Duration getTimeOut(ConfigProperties config) {
-        Duration timeout = config.getDuration(METRICS_CONFIG_PREFIX + "timeout");
-        return timeout != null ? timeout : config.getDuration(GENERIC_CONFIG_PREFIX + "timeout");
+        return EXPORTER.DYNATRACE.METRICS.TIMEOUT.getValue(config);
     }
 
     private static AggregationTemporalitySelector getAggregationTemporalitySelector(ConfigProperties config) {
-        String temporalityStr = config.getString(METRICS_CONFIG_PREFIX + "temporality.preference");
-        if (temporalityStr == null) {
-            return ALWAYS_DELTA;
-        }
-        AggregationTemporalitySelector temporalitySelector;
+        String temporalityStr = EXPORTER.DYNATRACE.METRICS.TEMPORALITY_PREFERENCE.getValue(config);
         switch (temporalityStr.toLowerCase(Locale.ROOT)) {
         case "cumulative":
             return AggregationTemporalitySelector.alwaysCumulative();
@@ -75,7 +71,7 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
     }
 
     private static DefaultAggregationSelector getDefaultAggregationSelector(ConfigProperties config) {
-        String defaultHistogramAggregation = config.getString(METRICS_CONFIG_PREFIX + "default.histogram.aggregation");
+        String defaultHistogramAggregation = EXPORTER.DYNATRACE.METRICS.DEFAULT_HISTOGRAM_AGGREGATION.getValue(config);
         if (defaultHistogramAggregation == null) {
             return DefaultAggregationSelector.getDefault()
                                              .with(InstrumentType.HISTOGRAM, Aggregation.defaultAggregation());
@@ -125,10 +121,10 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
                     "Credential \"" + CRED_DYNATRACE_APIURL + "\" not found. Skipping dynatrace exporter configuration");
             return NoopMetricExporter.getInstance();
         }
-        String tokenName = config.getString("otel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name");
+        String tokenName = DEPRECATED.RUNTIME.CLOUD_FOUNDRY.SERVICE.DYNATRACE.TOKEN_NAME_OTEL.getValue(config);
         if (isBlank(tokenName)) {
             LOG.warning(
-                    "Configuration \"otel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name\" not found. Skipping dynatrace exporter configuration");
+                    "Configuration \"" + DEPRECATED.RUNTIME.CLOUD_FOUNDRY.SERVICE.DYNATRACE.TOKEN_NAME_OTEL.getKey() + "\" not found. Skipping dynatrace exporter configuration");
             return NoopMetricExporter.getInstance();
         }
         String apiToken = credentials.getString(tokenName);
@@ -151,8 +147,9 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
         LOG.info(
                 "Created metrics exporter for service binding " + cfService.getName() + " (" + cfService.getLabel() + ")");
         MetricExporter exporter = builder.build();
-        return FilteringMetricExporter.wrap(exporter).withConfig(config).withPropertyPrefix(METRICS_CONFIG_PREFIX)
-                                      .build();
+        return FilteringMetricExporter.wrap(exporter).withConfig(config)
+                                      .withIncludedNames(EXPORTER.DYNATRACE.METRICS.INCLUDE_NAMES)
+                                      .withExcludedNames(EXPORTER.DYNATRACE.METRICS.EXCLUDE_NAMES).build();
     }
 
 }

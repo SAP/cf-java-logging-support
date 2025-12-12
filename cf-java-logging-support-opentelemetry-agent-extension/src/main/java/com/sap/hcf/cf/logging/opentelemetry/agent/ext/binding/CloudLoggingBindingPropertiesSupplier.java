@@ -1,5 +1,6 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.DEPRECATED;
 import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
@@ -34,8 +35,8 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
 
     private static ConfigProperties getDefaultProperties() {
         Map<String, String> defaults = new HashMap<>();
-        defaults.put("com.sap.otel.extension.cloud-logging.label", "cloud-logging");
-        defaults.put("com.sap.otel.extension.cloud-logging.tag", "Cloud Logging");
+        defaults.put(DEPRECATED.RUNTIME.CLOUD_FOUNDRY.SERVICE.CLOUD_LOGGING.LABEL_SAP.getKey(), "cloud-logging");
+        defaults.put(DEPRECATED.RUNTIME.CLOUD_FOUNDRY.SERVICE.CLOUD_LOGGING.TAG_SAP.getKey(), "Cloud Logging");
         defaults.put("otel.javaagent.extension.sap.cf.binding.user-provided.label", "user-provided");
         ComponentLoader componentLoader =
                 ComponentLoader.forClassLoader(DefaultConfigProperties.class.getClassLoader());

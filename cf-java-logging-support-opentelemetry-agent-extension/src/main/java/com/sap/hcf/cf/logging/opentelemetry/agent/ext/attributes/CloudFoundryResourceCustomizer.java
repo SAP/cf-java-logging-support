@@ -1,5 +1,6 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.attributes;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.RESOURCE;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
@@ -13,10 +14,6 @@ import java.util.logging.Logger;
 
 public class CloudFoundryResourceCustomizer implements BiFunction<Resource, ConfigProperties, Resource> {
 
-    private static final String OTEL_JAVAAGENT_EXTENSION_SAP_CF_RESOURCE_ENABLED =
-            "otel.javaagent.extension.sap.cf.resource.enabled";
-    private static final String OTEL_JAVAAGENT_EXTENTION_CF_RESOURCE_FORMAT =
-            "otel.javaagent.extension.sap.cf.resource.format";
     private static final Logger LOG = Logger.getLogger(CloudFoundryResourceCustomizer.class.getName());
     private static final Map<String, String> SAP_CF_RESOURCE_ATTRIBUTES = new HashMap<String, String>() {{
         put("cloudfoundry.app.id", "sap.cf.app_id");
@@ -32,7 +29,7 @@ public class CloudFoundryResourceCustomizer implements BiFunction<Resource, Conf
 
     @Override
     public Resource apply(Resource resource, ConfigProperties configProperties) {
-        boolean isEnabled = configProperties.getBoolean(OTEL_JAVAAGENT_EXTENSION_SAP_CF_RESOURCE_ENABLED, true);
+        boolean isEnabled = RESOURCE.CLOUD_FOUNDRY.ENABLED.getValue(configProperties);
         if (!isEnabled) {
             LOG.config("CF resource attributes are disabled by configuration.");
             return Resource.empty();
@@ -48,7 +45,7 @@ public class CloudFoundryResourceCustomizer implements BiFunction<Resource, Conf
             return resource;
         }
 
-        String format = configProperties.getString(OTEL_JAVAAGENT_EXTENTION_CF_RESOURCE_FORMAT, "SAP");
+        String format = RESOURCE.CLOUD_FOUNDRY.FORMAT.getValue(configProperties);
         if (!format.equalsIgnoreCase("SAP")) {
             return resource;
         }

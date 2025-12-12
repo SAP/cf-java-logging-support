@@ -2,6 +2,7 @@ package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryServiceInstance;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudLoggingServicesProvider;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.EXPORTER;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -34,13 +35,11 @@ public class CloudLoggingSpanExporterProvider implements ConfigurableSpanExporte
     }
 
     private static String getCompression(ConfigProperties config) {
-        String compression = config.getString("otel.exporter.cloud-logging.traces.compression");
-        return compression != null ? compression : config.getString("otel.exporter.cloud-logging.compression", "gzip");
+        return EXPORTER.CLOUD_LOGGING.TRACES.COMPRESSION.getValue(config);
     }
 
     private static Duration getTimeOut(ConfigProperties config) {
-        Duration timeout = config.getDuration("otel.exporter.cloud-logging.traces.timeout");
-        return timeout != null ? timeout : config.getDuration("otel.exporter.cloud-logging.timeout");
+        return EXPORTER.CLOUD_LOGGING.TRACES.TIMEOUT.getValue(config);
     }
 
     @Override

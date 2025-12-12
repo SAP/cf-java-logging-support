@@ -1,5 +1,6 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ConfigProperty;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.opentelemetry.sdk.common.export.MemoryMode;
@@ -22,7 +23,7 @@ import java.util.List;
 
 import static io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties.createFromMap;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
+import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mock.Strictness.LENIENT;
 import static org.mockito.Mockito.verify;
@@ -43,6 +44,12 @@ class FilteringMetricExporterTest {
     @Mock(strictness = LENIENT)
     private MetricData anotherMetric;
 
+    @Mock
+    private ConfigProperty<List<String>> includedMetricNames;
+
+    @Mock
+    private ConfigProperty<List<String>> excludedMetricNames;
+
     @Captor
     ArgumentCaptor<List<MetricData>> exported;
 
@@ -53,9 +60,14 @@ class FilteringMetricExporterTest {
         when(anotherMetric.getName()).thenReturn("another");
     }
 
+    private FilteringMetricExporter.Builder configureMetricExporter() {
+        return FilteringMetricExporter.wrap(delegate).withIncludedNames(includedMetricNames)
+                                      .withExcludedNames(excludedMetricNames);
+    }
+
     @Test
     void exportsAllWithoutConfig() {
-        try (MetricExporter exporter = FilteringMetricExporter.wrap(delegate).build()) {
+        try (MetricExporter exporter = configureMetricExporter().build()) {
             exporter.export(asList(includedMetric, excludedMetric, anotherMetric));
         }
         verify(delegate).export(exported.capture());
@@ -65,7 +77,9 @@ class FilteringMetricExporterTest {
     @Test
     void exportsAllWithEmptyConfig() {
         DefaultConfigProperties config = createFromMap(emptyMap());
-        try (MetricExporter exporter = FilteringMetricExporter.wrap(delegate).withConfig(config).build()) {
+        when(includedMetricNames.getValue(config)).thenReturn(emptyList());
+        when(excludedMetricNames.getValue(config)).thenReturn(emptyList());
+        try (MetricExporter exporter = configureMetricExporter().withConfig(config).build()) {
             exporter.export(asList(includedMetric, excludedMetric, anotherMetric));
         }
         verify(delegate).export(exported.capture());
@@ -75,7 +89,8 @@ class FilteringMetricExporterTest {
     @Test
     void exportsOnlyIncluded() {
         ConfigProperties config = createConfig(MapEntry.entry("include.names", "included"));
-        try (MetricExporter exporter = FilteringMetricExporter.wrap(delegate).withConfig(config).build()) {
+        when(includedMetricNames.getValue(config)).thenReturn(singletonList("included"));
+        try (MetricExporter exporter = configureMetricExporter().withConfig(config).build()) {
             exporter.export(asList(includedMetric, excludedMetric, anotherMetric));
         }
         verify(delegate).export(exported.capture());
@@ -83,9 +98,10 @@ class FilteringMetricExporterTest {
     }
 
     @Test
-    void rejectsEncluded() {
+    void rejectsExcluded() {
         ConfigProperties config = createConfig(MapEntry.entry("exclude.names", "excluded"));
-        try (MetricExporter exporter = FilteringMetricExporter.wrap(delegate).withConfig(config).build()) {
+        when(excludedMetricNames.getValue(config)).thenReturn(singletonList("excluded"));
+        try (MetricExporter exporter = configureMetricExporter().withConfig(config).build()) {
             exporter.export(asList(includedMetric, excludedMetric, anotherMetric));
         }
         verify(delegate).export(exported.capture());
@@ -96,7 +112,9 @@ class FilteringMetricExporterTest {
     void rejectsExcludedFromIncluded() {
         ConfigProperties config = createConfig(MapEntry.entry("include.names", "included,excluded"),
                                                MapEntry.entry("exclude.names", "excluded"));
-        try (MetricExporter exporter = FilteringMetricExporter.wrap(delegate).withConfig(config).build()) {
+        when(includedMetricNames.getValue(config)).thenReturn(asList("included", "excluded"));
+        when(excludedMetricNames.getValue(config)).thenReturn(singletonList("excluded"));
+        try (MetricExporter exporter = configureMetricExporter().withConfig(config).build()) {
             exporter.export(asList(includedMetric, excludedMetric, anotherMetric));
         }
         verify(delegate).export(exported.capture());
@@ -106,7 +124,8 @@ class FilteringMetricExporterTest {
     @Test
     void supportsWildcardsOnIncluded() {
         ConfigProperties config = createConfig(MapEntry.entry("include.names", "incl*"));
-        try (MetricExporter exporter = FilteringMetricExporter.wrap(delegate).withConfig(config).build()) {
+        when(includedMetricNames.getValue(config)).thenReturn(singletonList("incl*"));
+        try (MetricExporter exporter = configureMetricExporter().withConfig(config).build()) {
             exporter.export(asList(includedMetric, excludedMetric, anotherMetric));
         }
         verify(delegate).export(exported.capture());
@@ -116,23 +135,12 @@ class FilteringMetricExporterTest {
     @Test
     void supportsWildcardsOnEncluded() {
         ConfigProperties config = createConfig(MapEntry.entry("exclude.names", "excl*"));
-        try (MetricExporter exporter = FilteringMetricExporter.wrap(delegate).withConfig(config).build()) {
+        when(excludedMetricNames.getValue(config)).thenReturn(singletonList("excl*"));
+        try (MetricExporter exporter = configureMetricExporter().withConfig(config).build()) {
             exporter.export(asList(includedMetric, excludedMetric, anotherMetric));
         }
         verify(delegate).export(exported.capture());
         assertThat(exported.getValue()).containsExactlyInAnyOrder(includedMetric, anotherMetric);
-    }
-
-    @Test
-    void supportsConfigPrefixes() {
-        ConfigProperties config = createConfig(MapEntry.entry("config.include.names", "included,excluded"),
-                                               MapEntry.entry("config.exclude.names", "excluded"));
-        try (MetricExporter exporter = FilteringMetricExporter.wrap(delegate).withConfig(config)
-                                                              .withPropertyPrefix("config").build()) {
-            exporter.export(asList(includedMetric, excludedMetric, anotherMetric));
-        }
-        verify(delegate).export(exported.capture());
-        assertThat(exported.getValue()).containsExactlyInAnyOrder(includedMetric);
     }
 
     @SafeVarargs

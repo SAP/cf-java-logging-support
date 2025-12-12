@@ -1,5 +1,6 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ConfigProperty;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.common.export.MemoryMode;
@@ -14,6 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
@@ -74,7 +77,8 @@ public class FilteringMetricExporter implements MetricExporter {
 
         private final MetricExporter delegate;
         private ConfigProperties config;
-        private String prefix = "";
+        private ConfigProperty<List<String>> included;
+        private ConfigProperty<List<String>> excluded;
 
         public Builder(MetricExporter delegate) {
             this.delegate = delegate;
@@ -85,8 +89,13 @@ public class FilteringMetricExporter implements MetricExporter {
             return this;
         }
 
-        public Builder withPropertyPrefix(String prefix) {
-            this.prefix = prefix.endsWith(".") ? prefix : prefix + ".";
+        public Builder withIncludedNames(ConfigProperty<List<String>> included) {
+            this.included = included;
+            return this;
+        }
+
+        public Builder withExcludedNames(ConfigProperty<List<String>> excluded) {
+            this.excluded = excluded;
             return this;
         }
 
@@ -95,8 +104,8 @@ public class FilteringMetricExporter implements MetricExporter {
                 return delegate;
             }
 
-            List<String> includedNames = config.getList(prefix + INCLUDED_NAMES_KEY);
-            List<String> excludedNames = config.getList(prefix + EXCLUDED_NAMES_KEY);
+            List<String> includedNames = ofNullable(included).map(p -> p.getValue(config)).orElse(emptyList());
+            List<String> excludedNames = ofNullable(excluded).map(p -> p.getValue(config)).orElse(emptyList());
             if (includedNames.isEmpty() && excludedNames.isEmpty()) {
                 return delegate;
             }

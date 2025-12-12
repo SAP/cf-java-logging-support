@@ -1,5 +1,7 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.DEPRECATED;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.RUNTIME;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 
 import java.util.List;
@@ -9,10 +11,6 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 
 public class CloudLoggingServicesProvider implements Supplier<Stream<CloudFoundryServiceInstance>> {
-
-    private static final String DEFAULT_USER_PROVIDED_LABEL = "user-provided";
-    private static final String DEFAULT_CLOUD_LOGGING_LABEL = "cloud-logging";
-    private static final String DEFAULT_CLOUD_LOGGING_TAG = "Cloud Logging";
 
     private final List<CloudFoundryServiceInstance> services;
 
@@ -27,20 +25,15 @@ public class CloudLoggingServicesProvider implements Supplier<Stream<CloudFoundr
     }
 
     private String getUserProvidedLabel(ConfigProperties config) {
-        return config.getString("otel.javaagent.extension.sap.cf.binding.user-provided.label",
-                                DEFAULT_USER_PROVIDED_LABEL);
+        return DEPRECATED.RUNTIME.CLOUD_FOUNDRY.SERVICE.USER_PROVIDED.LABEL_OTEL.getValue(config);
     }
 
     private String getCloudLoggingLabel(ConfigProperties config) {
-        String fromOwnProperties =
-                System.getProperty("com.sap.otel.extension.cloud-logging.label", DEFAULT_CLOUD_LOGGING_LABEL);
-        return config.getString("otel.javaagent.extension.sap.cf.binding.cloud-logging.label", fromOwnProperties);
+        return RUNTIME.CLOUD_FOUNDRY.SERVICE.CLOUD_LOGGING.LABEL.getValue(config);
     }
 
     private String getCloudLoggingTag(ConfigProperties config) {
-        String fromOwnProperties =
-                System.getProperty("com.sap.otel.extension.cloud-logging.tag", DEFAULT_CLOUD_LOGGING_TAG);
-        return config.getString("otel.javaagent.extension.sap.cf.binding.cloud-logging.tag", fromOwnProperties);
+        return RUNTIME.CLOUD_FOUNDRY.SERVICE.CLOUD_LOGGING.TAG.getValue(config);
     }
 
     @Override
