@@ -263,4 +263,4 @@ The main differences are:
 
 * The `cloud-logging` exporter will send data to all found bindings to SAP Cloud Logging.
 * The `otlp` configuration will write the required certificates and keys to temporary files, which are deleted when the JVM is shut down. The `cloud-logging` exporter will keep the secrets in memory.
-* The `cloud-logging` exporter needs to be configured explicitly as does the `otlp` exporter for logs.
+* The `cloud-logging` exporter needs to be configured explicitly.
