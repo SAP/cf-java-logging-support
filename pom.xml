@@ -73,7 +73,7 @@
         <jackson.version>2.19.2</jackson.version>
         <slf4j.version>2.0.17</slf4j.version>
         <logback.version>1.5.22</logback.version>
-        <log4j2.version>2.25.2</log4j2.version>
+        <log4j2.version>2.25.3</log4j2.version>
         <servlet.api.version>6.0.0</servlet.api.version>
 
         <!-- Test dependencies -->
