@@ -1,15 +1,13 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.DEPRECATED;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.RUNTIME;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 
 import java.util.List;
 import java.util.function.Supplier;
 
 public class DynatraceServiceProvider implements Supplier<CloudFoundryServiceInstance> {
-
-    private static final String DEFAULT_USER_PROVIDED_LABEL = "user-provided";
-    private static final String DEFAULT_DYNATRACE_LABEL = "dynatrace";
-    private static final String DEFAULT_DYNATRACE_TAG = "dynatrace";
 
     private final CloudFoundryServiceInstance service;
 
@@ -24,16 +22,15 @@ public class DynatraceServiceProvider implements Supplier<CloudFoundryServiceIns
     }
 
     private String getUserProvidedLabel(ConfigProperties config) {
-        return config.getString("otel.javaagent.extension.sap.cf.binding.user-provided.label",
-                                DEFAULT_USER_PROVIDED_LABEL);
+        return DEPRECATED.RUNTIME.CLOUD_FOUNDRY.SERVICE.USER_PROVIDED.LABEL_OTEL.getValue(config);
     }
 
     private String getDynatraceLabel(ConfigProperties config) {
-        return config.getString("otel.javaagent.extension.sap.cf.binding.dynatrace.label", DEFAULT_DYNATRACE_LABEL);
+        return RUNTIME.CLOUD_FOUNDRY.SERVICE.DYNATRACE.LABEL.getValue(config);
     }
 
     private String getDynatraceTag(ConfigProperties config) {
-        return config.getString("otel.javaagent.extension.sap.cf.binding.dynatrace.tag", DEFAULT_DYNATRACE_TAG);
+        return RUNTIME.CLOUD_FOUNDRY.SERVICE.DYNATRACE.TAG.getValue(config);
     }
 
     @Override

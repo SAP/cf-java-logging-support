@@ -1,5 +1,6 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.EXTENSION;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
@@ -24,7 +25,7 @@ public class SanitizeSpanExporterCustomizer implements BiFunction<SpanExporter, 
 
     @Override
     public SpanExporter apply(SpanExporter delegate, ConfigProperties config) {
-        if (config != null && !config.getBoolean(PROPERTY_ENABLED_KEY, true)) {
+        if (EXTENSION.SANITIZER.ENABLED.getValue(config) != Boolean.TRUE) {
             return delegate;
         }
         return new SpanExporter() {

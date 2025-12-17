@@ -35,7 +35,7 @@ java -javaagent:BOOT-INF/lib/opentelemetry-javaagent-<version>.jar \
      # your Java application command
 ```
 
-> You need to use OpenTelemetry Java Agent 1.29.0+, so it provides jackson-databind to the extension.
+> You need to use the OpenTelemetry Java Agent version this extension was built against to avoid compatibility issues.
 
 See the [example manifest](../sample-spring-boot/manifest-otel-javaagent.yml), how this translates into a deployment description.
 
@@ -43,6 +43,7 @@ Once the agent is attached to the JVM with the extension in place, there are two
 
 1. Use the `cloud-logging` and/or `dynatrace` exporters explicitly as provided by the extension.
 This can be achieved via system properties or environment variables:
+
 ```sh
 -Dotel.logs.exporter=cloud-logging \
 -Dotel.metrics.exporter=cloud-logging,dynatrace \
@@ -84,34 +85,37 @@ The service instances can be either managed or [user-provided](#using-user-provi
 The OpenTelemetry Java Agent supports a wide variety of [configuration options](https://opentelemetry.io/docs/instrumentation/java/automatic/agent-config/).
 As the extension provides configuration via SPI, all its configuration takes lower precedence than other configuration options for OpenTelemetry.
 Users can easily overwrite any setting using environment variables or system properties.
+The full list of configuration properties provided by the extension is available in the [Configuration Properties Summary](#configuration-properties-summary) section.
 
 ### Using the Extension
 
 The extension needs to be started with the OpenTelemetry Java Agent as outlined in the [Quick Start Guide](#quickstart-guide).
-You need to enable shipping data either by using the `cloud-logging` exporters or relying on the `otlp` exporters for each signal type.
+You need to enable shipping data either by using the `cloud-logging` exporters for each signal type or `dynatrace` for metrics explicitly.
 Multiple different exporters can be configured with comma separation.
-Using the custom `cloud-logging` exporter will enable you, to use the default `otlp` exporter for different services.
-The extension will configure a default endpoint and credentials for the `otlp` endpoints, so no further configuration is required.
+Using the custom `cloud-logging` exporter enables you, to use the default `otlp` exporter for different services.
 
-Note, that the `cloud-logging` exporter is just a facade for the `otlp` exporter to allow configuration of multiple data sinks.
+Note, that the `cloud-logging` and `dynatrace` exporters are just facades for the `otlp` exporter to allow configuration of multiple data sinks.
 There is no custom network client provided by this extension.
 
 ### Configuring the Extension
 
+> Note: This section describes configuration options introduced with version 4.1.0 of the extension.
+> Earlier versions use different property names, which are still supported as fallback.
+> They will create warning messages during initialization as those properties are deprecated for removal.
+
 The extension itself can be configured by specifying the following system properties:
 
-| Property | Default Value | Comment |
-|----------|---------------|---------|
-| `otel.javaagent.extension.sap.cf.binding.cloud-logging.label` or `com.sap.otel.extension.cloud-logging.label` | `cloud-logging` | The label of the managed service binding to bind to. |
-| `otel.javaagent.extension.sap.cf.binding.cloud-logging.tag` or `com.sap.otel.extension.cloud-logging.tag` | `Cloud Logging` | The tag of any service binding (managed or user-provided) to bind to. |
-| `otel.javaagent.extension.sap.cf.binding.dynatrace.label` | `dynatrace` | The label of the managed service binding to bind to. |
-| `otel.javaagent.extension.sap.cf.binding.dynatrace.tag` | `dynatrace` | The tag of any service binding (managed or user-provided) to bind to. |
-| `otel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name` | | The name of the field containing the Dynatrace API token within the service binding credentials. This is required to send metrics to Dynatrace. |
-| `otel.javaagent.extension.sap.cf.binding.user-provided.label` | `user-provided` | The label of a user-provided service binding to bind to. Note, this label is defined by the Cloud Foundry instance. |
-| `otel.javaagent.extension.sap.cf.resource.enabled` | `true` | Whether to add CF resource attributes to all events. |
+| Property                                   | Description | Default Value |
+|--------------------------------------------|-------------|---------------|
+| `sap.cloud-logging.cf.binding.label.value` | The label of the managed service binding to bind to. | `cloud-logging` |
+| `sap.cloud-logging.cf.binding.tag.value`   | The tag of any service binding (managed or user-provided) to bind to. | `Cloud Logging` |
+| `sap.dynatrace.cf.binding.label.value`     | The label of the managed service binding to bind to. | `dynatrace` |
+| `sap.dynatrace.cf.binding.tag.value`       | The tag of any service binding (managed or user-provided) to bind to. | `dynatrace` |
+| `sap.dynatrace.cf.binding.token.name`      | The name of the field containing the Dynatrace API token within the service binding credentials. This is required to send metrics to Dynatrace. | |
+| `sap.cloudfoundry.otel.resources.enabled`  | Whether to add CF resource attributes to all events. | `true` |
+| `sap.cloudfoundry.otel.resources.format`   | The semantic convention to follow for the CF resource attributes. Supported values are `SAP` and `OTEL`. | `SAP` |
 
-> The `otel.javaagent.extension.sap.*` properties are preferred over the `com.sap.otel.extension.*` properties, which are kept for compatibility. 
-Each `otel.javaagent.extension.sap.*` property can also be provided as environment variable `OTEL_JAVAAGENT_EXTENSION_SAP_*`.
+> Each property can also be provided as environment variable, e.g., `sap.cloud-logging.cf.binding.label.value` as `SAP.CLOUD-LOGGING.CF.BINDING.LABEL.VALUE`.
 
 The extension will scan the environment variable `VCAP_SERVICES` for CF service bindings.
 User-provided bindings will take precedence over managed bindings of the configured label ("cloud-logging" or "dynatrace" by default).
@@ -148,14 +152,47 @@ _This feature was introduced with version 4.1.0 of the extension._
 
 You can filter which metrics are exported to Cloud Logging or Dynatrace by name using the following properties:
 
-| Property                                                                                               | Description                                                                                                      |
-|--------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| Property                                                                                               | Description                                                                                                     |
+|--------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
 | `otel.exporter.cloud-logging.metrics.include.names` or `otel.exporter.dynatrace.metrics.include.names` | A comma-separated list of metric names to be forwarded. This may include a wildcard "*" at the end of the name. |    
 | `otel.exporter.cloud-logging.metrics.exclude.names` or `otel.exporter.dynatrace.metrics.exclude.names` | A comma-separated list of metric names to be rejected. This may include a wildcard "*" at the end of the name.  |    
 
 Note, that the `include` filter is applied before the `exclude` filter.
 That means, if a metric matches both filters, it will be excluded.
 The configuration applies to both the `cloud-logging` and `dynatrace` exporters independently.
+
+### Configuration Properties Summary
+
+The following table summarizes all configuration properties provided by the extension:
+
+| Property                                                            | Description                                                                                                                                                                                                                                                                                                                                   | Default Value                               |
+|---------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
+| `otel.exporter.cloud-logging.compression`                           | The compression algorithm to use when exporting logs.                                                                                                                                                                                                                                                                                         | `gzip`                                      |
+| `otel.exporter.cloud-logging.timeout`                               | The maximum duration to wait for Cloud Logging when exporting data.                                                                                                                                                                                                                                                                           | `10000 (from OTel SDK)                      |
+| `otel.exporter.cloud-logging.logs.compression`                      | The compression algorithm to use when exporting logs. Falls back to `otel.exporter.cloud-logging.compression` if not set.                                                                                                                                                                                                                     | `gzip` (from `otel.exporter.cloud-logging.compression`) |
+| `otel.exporter.cloud-logging.logs.timeout`                          | The maximum duration to wait for Cloud Logging when exporting logs. Falls back to `otel.exporter.cloud-logging.timeout` if not set.                                                                                                                                                                                                           | `10000` (from OTel SDK)                     |
+| `otel.exporter.cloud-logging.metrics.compression`                   | The compression algorithm to use when exporting metrics. Falls back to `otel.exporter.cloud-logging.compression` if not set.                                                                                                                                                                                                                  | `gzip` (from `otel.exporter.cloud-logging.compression`) |
+| `otel.exporter.cloud-logging.metrics.default.histogram.aggregation` | The default histogram aggregation for metrics exported to Cloud Logging. Delegates to the underlying OTLP exporter, supporting all its configurations.                                                                                                                                                                                        | `EXPLICIT_BUCKET_HISTOGRAM` (from OTel SDK) |
+| `otel.exporter.cloud-logging.metrics.exclude.names`                 | A comma-separated list of metric name patterns to be excluded when exporting metrics to Cloud Logging. Wildcard "\*" is only supported at the end of the name. If not set, no metrics are excluded.                                                                                                                                           |                                             |
+| `otel.exporter.cloud-logging.metrics.include.names`                 | A comma-separated list of metric name patterns to be included when exporting metrics to Cloud Logging. Wildcard "\*" is only supported at the end of the name. If not set, all metrics are exported.                                                                                                                                          |                                             |
+| `otel.exporter.cloud-logging.metrics.temporality.preference`        | The preferred aggregation temporality for metrics exported to Cloud Logging. Can be either `cumulative`, `delta`, or `lowmemory`.                                                                                                                                                                                                             | `cumulative`                                |
+| `otel.exporter.cloud-logging.metrics.timeout`                       | The maximum duration to wait for Cloud Logging when exporting metrics. Falls back to `otel.exporter.cloud-logging.timeout` if not set.                                                                                                                                                                                                        | `10000` (from OTel SDK)                     |
+| `otel.exporter.cloud-logging.traces.compression`                    | The compression algorithm to use when exporting traces. Falls back to `otel.exporter.cloud-logging.compression` if not set.                                                                                                                                                                                                                   | `gzip` (from `otel.exporter.cloud-logging.compression`) |
+| `otel.exporter.cloud-logging.traces.timeout`                        | The maximum duration to wait for Cloud Logging when exporting traces. Falls back to `otel.exporter.cloud-logging.timeout` if not set.                                                                                                                                                                                                         | `10000` (from OTel SDK)                     |
+| `otel.exporter.dynatrace.metrics.compression`                       | The compression algorithm to use when exporting metrics.                                                                                                                                                                                                                                                                                      | `gzip`                                      |
+| `otel.exporter.dynatrace.metrics.default.histogram.aggregation`     | The default histogram aggregation for metrics exported to Dynatrace. Delegates to the underlying OTLP exporter, supporting all its configurations.                                                                                                                                                                                            | `EXPLICIT_BUCKET_HISTOGRAM` (from OTel SDK) |
+| `otel.exporter.dynatrace.metrics.exclude.names`                     | A comma-separated list of metric name patterns to be excluded when exporting metrics to Dynatrace. Wildcard "\*" is only supported at the end of the name. If not set, no metrics are excluded.                                                                                                                                               |                                             |
+| `otel.exporter.dynatrace.metrics.include.names`                     | A comma-separated list of metric name patterns to be included when exporting metrics to Dynatrace. Wildcard "\*" is only supported at the end of the name. If not set, all metrics are exported.                                                                                                                                              |                                             |
+| `otel.exporter.dynatrace.metrics.temporality.preference`            | The default histogram aggregation for metrics exported to Dynatrace. Delegates to the underlying OTLP exporter, supporting all its configurations. The Dynatrace metrics exporter provides an additional option `always_delta` which always uses delta aggregation temporality. This is also the default behavior if the property is not set. | `always_delta`                              |
+| `otel.exporter.dynatrace.metrics.timeout`                           | The maximum duration to wait for Dynatrace when exporting metrics.                                                                                                                                                                                                                                                                            | `10000` (from OTel SDK)                     |
+| `sap.cf.integration.otel.extension.sanitizer.enabled`               | Enables or disables the sanitizer.                                                                                                                                                                                                                                                                                                            | `true`                                      |
+| `sap.cloudfoundry.otel.resources.enabled`                           | Should Cloud Foundry resource attributes be added to the OpenTelemetry resource?                                                                                                                                                                                                                                                              | `true`                                      |
+| `sap.cloudfoundry.otel.resources.format`                            | Determines the semantic convention used for Cloud Foundry resource attributes names. `SAP` - use SAP specific attribute names (default). `OTEL` - use OpenTelemetry semantic convention attribute names.                                                                                                                                      | `SAP`                                       |
+| `sap.cloud-logging.cf.binding.label.value`                          | The label value used to identify managed Cloud Logging service bindings.                                                                                                                                                                                                                                                                      | `cloud-logging`                             |
+| `sap.cloud-logging.cf.binding.tag.value`                            | The tag value used to identify managed Cloud Logging service bindings.                                                                                                                                                                                                                                                                        | `Cloud Logging`                             |
+| `sap.dynatrace.cf.binding.label.value`                              | The label value used to identify managed Dynatrace service bindings.                                                                                                                                                                                                                                                                          | `dynatrace`                                 |
+| `sap.dynatrace.cf.binding.tag.value`                                | The tag value used to identify managed Dynatrace service bindings.                                                                                                                                                                                                                                                                            | `dynatrace`                                 |
+| `sap.dynatrace.cf.binding.token.name`                               | The name of the field containing the Dynatrace API token within the service binding credentials.                                                                                                                                                                                                                                              |                                             |
 
 ## Using User-Provided Service Instances
 
@@ -167,12 +204,12 @@ Furthermore, this helps on sharing service instances across CF orgs or landscape
 
 The extension requires four fields in the user-provided service credentials and needs to be tagged with the `otel.javaagent.extension.sap.cf.binding.cloud-logging.tag` (default: `Cloud Logging`) documented in section [Configuration](#configuration).
 
-| Field name | Contents |
-|------------|----------|
-| `ingest-otlp-endpoint` | The OTLP endpoint including port. It will be prefixed with `https://`. |
-| `ingest-otlp-key` | The mTLS client key in PCKS#8 format. Line breaks as `\n`. |
-| `ingest-otlp-cert`| The mTLS client certificate in PEM format matching the client key. Line breaks as `\n`. |
-| `server-ca` | The trusted mTLS server certificate in PEM format. Line breaks as `\n`. |
+| Field name             | Contents                                                                                |
+|------------------------|-----------------------------------------------------------------------------------------|
+| `ingest-otlp-endpoint` | The OTLP endpoint including port. It will be prefixed with `https://`.                  |
+| `ingest-otlp-key`      | The mTLS client key in PCKS#8 format. Line breaks as `\n`.                              |
+| `ingest-otlp-cert`     | The mTLS client certificate in PEM format matching the client key. Line breaks as `\n`. |
+| `server-ca`            | The trusted mTLS server certificate in PEM format. Line breaks as `\n`.                 |
 
 If you have a [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging) service key, you can generate the required JSON file with jq:
 
@@ -198,23 +235,23 @@ You can even change the tag using the configuration parameters of the extension.
 SAP BTP internally offers a managed Dynatrace service, that is recognized by the extension.
 Externally, user-provided service instances need to be created.
 The [Dynatrace documentation](https://docs.dynatrace.com/docs/setup-and-configuration/setup-on-container-platforms/cloud-foundry/deploy-oneagent-on-sap-cloud-platform-for-application-only-monitoring) explains, how to generate the necessary access url and tokens.
-The extension requires two fields in the user-provided service credentials and needs to be tagged with the `otel.javaagent.extension.sap.cf.binding.dynatrace.tag` (default: `dynatrace`) documented in section [Configuration](#configuration).
+The extension requires two fields in the user-provided service credentials and needs to be tagged with the `sap.dynatrace.cf.binding.tag.value` (default: `dynatrace`) documented in section [Configuration](#configuration).
 
-| Field name | Contents |
-|------------|----------|
-| `apiurl` | The Dynatrace API endpoint, e.g. `https://apm.example.com/e/<some-uuid>/api`. This url will be appended with `/v2/otlp/v1/metrics` to create the full endpoint url. |
-| `<your_token_field>` | The API token to be used with the above endpoint. Ensure, that it has the required permissions to ingest data over the endpoint. |
+| Field name           | Contents                                                                                                                                                            |
+|----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `apiurl`             | The Dynatrace API endpoint, e.g. `https://apm.example.com/e/<some-uuid>/api`. This url will be appended with `/v2/otlp/v1/metrics` to create the full endpoint url. |
+| `<your_token_field>` | The API token to be used with the above endpoint. Ensure, that it has the required permissions to ingest data over the endpoint.                                    |
 
 Do not forget to configure the name chosen for `<your_token_field>` via the respective configuration property:
 
 ```sh
 java #... \
--Dotel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name=<your_token_field> \
+-Dsap.dynatrace.cf.binding.token.name=<your_token_field> \
 # ...
 
 # or
 
-OTEL_JAVAAGENT_EXTENSION_SAP_CF_BINDING_DYNATRACE_METRICS_TOKEN-NAME=<your_token_field>
+SAP_DYNATRACE_CF_BINDING_TOKEN_NAME=<your_token_field>
 java #...
 ```
 
@@ -225,7 +262,5 @@ The difference is just during the bootstrapping phase.
 The main differences are:
 
 * The `cloud-logging` exporter will send data to all found bindings to SAP Cloud Logging.
-The auto-instrumentation of the `otlp` exporter will just configure the first binding it finds priotizing user-provided services.
 * The `otlp` configuration will write the required certificates and keys to temporary files, which are deleted when the JVM is shut down. The `cloud-logging` exporter will keep the secrets in memory.
-* Since the `otlp` exporter is the default for traces and metrics, just attaching the extension and binding to Cloud Logging will result in metrics and traces being forwarded. 
-The `cloud-logging` exporter needs to be configured explictly as does the `otlp` exporter for logs.
+* The `cloud-logging` exporter needs to be configured explicitly.
