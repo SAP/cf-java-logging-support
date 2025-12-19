@@ -188,7 +188,7 @@ class CaasBindingPropertiesSupplierTest {
                           .containsEntry("otel.exporter.otlp.protocol", "http/protobuf")
                           .containsEntry("otel.exporter.otlp.compression", "gzip")
                           .containsEntry("otel.exporter.otlp.certificate", "/tmp/server.crt")
-                          .containsEntry("otel.exporter.otlp.client.cert", "/tmp/client.crt")
+                          .containsEntry("otel.exporter.otlp.client.certificate", "/tmp/client.crt")
                           .containsEntry("otel.exporter.otlp.client.key", "/tmp/client.key");
     }
 

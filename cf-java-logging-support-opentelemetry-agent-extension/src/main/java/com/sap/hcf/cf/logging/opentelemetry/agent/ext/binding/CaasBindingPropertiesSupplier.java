@@ -89,7 +89,7 @@ public class CaasBindingPropertiesSupplier implements Supplier<Map<String, Strin
                 File clientKeyFile = pemFileCreator.writeFile("caas-client-key-", ".key", clientKey);
 
                 properties.put("otel.exporter.otlp.certificate", serverCertFile.getAbsolutePath());
-                properties.put("otel.exporter.otlp.client.cert", clientCertFile.getAbsolutePath());
+                properties.put("otel.exporter.otlp.client.certificate", clientCertFile.getAbsolutePath());
                 properties.put("otel.exporter.otlp.client.key", clientKeyFile.getAbsolutePath());
 
             } catch (IOException e) {
