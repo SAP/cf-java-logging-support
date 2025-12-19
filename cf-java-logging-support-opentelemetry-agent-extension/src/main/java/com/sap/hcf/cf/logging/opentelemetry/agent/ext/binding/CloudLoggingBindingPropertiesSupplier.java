@@ -1,12 +1,12 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.DEPRECATED;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.tls.PemFileCreator;
 import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,13 +24,17 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
     private static final String OTLP_SERVER_CERT = "server-ca";
 
     private final CloudLoggingServicesProvider cloudLoggingServicesProvider;
+    private final PemFileCreator pemFileCreator;
 
     public CloudLoggingBindingPropertiesSupplier() {
-        this(new CloudLoggingServicesProvider(getDefaultProperties(), new CloudFoundryServicesAdapter()));
+        this(new CloudLoggingServicesProvider(getDefaultProperties(), new CloudFoundryServicesAdapter()),
+             new PemFileCreator());
     }
 
-    CloudLoggingBindingPropertiesSupplier(CloudLoggingServicesProvider cloudLoggingServicesProvider) {
+    CloudLoggingBindingPropertiesSupplier(CloudLoggingServicesProvider cloudLoggingServicesProvider,
+                                          PemFileCreator pemFileCreator) {
         this.cloudLoggingServicesProvider = cloudLoggingServicesProvider;
+        this.pemFileCreator = pemFileCreator;
     }
 
     private static ConfigProperties getDefaultProperties() {
@@ -45,16 +49,6 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
 
     private static boolean isBlank(String text) {
         return text == null || text.trim().isEmpty();
-    }
-
-    private static File writeFile(String prefix, String suffix, String content) throws IOException {
-        File file = File.createTempFile(prefix, suffix);
-        file.deleteOnExit();
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.append(content);
-            LOG.fine("Created temporary file " + file.getAbsolutePath());
-        }
-        return file;
     }
 
     /**
@@ -95,9 +89,9 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
         }
 
         try {
-            File clientKeyFile = writeFile("cloud-logging-client", ".key", clientKey);
-            File clientCertFile = writeFile("cloud-logging-client", ".cert", clientCert);
-            File serverCertFile = writeFile("cloud-logging-server", ".cert", serverCert);
+            File clientKeyFile = pemFileCreator.writeFile("cloud-logging-client", ".key", clientKey);
+            File clientCertFile = pemFileCreator.writeFile("cloud-logging-client", ".cert", clientCert);
+            File serverCertFile = pemFileCreator.writeFile("cloud-logging-server", ".cert", serverCert);
 
             HashMap<String, String> properties = new HashMap<>();
             properties.put("otel.exporter.otlp.endpoint", "https://" + endpoint);

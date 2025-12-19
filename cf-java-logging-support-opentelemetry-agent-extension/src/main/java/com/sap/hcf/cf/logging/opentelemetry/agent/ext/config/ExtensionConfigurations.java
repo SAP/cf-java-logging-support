@@ -213,6 +213,16 @@ public interface ExtensionConfigurations {
     interface RUNTIME {
         interface CLOUD_FOUNDRY {
             interface SERVICE {
+                interface CAAS {
+                    /**
+                     * <p>Parses {@code sap.caas.cf.binding.label.value}.</p>
+                     * <p>The label value used to identify managed CaaS service bindings. Default is
+                     * {@code "caas-service"}.</p>
+                     */
+                    ConfigProperty<String> LABEL =
+                            stringValued("sap.caas.cf.binding.label.value").withDefaultValue("caas-service").build();
+                }
+
                 interface CLOUD_LOGGING {
                     /**
                      * <p>Parses {@code sap.cloud-logging.cf.binding.label.value}.</p>
