@@ -48,6 +48,8 @@ class ExtensionConfigurationsTest {
                             "sap.cloudfoundry.otel.resources.format", "OTEL"),
                          of(ExtensionConfigurations.RESOURCE.CLOUD_FOUNDRY.FORMAT,
                             "otel.javaagent.extension.sap.cf.resource.format", "OTEL"),
+                         of(ExtensionConfigurations.RUNTIME.CLOUD_FOUNDRY.SERVICE.CAAS.LABEL,
+                            "sap.caas.cf.binding.label.value", "caas"),
                          of(ExtensionConfigurations.RUNTIME.CLOUD_FOUNDRY.SERVICE.CLOUD_LOGGING.LABEL,
                             "sap.cloud-logging.cf.binding.label.value", "cls"),
                          of(ExtensionConfigurations.RUNTIME.CLOUD_FOUNDRY.SERVICE.CLOUD_LOGGING.LABEL,

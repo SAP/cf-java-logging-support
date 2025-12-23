@@ -1,22 +1,21 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
-import org.assertj.core.api.AbstractStringAssert;
-import org.jetbrains.annotations.NotNull;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.tls.PemFileCreator;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,13 +32,15 @@ public class CloudLoggingBindingPropertiesSupplierTest {
     @Mock
     private CloudLoggingServicesProvider servicesProvider;
 
+    @Mock
+    private PemFileCreator pemFileCreator;
+
     @InjectMocks
     private CloudLoggingBindingPropertiesSupplier propertiesSupplier;
 
-    @NotNull
-    private static AbstractStringAssert<?> assertFileContent(String filename) throws IOException {
-        List<String> lines = Files.readAllLines(Paths.get(filename));
-        return assertThat(String.join("\n", lines));
+    @AfterEach
+    void assertNoUnexpectedInteractions() {
+        verifyNoMoreInteractions(servicesProvider, pemFileCreator);
     }
 
     @Test
@@ -57,8 +58,14 @@ public class CloudLoggingBindingPropertiesSupplierTest {
                                        .add("ingest-otlp-cert", "test-client-cert").add("server-ca", "test-server-cert")
                                        .build();
         when(servicesProvider.get()).thenReturn(Stream.of(defaultInstance().credentials(credentials).build()));
+        when(pemFileCreator.writeFile("cloud-logging-client", ".key", "test-client-key")).thenReturn(
+                new File("client-key-file"));
+        when(pemFileCreator.writeFile("cloud-logging-client", ".cert", "test-client-cert")).thenReturn(
+                new File("client-cert-file"));
+        when(pemFileCreator.writeFile("cloud-logging-server", ".cert", "test-server-cert")).thenReturn(
+                new File("server-cert-file"));
         CloudLoggingBindingPropertiesSupplier propertiesSupplier =
-                new CloudLoggingBindingPropertiesSupplier(servicesProvider);
+                new CloudLoggingBindingPropertiesSupplier(servicesProvider, pemFileCreator);
 
         Map<String, String> properties = propertiesSupplier.get();
 
@@ -66,9 +73,6 @@ public class CloudLoggingBindingPropertiesSupplierTest {
                               .containsKey("otel.exporter.otlp.client.key")
                               .containsKey("otel.exporter.otlp.client.certificate")
                               .containsKey("otel.exporter.otlp.certificate");
-        assertFileContent(properties.get("otel.exporter.otlp.client.key")).isEqualTo("test-client-key");
-        assertFileContent(properties.get("otel.exporter.otlp.client.certificate")).isEqualTo("test-client-cert");
-        assertFileContent(properties.get("otel.exporter.otlp.certificate")).isEqualTo("test-server-cert");
     }
 
     private static CloudFoundryServiceInstance.Builder defaultInstance() {
@@ -83,7 +87,7 @@ public class CloudLoggingBindingPropertiesSupplierTest {
                                        .build();
         when(servicesProvider.get()).thenReturn(Stream.of(defaultInstance().credentials(credentials).build()));
         CloudLoggingBindingPropertiesSupplier propertiesSupplier =
-                new CloudLoggingBindingPropertiesSupplier(servicesProvider);
+                new CloudLoggingBindingPropertiesSupplier(servicesProvider, pemFileCreator);
 
         Map<String, String> properties = propertiesSupplier.get();
 
@@ -98,7 +102,7 @@ public class CloudLoggingBindingPropertiesSupplierTest {
                                        .build();
         when(servicesProvider.get()).thenReturn(Stream.of(defaultInstance().credentials(credentials).build()));
         CloudLoggingBindingPropertiesSupplier propertiesSupplier =
-                new CloudLoggingBindingPropertiesSupplier(servicesProvider);
+                new CloudLoggingBindingPropertiesSupplier(servicesProvider, pemFileCreator);
 
         Map<String, String> properties = propertiesSupplier.get();
 
@@ -113,7 +117,7 @@ public class CloudLoggingBindingPropertiesSupplierTest {
                                        .build();
         when(servicesProvider.get()).thenReturn(Stream.of(defaultInstance().credentials(credentials).build()));
         CloudLoggingBindingPropertiesSupplier propertiesSupplier =
-                new CloudLoggingBindingPropertiesSupplier(servicesProvider);
+                new CloudLoggingBindingPropertiesSupplier(servicesProvider, pemFileCreator);
 
         Map<String, String> properties = propertiesSupplier.get();
 
@@ -128,7 +132,7 @@ public class CloudLoggingBindingPropertiesSupplierTest {
                                        .add("ingest-otlp-cert", "test-client-cert").build();
         when(servicesProvider.get()).thenReturn(Stream.of(defaultInstance().credentials(credentials).build()));
         CloudLoggingBindingPropertiesSupplier propertiesSupplier =
-                new CloudLoggingBindingPropertiesSupplier(servicesProvider);
+                new CloudLoggingBindingPropertiesSupplier(servicesProvider, pemFileCreator);
 
         Map<String, String> properties = propertiesSupplier.get();
 
