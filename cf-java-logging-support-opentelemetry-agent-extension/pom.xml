@@ -16,7 +16,7 @@
     </parent>
 
     <properties>
-        <opentelemetry.sdk.version>1.57.0-alpha</opentelemetry.sdk.version>
+        <opentelemetry.sdk.version>1.57.0</opentelemetry.sdk.version>
     </properties>
 
     <dependencyManagement>
