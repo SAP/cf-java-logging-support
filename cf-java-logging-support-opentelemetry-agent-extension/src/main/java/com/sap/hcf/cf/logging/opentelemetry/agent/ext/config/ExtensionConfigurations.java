@@ -297,6 +297,8 @@ public interface ExtensionConfigurations {
                         ConfigProperty<String> LABEL_OTEL = stringValued(
                                 "otel.javaagent.extension.sap.cf.binding.cloud-logging.label").setDeprecated(true)
                                                                                               .withFallback(LABEL_SAP)
+                                                                                              .withDefaultValue(
+                                                                                                      "cloud-logging")
                                                                                               .build();
                         ConfigProperty<String> TAG_SAP =
                                 stringValued("com.sap.otel.extension.cloud-logging.tag").setDeprecated(true)
@@ -305,7 +307,7 @@ public interface ExtensionConfigurations {
                                                                                         .build();
                         ConfigProperty<String> TAG_OTEL =
                                 stringValued("otel.javaagent.extension.sap.cf.binding.cloud-logging.tag").setDeprecated(
-                                        true).withFallback(TAG_SAP).build();
+                                        true).withDefaultValue("Cloud Logging").withFallback(TAG_SAP).build();
                     }
 
                     interface DYNATRACE {
