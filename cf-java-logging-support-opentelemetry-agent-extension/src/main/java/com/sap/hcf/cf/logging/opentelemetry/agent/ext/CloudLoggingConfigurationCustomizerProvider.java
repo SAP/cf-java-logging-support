@@ -14,7 +14,7 @@ import static com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.DefaultOtel
 public class CloudLoggingConfigurationCustomizerProvider implements AutoConfigurationCustomizerProvider {
 
     private static final Logger LOG = Logger.getLogger(CloudLoggingConfigurationCustomizerProvider.class.getName());
-    private static final String VERSION = "4.0.0";
+    private static final String VERSION = "4.1.0";
 
     private static DefaultOtelBackendPropertiesSupplier getDefaultOtelBackendPropertiesSupplier() {
         return builder() //
