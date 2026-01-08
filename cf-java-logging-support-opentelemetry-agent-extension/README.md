@@ -5,6 +5,8 @@ The extension scans the service bindings of an application for SAP Collector as 
 If such a binding is found, the OpenTelemetry Java Agent is configured to ship observability data to those services.
 Thus, this extension provides a convenient auto-instrumentation for Java applications running on SAP BTP.
 
+> Note: CaaS currently is an SAP internal only service.
+
 The extension provides the following main features:
 
 * auto-configuration of the generic OpenTelemetry OTLP exporter to SAP Collector as a Service (CaaS) or [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging)
