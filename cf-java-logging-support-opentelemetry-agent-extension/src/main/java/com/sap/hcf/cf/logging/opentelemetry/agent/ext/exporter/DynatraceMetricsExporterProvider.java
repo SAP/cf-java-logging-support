@@ -3,8 +3,8 @@ package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryCredentials;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryServiceInstance;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.DynatraceServiceProvider;
-import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.DEPRECATED;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.EXPORTER;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.RUNTIME;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -121,10 +121,10 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
                     "Credential \"" + CRED_DYNATRACE_APIURL + "\" not found. Skipping dynatrace exporter configuration");
             return NoopMetricExporter.getInstance();
         }
-        String tokenName = DEPRECATED.RUNTIME.CLOUD_FOUNDRY.SERVICE.DYNATRACE.TOKEN_NAME_OTEL.getValue(config);
+        String tokenName = RUNTIME.CLOUD_FOUNDRY.SERVICE.DYNATRACE.TOKEN_NAME.getValue(config);
         if (isBlank(tokenName)) {
             LOG.warning(
-                    "Configuration \"" + DEPRECATED.RUNTIME.CLOUD_FOUNDRY.SERVICE.DYNATRACE.TOKEN_NAME_OTEL.getKey() + "\" not found. Skipping dynatrace exporter configuration");
+                    "Configuration \"" + RUNTIME.CLOUD_FOUNDRY.SERVICE.DYNATRACE.TOKEN_NAME.getKey() + "\" not found. Skipping dynatrace exporter configuration");
             return NoopMetricExporter.getInstance();
         }
         String apiToken = credentials.getString(tokenName);
