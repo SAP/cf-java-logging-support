@@ -16,7 +16,8 @@
     </parent>
 
     <properties>
-        <opentelemetry.sdk.version>1.57.0</opentelemetry.sdk.version>
+        <opentelemetry.sdk.version>1.60.1</opentelemetry.sdk.version>
+        <opentelemetry.sdk-alpha.version>${opentelemetry.sdk.version}-alpha</opentelemetry.sdk-alpha.version>
     </properties>
 
     <dependencyManagement>
@@ -31,7 +32,7 @@
             <dependency>
                 <groupId>io.opentelemetry</groupId>
                 <artifactId>opentelemetry-bom-alpha</artifactId>
-                <version>${opentelemetry.sdk.version}-alpha</version>
+                <version>${opentelemetry.sdk-alpha.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
