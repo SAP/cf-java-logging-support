@@ -86,7 +86,7 @@
 
         <!-- Plugin dependencies -->
         <buildnumber.plugin.version>3.3.0</buildnumber.plugin.version>
-        <compiler.plugin.version>3.14.1</compiler.plugin.version>
+        <compiler.plugin.version>3.15.0</compiler.plugin.version>
         <enforcer.plugin.version>3.6.2</enforcer.plugin.version>
         <source.plugin.version>3.4.0</source.plugin.version>
         <jar.plugin.version>3.5.0</jar.plugin.version>
