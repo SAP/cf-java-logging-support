@@ -18,7 +18,6 @@ import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
 public class SanitizeSpanExporterCustomizer implements BiFunction<SpanExporter, ConfigProperties, SpanExporter> {
 
-    private static final String PROPERTY_ENABLED_KEY = "sap.cf.integration.otel.extension.sanitizer.enabled";
     private static final AttributeKey<String> DB_QUERY_TEXT = stringKey("db.query.text");
     //@Deprecated
     private static final AttributeKey<String> DB_STATEMENT = stringKey("db.statement");

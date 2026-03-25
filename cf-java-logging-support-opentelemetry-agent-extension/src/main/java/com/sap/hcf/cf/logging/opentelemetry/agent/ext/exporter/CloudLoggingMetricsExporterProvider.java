@@ -28,7 +28,6 @@ import static io.opentelemetry.sdk.metrics.Aggregation.explicitBucketHistogram;
 
 public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricExporterProvider {
 
-    private static final String METRICS_CONFIG_PREFIX = "otel.exporter.cloud-logging.metrics.";
     private static final Logger LOG = Logger.getLogger(CloudLoggingMetricsExporterProvider.class.getName());
 
     private final Function<ConfigProperties, Stream<CloudFoundryServiceInstance>> servicesProvider;

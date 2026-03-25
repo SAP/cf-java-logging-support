@@ -30,10 +30,7 @@ public class DynatraceMetricsExporterProvider implements ConfigurableMetricExpor
 
     public static final String CRED_DYNATRACE_APIURL = "apiurl";
     public static final String DT_APIURL_METRICS_SUFFIX = "/v2/otlp/v1/metrics";
-
-    private static final String GENERIC_CONFIG_PREFIX = "otel.exporter.dynatrace.";
-    private static final String METRICS_CONFIG_PREFIX = "otel.exporter.dynatrace.metrics.";
-
+    
     private static final Logger LOG = Logger.getLogger(DynatraceMetricsExporterProvider.class.getName());
     private static final AggregationTemporalitySelector ALWAYS_DELTA = instrumentType -> AggregationTemporality.DELTA;
     private final Function<ConfigProperties, CloudFoundryServiceInstance> serviceProvider;
