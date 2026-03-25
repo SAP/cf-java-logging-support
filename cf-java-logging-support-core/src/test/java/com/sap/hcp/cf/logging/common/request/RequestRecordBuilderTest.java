@@ -1,7 +1,6 @@
 package com.sap.hcp.cf.logging.common.request;
 
 import com.fasterxml.jackson.jr.ob.JSON;
-import com.fasterxml.jackson.jr.ob.JSONObjectException;
 import com.sap.hcp.cf.logging.common.Defaults;
 import org.junit.jupiter.api.Test;
 

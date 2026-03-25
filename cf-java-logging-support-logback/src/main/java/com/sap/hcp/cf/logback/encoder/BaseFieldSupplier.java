@@ -5,11 +5,12 @@ import ch.qos.logback.classic.spi.ThrowableProxy;
 import com.sap.hcp.cf.logback.converter.api.LogbackContextFieldSupplier;
 import com.sap.hcp.cf.logging.common.Defaults;
 import com.sap.hcp.cf.logging.common.Fields;
-import com.sap.hcp.cf.logging.common.Markers;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.sap.hcp.cf.logback.encoder.ILoggingEventUtilities.isRequestLog;
 
 public class BaseFieldSupplier implements LogbackContextFieldSupplier {
 
@@ -48,10 +49,6 @@ public class BaseFieldSupplier implements LogbackContextFieldSupplier {
         Instant now = Instant.now();
         long timestamp = now.getEpochSecond() * 1_000_000_000L + now.getNano();
         return String.valueOf(timestamp);
-    }
-
-    private boolean isRequestLog(ILoggingEvent event) {
-        return Markers.REQUEST_MARKER.equals(event.getMarker());
     }
 
 }

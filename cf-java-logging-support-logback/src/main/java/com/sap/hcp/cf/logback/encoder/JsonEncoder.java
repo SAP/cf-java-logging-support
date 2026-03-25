@@ -290,9 +290,13 @@ public class JsonEncoder extends EncoderBase<ILoggingEvent> {
     }
 
     private <P extends ComposerBase> void addMarkers(ObjectComposer<P> oc, ILoggingEvent event) throws IOException {
-        if (sendDefaultValues || event.getMarker() != null) {
+        if (sendDefaultValues || (event.getMarkerList() != null && !event.getMarkerList().isEmpty())) {
             ArrayComposer<ObjectComposer<P>> ac = oc.startArrayField(Fields.CATEGORIES);
-            addMarker(ac, event.getMarker());
+            if (event.getMarkerList() != null) {
+                for (Marker marker: event.getMarkerList()) {
+                    addMarker(ac, marker);
+                }
+            }
             ac.end();
         }
     }
