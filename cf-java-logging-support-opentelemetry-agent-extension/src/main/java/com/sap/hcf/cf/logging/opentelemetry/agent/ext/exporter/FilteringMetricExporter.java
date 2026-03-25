@@ -22,9 +22,6 @@ import static java.util.stream.Collectors.toList;
 
 public class FilteringMetricExporter implements MetricExporter {
 
-    private static final String INCLUDED_NAMES_KEY = "include.names";
-    private static final String EXCLUDED_NAMES_KEY = "exclude.names";
-
     private final MetricExporter delegate;
     private final Predicate<MetricData> predicate;
 

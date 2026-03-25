@@ -21,8 +21,6 @@ class CloudFoundryServicesAdapter {
     private static final String SERVICE_NAME = "name";
     private static final String SERVICE_TAGS = "tags";
     private static final String SERVICE_CREDENTIALS = "credentials";
-    private static final String SERVICE_CREDENTIALS_ENDPOINT = "ingest-otlp-endpoint";
-    private static final String SERVICE_CREDENTIALS_CLIENT_KEY = "ingest-otlp-key";
 
     private final String vcapServicesJson;
 
