@@ -2,6 +2,7 @@ package com.sap.hcf.cf.logging.opentelemetry.agent.ext.attributes;
 
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.RESOURCE;
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Value;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.resources.ResourceBuilder;
@@ -88,6 +89,10 @@ public class CloudFoundryResourceCustomizer implements BiFunction<Resource, Conf
                 break;
             case STRING_ARRAY:
                 builder.put(rename(k), (String[]) v);
+                break;
+            case VALUE:
+                AttributeKey<Value<?>> attributeKey = AttributeKey.valueKey(rename(k));
+                builder.put(attributeKey, (Value<?>) v);
                 break;
             }
         };
