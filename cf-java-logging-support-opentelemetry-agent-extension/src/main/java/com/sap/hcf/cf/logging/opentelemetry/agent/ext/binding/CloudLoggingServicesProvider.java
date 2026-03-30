@@ -15,7 +15,7 @@ public class CloudLoggingServicesProvider implements Supplier<Stream<CloudFoundr
     private final List<CloudFoundryServiceInstance> services;
 
     public CloudLoggingServicesProvider(ConfigProperties config) {
-        this(config, new CloudFoundryServicesAdapter());
+        this(config, CloudFoundryServicesAdapter.builder().build());
     }
 
     CloudLoggingServicesProvider(ConfigProperties config, CloudFoundryServicesAdapter adapter) {

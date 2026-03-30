@@ -12,7 +12,7 @@ public class DynatraceServiceProvider implements Supplier<CloudFoundryServiceIns
     private final CloudFoundryServiceInstance service;
 
     public DynatraceServiceProvider(ConfigProperties config) {
-        this(config, new CloudFoundryServicesAdapter());
+        this(config, CloudFoundryServicesAdapter.builder().build());
     }
 
     DynatraceServiceProvider(ConfigProperties config, CloudFoundryServicesAdapter adapter) {
