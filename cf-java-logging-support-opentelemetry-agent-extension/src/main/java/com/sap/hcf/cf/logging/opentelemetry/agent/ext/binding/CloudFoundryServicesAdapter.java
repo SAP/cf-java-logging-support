@@ -196,16 +196,16 @@ class CloudFoundryServicesAdapter {
         }
 
         CloudFoundryServicesAdapter build() {
-            String vcapServiceFilePath = envSupplier.apply(vcapServicesFilePathKey);
-            if (vcapServiceFilePath != null) {
+            String vcapServicesFilePath = envSupplier.apply(vcapServicesFilePathKey);
+            if (vcapServicesFilePath != null) {
                 try {
-                    Path path = Paths.get(vcapServiceFilePath);
+                    Path path = Paths.get(vcapServicesFilePath);
                     String vcapServicesJson = Files.readString(path, StandardCharsets.UTF_8);
-                    LOG.fine("Successfully read VCAP services from file " + vcapServiceFilePath);
+                    LOG.fine("Successfully read VCAP services from file " + vcapServicesFilePath);
                     return new CloudFoundryServicesAdapter(vcapServicesJson);
                 } catch (IOException cause) {
                     LOG.warning(
-                            "Cannot read VCAP services from file \"" + vcapServiceFilePath + "\". Falling back to environment variable " + VCAP_SERVICES);
+                            "Cannot read VCAP services from file \"" + vcapServicesFilePath + "\". Falling back to environment variable " + VCAP_SERVICES);
                 }
             }
             return new CloudFoundryServicesAdapter(envSupplier.apply(VCAP_SERVICES));
