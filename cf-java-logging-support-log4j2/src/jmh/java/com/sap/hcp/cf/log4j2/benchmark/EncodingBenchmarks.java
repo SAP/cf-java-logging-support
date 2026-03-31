@@ -1,4 +1,4 @@
-package com.sap.hcp.cf.logback.benchmark;
+package com.sap.hcp.cf.log4j2.benchmark;
 
 import com.sap.hcp.cf.logging.common.Fields;
 import com.sap.hcp.cf.logging.common.Markers;
@@ -15,8 +15,11 @@ import java.util.concurrent.TimeUnit;
 
 import static com.sap.hcp.cf.logging.common.request.RequestRecordBuilder.requestRecord;
 
+@BenchmarkMode(Mode.AverageTime)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
+@Fork(1)
 public class EncodingBenchmarks {
 
     public static Logger LOG = LoggerFactory.getLogger(EncodingBenchmarks.class);
