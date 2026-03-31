@@ -119,10 +119,55 @@ public class GenerateRequestLogFilterTest {
         assertThat(console.getAllEvents()).isEmpty();
 
         ((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger(RequestLogger.class).setLevel(Level.INFO);
+    }
 
+    @Test
+    public void doesNotWriteRequestLogForExcludedUri(ConsoleOutput console) throws Exception {
+        when(request.getRequestURI()).thenReturn("/health");
+        GenerateRequestLogFilter filter = new GenerateRequestLogFilter(requestRecordFactory);
+        filter.init(new ExcludePatternsConfig("/health,/metrics"));
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(console.getAllEvents()).isEmpty();
+    }
+
+    @Test
+    public void writesRequestLogForNonExcludedUri(ConsoleOutput console) throws Exception {
+        when(request.getRequestURI()).thenReturn("/api/orders");
+        GenerateRequestLogFilter filter = new GenerateRequestLogFilter(requestRecordFactory);
+        filter.init(new ExcludePatternsConfig("/health,/metrics"));
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(console.getAllEvents()).isNotEmpty();
+    }
+
+    @Test
+    public void stillEnrichesContextForExcludedUri(ConsoleOutput console) throws Exception {
+        when(request.getRequestURI()).thenReturn("/actuator/health");
+        GenerateRequestLogFilter filter = new GenerateRequestLogFilter(requestRecordFactory);
+        filter.init(new ExcludePatternsConfig("/actuator/**"));
+
+        filter.doFilter(request, response, chain);
+
+        verify(request).setAttribute(eq(MDC.class.getName()), anyMap());
+        assertThat(console.getAllEvents()).isEmpty();
+    }
+
+    @Test
+    public void doesNotWriteRequestLogForWildcardExcludedUri(ConsoleOutput console) throws Exception {
+        when(request.getRequestURI()).thenReturn("/actuator/health/liveness");
+        GenerateRequestLogFilter filter = new GenerateRequestLogFilter(requestRecordFactory);
+        filter.init(new ExcludePatternsConfig("/actuator/**"));
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(console.getAllEvents()).isEmpty();
     }
 
     private static class NoRequestWrappingConfig implements FilterConfig {
+
         @Override
         public String getFilterName() {
             return "no-request-wrapping";
@@ -141,6 +186,38 @@ public class GenerateRequestLogFilterTest {
         @Override
         public Enumeration<String> getInitParameterNames() {
             return enumeration(List.of("wrapRequest"));
+        }
+    }
+
+    private static class ExcludePatternsConfig implements FilterConfig {
+
+        private final String excludePatterns;
+
+        ExcludePatternsConfig(String excludePatterns) {
+            this.excludePatterns = excludePatterns;
+        }
+
+        @Override
+        public String getFilterName() {
+            return "exclude-patterns";
+        }
+
+        @Override
+        public ServletContext getServletContext() {
+            return null;
+        }
+
+        @Override
+        public String getInitParameter(String name) {
+            if (GenerateRequestLogFilter.EXCLUDE_PATTERNS_INIT_PARAM.equals(name)) {
+                return excludePatterns;
+            }
+            return null;
+        }
+
+        @Override
+        public Enumeration<String> getInitParameterNames() {
+            return enumeration(List.of(GenerateRequestLogFilter.EXCLUDE_PATTERNS_INIT_PARAM));
         }
     }
 }

@@ -23,11 +23,13 @@ public class GenerateRequestLogFilter extends AbstractLoggingFilter {
 
     public static final String WRAP_RESPONSE_INIT_PARAM = "wrapResponse";
     public static final String WRAP_REQUEST_INIT_PARAM = "wrapRequest";
+    public static final String EXCLUDE_PATTERNS_INIT_PARAM = "excludePatterns";
 
     private final RequestRecordFactory requestRecordFactory;
 
     private boolean wrapResponse = true;
     private boolean wrapRequest = true;
+    private RequestUriMatcher excludeMatcher = new RequestUriMatcher(null);
 
     public GenerateRequestLogFilter() {
         this(new RequestRecordFactory(new LogOptionalFieldsSettings(GenerateRequestLogFilter.class.getName())));
@@ -47,6 +49,7 @@ public class GenerateRequestLogFilter extends AbstractLoggingFilter {
         if ("false".equalsIgnoreCase(value)) {
             wrapRequest = false;
         }
+        excludeMatcher = new RequestUriMatcher(filterConfig.getInitParameter(EXCLUDE_PATTERNS_INIT_PARAM));
     }
 
     @Override
@@ -75,7 +78,7 @@ public class GenerateRequestLogFilter extends AbstractLoggingFilter {
         try {
             doFilter(chain, request, response);
         } finally {
-            if (!request.isAsyncStarted()) {
+            if (!request.isAsyncStarted() && !excludeMatcher.matches(request.getRequestURI())) {
                 logger.logRequest();
             }
 
