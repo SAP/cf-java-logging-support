@@ -34,7 +34,8 @@ With such standardized formats in place, it becomes much easier to ingest, proce
 analysis stacks such as [ELK](https://www.elastic.co/webinars/introduction-elk-stack).
 
 If you're interested in the specifications of these standardized formats, you may want to have a closer look at the
-`fields.yml` files in the [beats folder](./cf-java-logging-support-core/beats).
+field name constants and their documentation in
+[`Fields.java`](./cf-java-logging-support-core/src/main/java/com/sap/hcp/cf/logging/common/Fields.java).
 
 While [logstash-logback-encoder](https://github.com/logstash/logstash-logback-encoder) is tied
 to [logback](http://logback.qos.ch/), we've tried to keep implementation neutral and have implemented the core
