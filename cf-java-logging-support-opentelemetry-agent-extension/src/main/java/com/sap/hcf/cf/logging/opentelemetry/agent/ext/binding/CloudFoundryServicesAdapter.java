@@ -6,10 +6,15 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -18,6 +23,7 @@ class CloudFoundryServicesAdapter {
     private static final Logger LOG = Logger.getLogger(CloudFoundryServicesAdapter.class.getName());
 
     private static final String VCAP_SERVICES = "VCAP_SERVICES";
+    private static final String VCAP_SERVICES_FILE_PATH = "VCAP_SERVICES_FILE_PATH";
     private static final String SERVICE_NAME = "name";
     private static final String SERVICE_TAGS = "tags";
     private static final String SERVICE_CREDENTIALS = "credentials";
@@ -164,5 +170,45 @@ class CloudFoundryServicesAdapter {
 
     private Comparator<CloudFoundryServiceInstance> byLabels(List<String> serviceLabels) {
         return (l, r) -> getIndex(serviceLabels, l.getLabel()) - getIndex(serviceLabels, r.getLabel());
+    }
+
+    static Builder builder() {
+        return builder(System::getenv);
+    }
+
+    static Builder builder(Function<String, String> envSupplier) {
+        return new Builder(envSupplier);
+    }
+
+    static class Builder {
+
+        private final Function<String, String> envSupplier;
+        private String vcapServicesFilePathKey = VCAP_SERVICES_FILE_PATH;
+
+        private Builder(Function<String, String> envSupplier) {
+            this.envSupplier = envSupplier;
+        }
+
+        Builder withVcapServicesFilePathKey(String vcapServicesFilePathKey) {
+            LOG.fine("Using environment variable " + vcapServicesFilePathKey + " to read VCAP services from file.");
+            this.vcapServicesFilePathKey = vcapServicesFilePathKey;
+            return this;
+        }
+
+        CloudFoundryServicesAdapter build() {
+            String vcapServicesFilePath = envSupplier.apply(vcapServicesFilePathKey);
+            if (vcapServicesFilePath != null) {
+                try {
+                    Path path = Paths.get(vcapServicesFilePath);
+                    String vcapServicesJson = Files.readString(path, StandardCharsets.UTF_8);
+                    LOG.fine("Successfully read VCAP services from file " + vcapServicesFilePath);
+                    return new CloudFoundryServicesAdapter(vcapServicesJson);
+                } catch (IOException cause) {
+                    LOG.warning(
+                            "Cannot read VCAP services from file \"" + vcapServicesFilePath + "\". Falling back to environment variable " + VCAP_SERVICES);
+                }
+            }
+            return new CloudFoundryServicesAdapter(envSupplier.apply(VCAP_SERVICES));
+        }
     }
 }

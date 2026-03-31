@@ -11,7 +11,7 @@ public class CaasServiceProvider implements Supplier<CloudFoundryServiceInstance
     private final CloudFoundryServiceInstance service;
 
     public CaasServiceProvider(ConfigProperties config) {
-        this(config, new CloudFoundryServicesAdapter());
+        this(config, CloudFoundryServicesAdapter.builder().build());
     }
 
     CaasServiceProvider(ConfigProperties config, CloudFoundryServicesAdapter adapter) {

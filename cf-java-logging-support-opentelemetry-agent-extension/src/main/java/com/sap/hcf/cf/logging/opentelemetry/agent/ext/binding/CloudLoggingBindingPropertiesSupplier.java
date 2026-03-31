@@ -27,7 +27,7 @@ public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<Strin
     private final PemFileCreator pemFileCreator;
 
     public CloudLoggingBindingPropertiesSupplier() {
-        this(new CloudLoggingServicesProvider(getDefaultProperties(), new CloudFoundryServicesAdapter()),
+        this(new CloudLoggingServicesProvider(getDefaultProperties(), CloudFoundryServicesAdapter.builder().build()),
              new PemFileCreator());
     }
 

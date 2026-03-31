@@ -1,0 +1,64 @@
+{
+  "managed-find-me-service": [
+    {
+      "label": "managed-find-me-service",
+      "tags": [
+        "Find Me!"
+      ],
+      "name": "managed-find-me1"
+    },
+    {
+      "label": "managed-find-me-service",
+      "tags": [
+        "Find Me!"
+      ],
+      "name": "managed-find-me2"
+    },
+    {
+      "label": "managed-find-me-service",
+      "tags": [
+        "You can't see me!"
+      ],
+      "name": "managed-other"
+    }
+  ],
+  "managed-notice-me-not-service": [
+    {
+      "label": "managed-notice-me-not-service",
+      "tags": [
+        "Find Me!"
+      ],
+      "name": "managed-other1"
+    },
+    {
+      "label": "managed-notice-me-not-service",
+      "tags": [
+        "You can't see me!"
+      ],
+      "name": "managed-other2"
+    }
+  ],
+  "user-provided": [
+    {
+      "label": "user-provided",
+      "tags": [
+        "Find Me!"
+      ],
+      "name": "ups-find-me1"
+    },
+    {
+      "label": "user-provided",
+      "tags": [
+        "Find Me!"
+      ],
+      "name": "ups-find-me2"
+    },
+    {
+      "label": "user-provided",
+      "tags": [
+        "You can't see me!"
+      ],
+      "name": "ups-other"
+    }
+  ]
+}
