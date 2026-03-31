@@ -34,24 +34,29 @@ public class LogController {
                                                             defaultValue = DEFAULT_LOG_MESSAGE) String message) {
         Logger logger = LoggerFactory.getLogger(loggerName);
         switch (logLevel.toLowerCase()) {
-        case "error":
+        case "error" -> {
             logger.error(message);
             return ResponseEntity.ok().body("Generated error log with message: \"" + message + "\".");
-        case "warn":
-        case "warning":
+        }
+        case "warn", "warning" -> {
             logger.warn(message);
             return ResponseEntity.ok().body("Generated warn log with message: \"" + message + "\".");
-        case "info":
-        case "informational":
+        }
+        case "info", "informational" -> {
             logger.info(message);
             return ResponseEntity.ok().body("Generated info log with message: \"" + message + "\".");
-        case "debug":
+        }
+        case "debug" -> {
             logger.debug(message);
             return ResponseEntity.ok().body("Generated debug log with message: \"" + message + "\".");
-        case "trace":
+        }
+        case "trace" -> {
             logger.trace(message);
             return ResponseEntity.ok().body("Generated trace log with message: \"" + message + "\".");
         }
-        return ResponseEntity.badRequest().body("Unknows log level \"" + logLevel + "\".");
+        default -> {
+            return ResponseEntity.badRequest().body("Unknows log level \"" + logLevel + "\".");
+        }
+        }
     }
 }

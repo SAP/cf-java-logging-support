@@ -15,7 +15,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.boot.version>3.5.12</spring.boot.version>
+        <spring.boot.version>4.0.5</spring.boot.version>
         <keytool.plugin.version>1.5</keytool.plugin.version>
         <keystore.token.store_password>0bzhBRNUXBR5
         </keystore.token.store_password>
@@ -103,12 +103,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sap.hcp.cf.logging</groupId>
-            <artifactId>cf-java-logging-support-servlet-dynlog-jwt</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin.external.google</groupId>
+                    <artifactId>android-json</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -185,7 +185,7 @@
                 </dependency>
                 <dependency>
                     <groupId>org.apache.logging.log4j</groupId>
-                    <artifactId>log4j-slf4j-impl</artifactId>
+                    <artifactId>log4j-slf4j2-impl</artifactId>
                     <version>${log4j2.version}</version>
                 </dependency>
                 <dependency>
@@ -207,7 +207,7 @@
                         </exclusion>
                         <exclusion>
                             <groupId>org.apache.logging.log4j</groupId>
-                            <artifactId>log4j-slf4j-impl</artifactId>
+                            <artifactId>log4j-slf4j2-impl</artifactId>
                         </exclusion>
                         <exclusion>
                             <groupId>org.apache.logging.log4j</groupId>

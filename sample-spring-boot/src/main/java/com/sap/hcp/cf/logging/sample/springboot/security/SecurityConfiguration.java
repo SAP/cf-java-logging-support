@@ -23,7 +23,8 @@ public class SecurityConfiguration {
     public UserDetailsService userDetails(@Autowired PasswordEncoder encoder,
                                           @Value("${auth.basic.username:user}") String username,
                                           @Value("${auth.basic.password:secret}") String password) {
-        UserDetails user = User.withUsername(username).password(encoder.encode(password)).roles(Roles.USER).build();
+        UserDetails user =
+                User.builder().username(username).password(encoder.encode(password)).roles(Roles.USER).build();
         return new InMemoryUserDetailsManager(user);
     }
 
