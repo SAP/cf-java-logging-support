@@ -14,14 +14,6 @@
             <!-- <customFieldMdcKeyName>message_count</customFieldMdcKeyName> -->
         </encoder>
     </appender>
-    <appender name="STDOUT"
-              class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d %-5level [%thread] %logger{0} [%mdc]>: %msg
-                %replace(%xEx){'\n', ' | '}%nopex%n
-            </pattern>
-        </encoder>
-    </appender>
     <!-- default log level for all loggers is INFO by default -->
     <root level="${LOG_ROOT_LEVEL:-INFO}">
         <appender-ref ref="STDOUT-JSON"/>
