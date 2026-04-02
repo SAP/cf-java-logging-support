@@ -70,7 +70,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Runtime dependencies (aligned with Spring Boot 3.5.12) -->
-        <jackson.version>2.19.4</jackson.version>
+        <jackson.version>2.21.2</jackson.version>
         <slf4j.version>2.0.17</slf4j.version>
         <logback.version>1.5.32</logback.version>
         <log4j2.version>2.25.3</log4j2.version>
