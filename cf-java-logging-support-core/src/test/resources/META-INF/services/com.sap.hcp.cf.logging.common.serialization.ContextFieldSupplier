@@ -1,0 +1,2 @@
+# Intentionally invalid entry (does not implement ContextFieldSupplier) to trigger a ServiceConfigurationError for testing.
+com.sap.hcp.cf.logging.common.helper.StacktraceGenerator
