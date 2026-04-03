@@ -90,7 +90,7 @@
         <enforcer.plugin.version>3.6.2</enforcer.plugin.version>
         <source.plugin.version>3.4.0</source.plugin.version>
         <jar.plugin.version>3.5.0</jar.plugin.version>
-        <surefire.plugin.version>3.5.3</surefire.plugin.version>
+        <surefire.plugin.version>3.5.5</surefire.plugin.version>
         <exec.plugin.version>3.6.3</exec.plugin.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <javadoc.plugin.version>3.12.0</javadoc.plugin.version>
