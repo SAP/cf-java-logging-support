@@ -114,7 +114,7 @@
         <dependency>
             <groupId>com.sap.cloud.environment.servicebinding</groupId>
             <artifactId>java-sap-vcap-services</artifactId>
-            <version>0.21.0</version>
+            <version>0.30.0</version>
         </dependency>
     </dependencies>
 
