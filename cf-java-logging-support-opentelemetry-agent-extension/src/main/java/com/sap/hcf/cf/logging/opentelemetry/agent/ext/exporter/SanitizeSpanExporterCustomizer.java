@@ -2,6 +2,7 @@ package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter.customizer.DbConnectStatementCustomizer;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter.customizer.SpanAttributeCustomizer;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter.customizer.SpanAttributeNameFilterCustomizer;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -21,7 +22,7 @@ public class SanitizeSpanExporterCustomizer implements BiFunction<SpanExporter, 
     private final List<SpanAttributeCustomizer> customizers;
 
     public SanitizeSpanExporterCustomizer() {
-        this(List.of(new DbConnectStatementCustomizer()));
+        this(List.of(new DbConnectStatementCustomizer(), new SpanAttributeNameFilterCustomizer()));
     }
 
     SanitizeSpanExporterCustomizer(List<SpanAttributeCustomizer> customizers) {
