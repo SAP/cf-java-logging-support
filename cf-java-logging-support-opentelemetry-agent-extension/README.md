@@ -13,6 +13,7 @@ The extension provides the following main features:
 * additional exporters for logs, metrics and traces for [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging)
 * additional exporter for metrics for [Dynatrace](https://docs.dynatrace.com/docs/setup-and-configuration/setup-on-container-platforms/cloud-foundry/deploy-oneagent-on-sap-cloud-platform-for-application-only-monitoring)
 * adding resource attributes describing the CF application
+* filtering span attributes by name before export
 
 See the section on [configuration](#configuration) for further details.
 
@@ -151,6 +152,22 @@ Note, that the `include` filter is applied before the `exclude` filter.
 That means, if a metric matches both filters, it will be excluded.
 The configuration applies to both the `cloud-logging` and `dynatrace` exporters independently.
 
+### Filtering Span Attributes
+
+_This feature was introduced with version 4.3.0 of the extension._
+
+You can filter which span attributes are exported by name using the following properties:
+
+| Property                                                                              | Description                                                                                                            |
+|---------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
+| `sap.cf.integration.otel.extension.sanitizer.span.attribute.filter.include.names`    | A comma-separated list of span attribute name patterns to be included. This may include a wildcard "*" at the end of the name. |
+| `sap.cf.integration.otel.extension.sanitizer.span.attribute.filter.exclude.names`    | A comma-separated list of span attribute name patterns to be excluded. This may include a wildcard "*" at the end of the name. |
+
+The filter is only active when the sanitizer is enabled (`sap.cf.integration.otel.extension.sanitizer.enabled=true`) and at least one of the two properties is set.
+
+The `include` filter is applied before the `exclude` filter.
+That means, if a span attribute matches both filters, it will be excluded.
+
 ### Configuration Properties Summary
 
 The following table summarizes all configuration properties provided by the extension:
@@ -175,7 +192,9 @@ The following table summarizes all configuration properties provided by the exte
 | `otel.exporter.dynatrace.metrics.include.names`                     | A comma-separated list of metric name patterns to be included when exporting metrics to Dynatrace. Wildcard "\*" is only supported at the end of the name. If not set, all metrics are exported.                                                                                                                                              |                                                         |
 | `otel.exporter.dynatrace.metrics.temporality.preference`            | The default histogram aggregation for metrics exported to Dynatrace. Delegates to the underlying OTLP exporter, supporting all its configurations. The Dynatrace metrics exporter provides an additional option `always_delta` which always uses delta aggregation temporality. This is also the default behavior if the property is not set. | `always_delta`                                          |
 | `otel.exporter.dynatrace.metrics.timeout`                           | The maximum duration to wait for Dynatrace when exporting metrics.                                                                                                                                                                                                                                                                            | `10000` (from OTel SDK)                                 |
-| `sap.cf.integration.otel.extension.sanitizer.enabled`               | Enables or disables the sanitizer.                                                                                                                                                                                                                                                                                                            | `true`                                                  |
+| `sap.cf.integration.otel.extension.sanitizer.enabled`                                    | Enables or disables the sanitizer.                                                                                                                                                                                                                                                                                                            | `true`                                                  |
+| `sap.cf.integration.otel.extension.sanitizer.span.attribute.filter.exclude.names`        | A comma-separated list of span attribute name patterns to be excluded. Wildcard "\*" is only supported at the end of the name. If not set, no span attributes are excluded. Requires the sanitizer to be enabled and at least one filter property to be set.                                                                                  |                                                         |
+| `sap.cf.integration.otel.extension.sanitizer.span.attribute.filter.include.names`        | A comma-separated list of span attribute name patterns to be included. Wildcard "\*" is only supported at the end of the name. If not set, all span attributes are included. Requires the sanitizer to be enabled and at least one filter property to be set.                                                                                 |                                                         |
 | `sap.cloudfoundry.otel.resources.enabled`                           | Should Cloud Foundry resource attributes be added to the OpenTelemetry resource?                                                                                                                                                                                                                                                              | `true`                                                  |
 | `sap.cloudfoundry.otel.resources.format`                            | Determines the semantic convention used for Cloud Foundry resource attributes names. `SAP` - use SAP specific attribute names (default). `OTEL` - use OpenTelemetry semantic convention attribute names.                                                                                                                                      | `SAP`                                                   |
 | `sap.cloud-logging.cf.binding.label.value`                          | The label value used to identify managed Cloud Logging service bindings.                                                                                                                                                                                                                                                                      | `cloud-logging`                                         |
