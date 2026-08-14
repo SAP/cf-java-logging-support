@@ -99,6 +99,7 @@
     </properties>
 
     <modules>
+        <module>cf-java-logging-support-bom</module>
         <module>cf-java-logging-support-core</module>
         <module>cf-java-logging-support-logback</module>
         <module>cf-java-logging-support-log4j2</module>
