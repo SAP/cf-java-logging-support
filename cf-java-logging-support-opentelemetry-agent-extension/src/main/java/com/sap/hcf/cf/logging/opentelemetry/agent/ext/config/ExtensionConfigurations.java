@@ -64,7 +64,7 @@ public interface ExtensionConfigurations {
 
                 /**
                  * <p>Parses {@code otel.exporter.cloud-logging.metrics.exclude.names}.</p>
-                 * <p>A comma-seperated list of metric name patterns to be excluded when exporting metrics to Cloud
+                 * <p>A comma-separated list of metric name patterns to be excluded when exporting metrics to Cloud
                  * Logging. Wildcard "*" is only supported at the end of the name. If not set, no metrics are
                  * excluded.</p>
                  */
@@ -73,7 +73,7 @@ public interface ExtensionConfigurations {
 
                 /**
                  * <p>Parses {@code otel.exporter.cloud-logging.metrics.include.names}.</p>
-                 * <p>A comma-seperated list of metric name patterns to be included when exporting metrics to Cloud
+                 * <p>A comma-separated list of metric name patterns to be included when exporting metrics to Cloud
                  * Logging. Wildcard "*" is only supported at the end of the name. If not set, all metrics are
                  * exported.</p>
                  */
@@ -138,7 +138,7 @@ public interface ExtensionConfigurations {
 
                 /**
                  * <p>Parses {@code otel.exporter.dynatrace.metrics.exclude.names}.</p>
-                 * <p>A comma-seperated list of metric name patterns to be excluded when exporting metrics to
+                 * <p>A comma-separated list of metric name patterns to be excluded when exporting metrics to
                  * CDynatrace. Wildcard "*" is only supported at the end of the name. If not set, no metrics are
                  * excluded.</p>
                  */
@@ -147,7 +147,7 @@ public interface ExtensionConfigurations {
 
                 /**
                  * <p>Parses {@code otel.exporter.dynatrace.metrics.include.names}.</p>
-                 * <p>A comma-seperated list of metric name patterns to be included when exporting metrics to
+                 * <p>A comma-separated list of metric name patterns to be included when exporting metrics to
                  * Dynatrace. Wildcard "*" is only supported at the end of the name. If not set, all metrics are
                  * exported.</p>
                  */
@@ -185,6 +185,33 @@ public interface ExtensionConfigurations {
              */
             ConfigProperty<Boolean> ENABLED =
                     booleanValued("sap.cf.integration.otel.extension.sanitizer.enabled").withDefaultValue(true).build();
+
+            interface SPAN {
+                interface ATTRIBUTE {
+                    interface FILTER {
+                        /**
+                         * <p>Parses
+                         * {@code sap.cf.integration.otel.extension.sanitizer.span.attribute.filter.exclude.names}.</p>
+                         * <p>A comma-separated list of span attribute name patterns to be excluded when sanitizing
+                         * span
+                         * attributes. Wildcard "*" is only supported at the end of the name. If not set, no span
+                         * attributes are excluded.</p>
+                         */
+                        ConfigProperty<List<String>> EXCLUDE_NAMES = listValued(
+                                "sap.cf.integration.otel.extension.sanitizer.span.attribute.filter.exclude.names").build();
+
+                        /**
+                         * <p>Parses
+                         * {@code sap.cf.integration.otel.extension.sanitizer.span.attribute.filter.include.names}.</p>
+                         * <p>A comma-separated list of span attribute name patterns to be included when sanitizing span
+                         * attributes. Wildcard "*" is only supported at the end of the name. If not set, all span
+                         * attributes are included.</p>
+                         */
+                        ConfigProperty<List<String>> INCLUDE_NAMES = listValued(
+                                "sap.cf.integration.otel.extension.sanitizer.span.attribute.filter.include.names").build();
+                    }
+                }
+            }
         }
     }
 

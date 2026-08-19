@@ -1,7 +1,8 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
-import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.EXTENSION;
-import io.opentelemetry.api.common.AttributeKey;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter.customizer.DbConnectStatementCustomizer;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter.customizer.SpanAttributeCustomizer;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter.customizer.SpanAttributeNameFilterCustomizer;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -11,26 +12,39 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
-import static io.opentelemetry.api.common.AttributeKey.stringKey;
+import static java.util.stream.Collectors.toList;
 
 public class SanitizeSpanExporterCustomizer implements BiFunction<SpanExporter, ConfigProperties, SpanExporter> {
 
-    private static final AttributeKey<String> DB_QUERY_TEXT = stringKey("db.query.text");
-    //@Deprecated
-    private static final AttributeKey<String> DB_STATEMENT = stringKey("db.statement");
+    private final List<SpanAttributeCustomizer> customizers;
+
+    public SanitizeSpanExporterCustomizer() {
+        this(List.of(new DbConnectStatementCustomizer(), new SpanAttributeNameFilterCustomizer()));
+    }
+
+    SanitizeSpanExporterCustomizer(List<SpanAttributeCustomizer> customizers) {
+        this.customizers = customizers;
+    }
 
     @Override
     public SpanExporter apply(SpanExporter delegate, ConfigProperties config) {
-        if (EXTENSION.SANITIZER.ENABLED.getValue(config) != Boolean.TRUE) {
+        // Keep delegate exporter unwrapped if no customizers are provided.
+        if (customizers == null || customizers.isEmpty()) {
+            return delegate;
+        }
+        // Keep delegate exporter unwrapped if no customizers are enabled.
+        final List<SpanAttributeCustomizer> enabledCustomizers =
+                customizers.stream().filter(c -> c.isEnabled(config)).collect(toList());
+        if (enabledCustomizers.isEmpty()) {
             return delegate;
         }
         return new SpanExporter() {
             @Override
             public CompletableResultCode export(Collection<SpanData> spans) {
-                return delegate.export(spans.stream().map(this::sanitizeSpanData).collect(Collectors.toList()));
+                return delegate.export(spans.stream().map(this::sanitizeSpanData).collect(toList()));
             }
 
             private SpanData sanitizeSpanData(SpanData spanData) {
@@ -38,23 +52,20 @@ public class SanitizeSpanExporterCustomizer implements BiFunction<SpanExporter, 
                 if (attributes == null) {
                     return spanData;
                 }
-                String dbQueryText = attributes.get(DB_QUERY_TEXT);
-                String dbStatement = attributes.get(DB_STATEMENT);
-                if (isClean(dbQueryText) && isClean(dbStatement)) {
+                // Only create a new AttributesBuilder if at least one customizer is applicable to the attributes.
+                AttributesBuilder sanitized = null;
+                for (SpanAttributeCustomizer customizer: enabledCustomizers) {
+                    if (customizer.isApplicable(attributes)) {
+                        if (sanitized == null) {
+                            sanitized = attributes.toBuilder();
+                        }
+                        customizer.customize(sanitized, attributes);
+                    }
+                }
+                if (sanitized == null) {
                     return spanData;
                 }
-                AttributesBuilder sanitized = attributes.toBuilder();
-                if (!isClean(dbQueryText)) {
-                    sanitized.put(DB_QUERY_TEXT, dbQueryText.substring(0, 7) + " [REDACTED]");
-                }
-                if (!isClean(dbStatement)) {
-                    sanitized.put(DB_STATEMENT, dbStatement.substring(0, 7) + " [REDACTED]");
-                }
                 return new SanitizedSpanData(spanData, sanitized.build());
-            }
-
-            private boolean isClean(String query) {
-                return query == null || !query.toLowerCase().startsWith("connect");
             }
 
             @Override
