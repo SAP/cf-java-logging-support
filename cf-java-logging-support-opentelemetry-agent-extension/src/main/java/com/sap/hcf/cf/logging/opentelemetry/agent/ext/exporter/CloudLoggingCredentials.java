@@ -2,7 +2,6 @@ package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryCredentials;
 
-import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
 public class CloudLoggingCredentials {
@@ -27,15 +26,6 @@ public class CloudLoggingCredentials {
 
     static CloudLoggingCredentials.Parser parser() {
         return PARSER;
-    }
-
-    private static byte[] getPEMBytes(CloudFoundryCredentials credentials, String key) {
-        String raw = credentials.getString(key);
-        return getPEMBytes(raw);
-    }
-
-    private static byte[] getPEMBytes(String raw) {
-        return raw == null ? null : raw.trim().replace("\\n", "\n").getBytes(StandardCharsets.UTF_8);
     }
 
     private static boolean isBlank(String text) {
@@ -94,9 +84,9 @@ public class CloudLoggingCredentials {
             CloudLoggingCredentials parsed = new CloudLoggingCredentials();
             String rawEndpoint = cfCredentials.getString(CRED_OTLP_ENDPOINT);
             parsed.endpoint = isBlank(rawEndpoint) ? null : CLOUD_LOGGING_ENDPOINT_PREFIX + rawEndpoint;
-            parsed.clientKey = getPEMBytes(cfCredentials, CRED_OTLP_CLIENT_KEY);
-            parsed.clientCert = getPEMBytes(cfCredentials, CRED_OTLP_CLIENT_CERT);
-            parsed.serverCert = getPEMBytes(cfCredentials, CRED_OTLP_SERVER_CERT);
+            parsed.clientKey = cfCredentials.getPEMBytes(CRED_OTLP_CLIENT_KEY);
+            parsed.clientCert = cfCredentials.getPEMBytes(CRED_OTLP_CLIENT_CERT);
+            parsed.serverCert = cfCredentials.getPEMBytes(CRED_OTLP_SERVER_CERT);
             return parsed;
         }
     }
