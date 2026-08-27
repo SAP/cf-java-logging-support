@@ -124,4 +124,5 @@ public class CloudFoundryServicesAdapterTest {
             List<CloudFoundryServiceInstance> services) {
         return assertThat(services).extracting(CloudFoundryServiceInstance::getName);
     }
+
 }

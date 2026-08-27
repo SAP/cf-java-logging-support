@@ -4,7 +4,6 @@ import com.sap.hcf.cf.logging.opentelemetry.agent.ext.tls.PemFileCreator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -35,17 +34,16 @@ public class CloudLoggingBindingPropertiesSupplierTest {
     @Mock
     private PemFileCreator pemFileCreator;
 
-    @InjectMocks
-    private CloudLoggingBindingPropertiesSupplier propertiesSupplier;
-
     @AfterEach
     void assertNoUnexpectedInteractions() {
-        verifyNoMoreInteractions(servicesProvider, pemFileCreator);
+        verifyNoMoreInteractions(pemFileCreator);
     }
 
     @Test
     void emptyWithoutBindings() {
         when(servicesProvider.get()).thenReturn(Stream.empty());
+        CloudLoggingBindingPropertiesSupplier propertiesSupplier =
+                new CloudLoggingBindingPropertiesSupplier(servicesProvider, pemFileCreator);
         Map<String, String> properties = propertiesSupplier.get();
         assertThat(properties).isEmpty();
     }
@@ -58,12 +56,9 @@ public class CloudLoggingBindingPropertiesSupplierTest {
                                        .add("ingest-otlp-cert", "test-client-cert").add("server-ca", "test-server-cert")
                                        .build();
         when(servicesProvider.get()).thenReturn(Stream.of(defaultInstance().credentials(credentials).build()));
-        when(pemFileCreator.writeFile("cloud-logging-client", ".key", "test-client-key")).thenReturn(
-                new File("client-key-file"));
-        when(pemFileCreator.writeFile("cloud-logging-client", ".cert", "test-client-cert")).thenReturn(
-                new File("client-cert-file"));
-        when(pemFileCreator.writeFile("cloud-logging-server", ".cert", "test-server-cert")).thenReturn(
-                new File("server-cert-file"));
+        when(pemFileCreator.writeFile("cloud-logging-server-ca-",   ".crt", "test-server-cert")).thenReturn(new File("server-cert-file"));
+        when(pemFileCreator.writeFile("cloud-logging-client-cert-", ".crt", "test-client-cert")).thenReturn(new File("client-cert-file"));
+        when(pemFileCreator.writeFile("cloud-logging-client-key-",  ".key", "test-client-key")).thenReturn(new File("client-key-file"));
         CloudLoggingBindingPropertiesSupplier propertiesSupplier =
                 new CloudLoggingBindingPropertiesSupplier(servicesProvider, pemFileCreator);
 
@@ -125,7 +120,7 @@ public class CloudLoggingBindingPropertiesSupplierTest {
     }
 
     @Test
-    void emptyWithoutServerCert() {
+    void basicPropsWithoutCertWhenServerCertMissing() {
         CloudFoundryCredentials credentials =
                 CloudFoundryCredentials.builder().add("ingest-otlp-endpoint", "test-endpoint")
                                        .add("ingest-otlp-key", "test-client-key")

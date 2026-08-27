@@ -1,7 +1,7 @@
 # OpenTelemetry Java Agent Extension for SAP BTP Observability
 
 This module provides an extension for the [OpenTelemetry Java Agent](https://opentelemetry.io/docs/instrumentation/java/automatic/).
-The extension scans the service bindings of an application for SAP Collector as a Service (CaaS), [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging) and [Dynatrace](https://docs.dynatrace.com/docs/setup-and-configuration/setup-on-container-platforms/cloud-foundry/deploy-oneagent-on-sap-cloud-platform-for-application-only-monitoring).
+The extension scans the service bindings of an application for a generic OTel Collector, SAP Collector as a Service (CaaS), [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging) and [Dynatrace](https://docs.dynatrace.com/docs/setup-and-configuration/setup-on-container-platforms/cloud-foundry/deploy-oneagent-on-sap-cloud-platform-for-application-only-monitoring).
 If such a binding is found, the OpenTelemetry Java Agent is configured to ship observability data to those services.
 Thus, this extension provides a convenient auto-instrumentation for Java applications running on SAP BTP.
 
@@ -9,7 +9,8 @@ Thus, this extension provides a convenient auto-instrumentation for Java applica
 
 The extension provides the following main features:
 
-* auto-configuration of the generic OpenTelemetry OTLP exporter to SAP Collector as a Service (CaaS) or [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging)
+* auto-configuration of the generic OpenTelemetry OTLP exporter to any OTel Collector service binding (identified by instance name), SAP Collector as a Service (CaaS) or [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging)
+* optional mTLS using client certificate and key read directly from the OTel Collector service binding credentials
 * additional exporters for logs, metrics and traces for [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging)
 * additional exporter for metrics for [Dynatrace](https://docs.dynatrace.com/docs/setup-and-configuration/setup-on-container-platforms/cloud-foundry/deploy-oneagent-on-sap-cloud-platform-for-application-only-monitoring)
 * adding resource attributes describing the CF application
@@ -44,8 +45,9 @@ See the [example manifest](../sample-spring-boot/manifest-otel-javaagent.yml), h
 
 Once the agent is attached to the JVM with the extension in place, the default `otlp` exporter is automatically configured based on available service bindings:
 
-1. **CaaS Service Binding** (preferred): If a CaaS service binding is found, the `otlp` exporter sends data to the CaaS endpoint.
-2. **Cloud Logging Service Binding** (fallback): If no CaaS binding exists, the `otlp` exporter sends data to Cloud Logging.
+1. **Generic OTel Collector Binding** (highest priority, explicit opt-in): If `sap.otel.generic.cf.binding.name` is configured, the extension locates that CF service instance by name and uses it as the OTel Collector endpoint. Optionally uses mTLS credentials (`tls.crt`, `tls.key`) read directly from the binding. See [Using a Generic OTel Collector Service Binding](#using-a-generic-otel-collector-service-binding).
+2. **CaaS Service Binding** (automatic, preferred): If no explicit binding name is set and a CaaS service binding is found, the `otlp` exporter sends data to the CaaS endpoint.
+3. **Cloud Logging Service Binding** (automatic, fallback): If neither of the above applies, the `otlp` exporter sends data to Cloud Logging.
 
 This means **metrics and traces are automatically exported** without additional configuration when either service is bound.
 The recommended way to export data to Cloud Logging and Dynatrace is to use the provided exporters explicitly.
@@ -92,23 +94,27 @@ There is no custom network client provided by this extension.
 
 The extension itself can be configured by specifying the following system properties:
 
-| Property                                   | Description                                                                                                                                     | Default Value   |
-|--------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|
-| `sap.caas.cf.binding.label.value`          | The label of the managed CaaS service binding to bind to.                                                                                       | `caas-service`  |
-| `sap.cloud-logging.cf.binding.label.value` | The label of the managed service binding to bind to.                                                                                            | `cloud-logging` |
-| `sap.cloud-logging.cf.binding.tag.value`   | The tag of any service binding (managed or user-provided) to bind to.                                                                           | `Cloud Logging` |
-| `sap.dynatrace.cf.binding.label.value`     | The label of the managed service binding to bind to.                                                                                            | `dynatrace`     |
-| `sap.dynatrace.cf.binding.tag.value`       | The tag of any service binding (managed or user-provided) to bind to.                                                                           | `dynatrace`     |
-| `sap.dynatrace.cf.binding.token.name`      | The name of the field containing the Dynatrace API token within the service binding credentials. This is required to send metrics to Dynatrace. |                 |
-| `sap.cloudfoundry.otel.resources.enabled`  | Whether to add CF resource attributes to all events.                                                                                            | `true`          |
-| `sap.cloudfoundry.otel.resources.format`   | The semantic convention to follow for the CF resource attributes. Supported values are `SAP` and `OTEL`.                                        | `SAP`           |
+| Property                                                    | Description                                                                                                                                                                                                                                       | Default Value              |
+|-------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------|
+| `sap.otel.generic.cf.binding.name`                        | The name of a CF service instance (managed or user-provided) to use as the **Generic OTel Collector** endpoint. When set, this binding takes priority over CaaS and Cloud Logging auto-detection. See [Using a Generic OTel Collector](#using-a-generic-otel-collector-service-binding). | *(absent)*                 |
+| `sap.otel.generic.cf.binding.label`                       | The service label of a CF service instance to use as the **Generic OTel Collector** endpoint. Used when `sap.otel.generic.cf.binding.name` is absent.                                                                                            | *(absent)*                 |
+| `sap.otel.generic.cf.binding.tag`                         | A tag of a CF service instance to use as the **Generic OTel Collector** endpoint. Used when neither name nor label selector is set.                                                                                                               | *(absent)*                 |
+| `sap.caas.cf.binding.label.value`                           | The label of the managed CaaS service binding to bind to.                                                                                                                                                                                         | `caas-service`             |
+| `sap.cloud-logging.cf.binding.label.value`                  | The label of the managed service binding to bind to.                                                                                                                                                                                              | `cloud-logging`            |
+| `sap.cloud-logging.cf.binding.tag.value`                    | The tag of any service binding (managed or user-provided) to bind to.                                                                                                                                                                             | `Cloud Logging`            |
+| `sap.dynatrace.cf.binding.label.value`                      | The label of the managed service binding to bind to.                                                                                                                                                                                              | `dynatrace`                |
+| `sap.dynatrace.cf.binding.tag.value`                        | The tag of any service binding (managed or user-provided) to bind to.                                                                                                                                                                             | `dynatrace`                |
+| `sap.dynatrace.cf.binding.token.name`                       | The name of the field containing the Dynatrace API token within the service binding credentials. This is required to send metrics to Dynatrace.                                                                                                   |                            |
+| `sap.cloudfoundry.otel.resources.enabled`                   | Whether to add CF resource attributes to all events.                                                                                                                                                                                              | `true`                     |
+| `sap.cloudfoundry.otel.resources.format`                    | The semantic convention to follow for the CF resource attributes. Supported values are `SAP` and `OTEL`.                                                                                                                                          | `SAP`                      |
 
 > Each property can also be provided as environment variable, e.g., `sap.cloud-logging.cf.binding.label.value` as `SAP.CLOUD-LOGGING.CF.BINDING.LABEL.VALUE`.
 
 The extension scans the `VCAP_SERVICES` environment variable for CF service bindings in the following order:
 
-1. **CaaS bindings**: Searches for bindings matching the configured label (`sap.caas.cf.binding.label.value`, default: `caas-service`)
-2. **Cloud Logging bindings**: If no CaaS binding is found, searches for bindings matching the configured label and tag (`sap.cloud-logging.cf.binding.label.value` and `sap.cloud-logging.cf.binding.tag.value`)
+1. **Generic OTel Collector binding** (only when `sap.otel.generic.cf.binding.name` is configured): Finds the service instance by that exact name. Reads the `url` credential field as the OTLP endpoint. Optionally reads mTLS client credentials (`tls.crt`, `tls.key`) and server CA certificate (`tls.ca.crt`). A server CA certificate is required when mTLS client credentials are present; the binding is skipped if both mTLS credentials are present but the CA certificate is absent.
+2. **CaaS bindings**: Searches for bindings matching the configured label (`sap.caas.cf.binding.label.value`, default: `caas-service`)
+3. **Cloud Logging bindings**: If no CaaS binding is found, searches for bindings matching the configured label and tag (`sap.cloud-logging.cf.binding.label.value` and `sap.cloud-logging.cf.binding.tag.value`)
 
 User-provided bindings take precedence over managed bindings.
 The first matching binding configures the default OpenTelemetry `otlp` exporter.
@@ -202,6 +208,72 @@ The following table summarizes all configuration properties provided by the exte
 | `sap.dynatrace.cf.binding.label.value`                              | The label value used to identify managed Dynatrace service bindings.                                                                                                                                                                                                                                                                          | `dynatrace`                                             |
 | `sap.dynatrace.cf.binding.tag.value`                                | The tag value used to identify managed Dynatrace service bindings.                                                                                                                                                                                                                                                                            | `dynatrace`                                             |
 | `sap.dynatrace.cf.binding.token.name`                               | The name of the field containing the Dynatrace API token within the service binding credentials.                                                                                                                                                                                                                                              |                                                         |
+| `sap.otel.generic.cf.binding.name`                                | CF service instance name to use as a Generic OTel Collector. When absent, this feature is disabled and the existing CaaS / Cloud Logging auto-detection is unaffected.                                                                                                                                                                        |                                                         |
+| `sap.otel.generic.cf.binding.label`                               | CF service label to use as a Generic OTel Collector. Used when `sap.otel.generic.cf.binding.name` is absent.                                                                                                                                                                                                                                  |                                                         |
+| `sap.otel.generic.cf.binding.tag`                                 | CF service tag to use as a Generic OTel Collector. Used when neither name nor label selector is configured.                                                                                                                                                                                                                                   |                                                         |
+
+## Using a Generic OTel Collector Service Binding
+
+_This feature was introduced with version 4.4.0 of the extension._
+
+The extension supports sending observability data to **any OTel Collector** service binding — whether a managed service or a user-provided service — by specifying the CF service instance name via the `sap.otel.generic.cf.binding.name` property.
+This is referred to as the **Generic OTel Collector** path to distinguish it from the CaaS-specific auto-detection.
+
+When `sap.otel.generic.cf.binding.name` is set, the extension:
+1. Locates the CF service instance with that exact name in `VCAP_SERVICES`.
+2. Reads the `url` credential field as the OTLP endpoint.
+3. Optionally reads mTLS client credentials (`tls.crt`, `tls.key`). If both mTLS fields are present, also reads the `tls.ca.crt` credential field (PEM-encoded server CA certificate) as the trusted CA. If mTLS is configured but the CA certificate is absent or blank, the binding is skipped and no exporter is configured.
+4. Reads the optional `token` credential field and sends it as a `Bearer` authorization header. This can be combined with mTLS.
+
+### Minimal setup (URL + token)
+
+Create a user-provided service with at least a `url` field and optionally a `token`:
+
+```bash
+cf cups my-otel-collector -p '{"url":"https://my-otel-collector.example.com","token":"<api-token>"}'
+```
+
+Configure the extension to use it:
+
+```sh
+-Dsap.otel.generic.cf.binding.name=my-otel-collector
+```
+
+### Setup with mTLS from binding credentials
+
+Place the PEM-encoded client certificate, private key, and optionally the server CA certificate directly in the user-provided service credentials:
+
+```bash
+cf cups my-otel-collector -p '{
+  "url": "https://my-otel-collector.example.com",
+  "tls.crt": "<PEM client certificate>",
+  "tls.key": "<PEM private key>",
+  "tls.ca.crt": "<PEM CA certificate (optional)>"
+}'
+```
+
+Configure the extension to use it:
+
+```sh
+-Dsap.otel.generic.cf.binding.name=my-otel-collector
+```
+
+The credential fields for the Generic OTel Collector binding are:
+
+| Field name  | Contents                                              | Required |
+|-------------|-------------------------------------------------------|----------|
+| `url`       | OTLP endpoint URL (e.g. `https://collector.example.com`). | Yes |
+| `tls.crt`   | PEM-encoded mTLS client certificate.                  | For mTLS |
+| `tls.key`   | PEM-encoded mTLS private key.                         | For mTLS |
+| `tls.ca.crt`| PEM-encoded server CA certificate.                    | For mTLS |
+| `token`     | Bearer token sent as `Authorization: Bearer <token>`. Can be combined with mTLS. | Optional |
+
+> **Implementation note:** The Generic OTel Collector path is backed by a small, reusable
+> `BindingPropertiesSupplier` that is configured with the credential field names and temp-file prefixes listed above.
+> The same reusable supplier can be pre-configured for other collector-style bindings by supplying a different set of
+> credential field names (endpoint URL, client certificate, client key, server CA certificate and bearer token). This
+> is purely an internal refactoring: the observable configuration, credential field names and produced OTLP exporter
+> properties for existing bindings are unchanged.
 
 ## Using User-Provided Service Instances
 

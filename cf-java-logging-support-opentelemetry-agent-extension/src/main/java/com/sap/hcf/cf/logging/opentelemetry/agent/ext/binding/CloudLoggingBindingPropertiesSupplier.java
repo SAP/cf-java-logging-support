@@ -1,112 +1,110 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
-import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.DEPRECATED;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.tls.PemFileCreator;
 import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static java.util.Collections.emptyMap;
+
+/**
+ * Configures the OpenTelemetry OTLP exporter from a Cloud Foundry Cloud Logging service binding.
+ * <p>
+ * Selects the first Cloud Logging binding that carries both a client certificate ({@code ingest-otlp-cert}) and a
+ * client key ({@code ingest-otlp-key}). Endpoint scheme, OTLP protocol, and compression are taken from
+ * {@link com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations} and default to
+ * {@code https://}, {@code grpc}, and {@code gzip} respectively.
+ */
 public class CloudLoggingBindingPropertiesSupplier implements Supplier<Map<String, String>> {
 
     private static final Logger LOG = Logger.getLogger(CloudLoggingBindingPropertiesSupplier.class.getName());
-    private static final String OTLP_ENDPOINT = "ingest-otlp-endpoint";
-    private static final String OTLP_CLIENT_KEY = "ingest-otlp-key";
+
+    private static final String OTLP_ENDPOINT    = "ingest-otlp-endpoint";
+    private static final String OTLP_CLIENT_KEY  = "ingest-otlp-key";
     private static final String OTLP_CLIENT_CERT = "ingest-otlp-cert";
     private static final String OTLP_SERVER_CERT = "server-ca";
+    private static final String CLOUD_LOGGING_DESCRIPTION = "cloud-logging";
 
-    private final CloudLoggingServicesProvider cloudLoggingServicesProvider;
-    private final PemFileCreator pemFileCreator;
+    private static final BindingCredentialKeys CLOUD_LOGGING_KEYS = BindingCredentialKeys.builder()
+            .endpointUrlKey(OTLP_ENDPOINT)
+            .clientCertKey(OTLP_CLIENT_CERT)
+            .clientKeyKey(OTLP_CLIENT_KEY)
+            .serverCaCertKey(OTLP_SERVER_CERT)
+            .clientCertFilePrefix("cloud-logging-client-cert-")
+            .clientKeyFilePrefix("cloud-logging-client-key-")
+            .serverCaFilePrefix("cloud-logging-server-ca-")
+            .build();
+
+    private final Supplier<Map<String, String>> delegate;
 
     public CloudLoggingBindingPropertiesSupplier() {
-        this(new CloudLoggingServicesProvider(getDefaultProperties(), CloudFoundryServicesAdapter.builder().build()),
+        this(new CloudLoggingServicesProvider(
+                DefaultConfigProperties.create(emptyMap(),
+                        ComponentLoader.forClassLoader(DefaultConfigProperties.class.getClassLoader()))),
              new PemFileCreator());
     }
 
-    CloudLoggingBindingPropertiesSupplier(CloudLoggingServicesProvider cloudLoggingServicesProvider,
-                                          PemFileCreator pemFileCreator) {
-        this.cloudLoggingServicesProvider = cloudLoggingServicesProvider;
-        this.pemFileCreator = pemFileCreator;
+    CloudLoggingBindingPropertiesSupplier(CloudLoggingServicesProvider provider, PemFileCreator pemFileCreator) {
+        this(provider, pemFileCreator,
+                DefaultConfigProperties.create(emptyMap(),
+                        ComponentLoader.forClassLoader(DefaultConfigProperties.class.getClassLoader())));
     }
 
-    private static ConfigProperties getDefaultProperties() {
-        Map<String, String> defaults = new HashMap<>();
-        defaults.put(DEPRECATED.RUNTIME.CLOUD_FOUNDRY.SERVICE.CLOUD_LOGGING.LABEL_SAP.getKey(), "cloud-logging");
-        defaults.put(DEPRECATED.RUNTIME.CLOUD_FOUNDRY.SERVICE.CLOUD_LOGGING.TAG_SAP.getKey(), "Cloud Logging");
-        defaults.put("otel.javaagent.extension.sap.cf.binding.user-provided.label", "user-provided");
-        ComponentLoader componentLoader =
-                ComponentLoader.forClassLoader(DefaultConfigProperties.class.getClassLoader());
-        return DefaultConfigProperties.create(defaults, componentLoader);
+    CloudLoggingBindingPropertiesSupplier(CloudLoggingServicesProvider provider,
+                                          PemFileCreator pemFileCreator,
+                                          ConfigProperties config) {
+        String scheme      = ExtensionConfigurations.RUNTIME.CLOUD_FOUNDRY.SERVICE.CLOUD_LOGGING.ENDPOINT_SCHEME.getValue(config);
+        String protocol    = ExtensionConfigurations.RUNTIME.CLOUD_FOUNDRY.SERVICE.CLOUD_LOGGING.PROTOCOL.getValue(config);
+        String compression = ExtensionConfigurations.RUNTIME.CLOUD_FOUNDRY.SERVICE.CLOUD_LOGGING.COMPRESSION.getValue(config);
+        this.delegate = BindingPropertiesSupplier.builder(
+                        CLOUD_LOGGING_DESCRIPTION,
+                        findValidInstance(provider),
+                        pemFileCreator,
+                        CLOUD_LOGGING_KEYS)
+                .scheme(scheme)
+                .protocol(protocol)
+                .compression(compression)
+                .build();
     }
 
-    private static boolean isBlank(String text) {
-        return text == null || text.trim().isEmpty();
+    private static Optional<CloudFoundryServiceInstance> findValidInstance(
+            CloudLoggingServicesProvider provider) {
+        return provider.get().findFirst().filter(instance -> {
+            CloudFoundryCredentials creds = instance.getCredentials();
+            if (creds == null) return false;
+            String key = creds.getString(OTLP_CLIENT_KEY);
+            if (key == null || key.isBlank()) {
+                LOG.warning("Cloud Logging binding '" + CLOUD_LOGGING_DESCRIPTION
+                        + "' has no '" + OTLP_CLIENT_KEY + "'");
+                return false;
+            }
+            String cert = creds.getString(OTLP_CLIENT_CERT);
+            if (cert == null || cert.isBlank()) {
+                LOG.warning("Cloud Logging binding '" + CLOUD_LOGGING_DESCRIPTION
+                        + "' has no '" + OTLP_CLIENT_CERT + "'");
+                return false;
+            }
+            return true;
+        });
     }
 
     /**
-     * Scans service bindings, both managed and user-provided for Cloud Logging. Managed services require the label
-     * "cloud-logging" to be considered. Services will be selected by the tag "Cloud Logging". User-provided services
-     * will be preferred over managed service instances.
+     * Reads the Cloud Logging service binding credentials from {@code VCAP_SERVICES} and returns the OpenTelemetry
+     * OTLP exporter configuration properties. Returns an empty map when no Cloud Logging binding with both a client
+     * certificate and client key is found, when the binding has no endpoint URL, or when the server CA certificate is
+     * absent.
      *
-     * @return The pre-configured connection properties for the OpenTelemetry SDK.
+     * @return the pre-configured connection properties for the OpenTelemetry SDK, or an empty map when no usable
+     * binding is found.
      */
     @Override
     public Map<String, String> get() {
-        return cloudLoggingServicesProvider.get().findFirst().map(this::createEndpointConfiguration)
-                                           .orElseGet(Collections::emptyMap);
+        return delegate.get();
     }
-
-    private Map<String, String> createEndpointConfiguration(CloudFoundryServiceInstance svc) {
-        LOG.config("Using service " + svc.getName() + " (" + svc.getLabel() + ")");
-
-        String endpoint = svc.getCredentials().getString(OTLP_ENDPOINT);
-        if (isBlank(endpoint)) {
-            LOG.warning("Credential \"" + OTLP_ENDPOINT + "\" not found. Skipping OTLP exporter configuration");
-            return Collections.emptyMap();
-        }
-        String clientKey = svc.getCredentials().getString(OTLP_CLIENT_KEY);
-        if (isBlank(clientKey)) {
-            LOG.warning("Credential \"" + OTLP_CLIENT_KEY + "\" not found. Skipping OTLP exporter configuration");
-            return Collections.emptyMap();
-        }
-        String clientCert = svc.getCredentials().getString(OTLP_CLIENT_CERT);
-        if (isBlank(clientCert)) {
-            LOG.warning("Credential \"" + OTLP_CLIENT_CERT + "\" not found. Skipping OTLP exporter configuration");
-            return Collections.emptyMap();
-        }
-        String serverCert = svc.getCredentials().getString(OTLP_SERVER_CERT);
-        if (isBlank(serverCert)) {
-            LOG.warning("Credential \"" + OTLP_SERVER_CERT + "\" not found. Skipping OTLP exporter configuration");
-            return Collections.emptyMap();
-        }
-
-        try {
-            File clientKeyFile = pemFileCreator.writeFile("cloud-logging-client", ".key", clientKey);
-            File clientCertFile = pemFileCreator.writeFile("cloud-logging-client", ".cert", clientCert);
-            File serverCertFile = pemFileCreator.writeFile("cloud-logging-server", ".cert", serverCert);
-
-            HashMap<String, String> properties = new HashMap<>();
-            properties.put("otel.exporter.otlp.endpoint", "https://" + endpoint);
-            properties.put("otel.exporter.otlp.client.key", clientKeyFile.getAbsolutePath());
-            properties.put("otel.exporter.otlp.client.certificate", clientCertFile.getAbsolutePath());
-            properties.put("otel.exporter.otlp.certificate", serverCertFile.getAbsolutePath());
-
-            properties.put("otel.exporter.otlp.protocol", "grpc");
-            properties.put("otel.exporter.otlp.compression", "gzip");
-
-            return properties;
-        } catch (IOException cause) {
-            LOG.log(Level.WARNING, "Cannot create TLS certificate or key files", cause);
-            return Collections.emptyMap();
-        }
-    }
-
 }

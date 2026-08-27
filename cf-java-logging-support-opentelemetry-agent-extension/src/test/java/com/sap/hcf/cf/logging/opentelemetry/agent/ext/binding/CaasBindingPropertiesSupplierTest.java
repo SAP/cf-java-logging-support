@@ -61,8 +61,10 @@ class CaasBindingPropertiesSupplierTest {
     @Test
     void shouldReturnEmptyMapWhenNoServiceInstanceFound() {
         when(serviceProvider.get()).thenReturn(null);
+        CaasBindingPropertiesSupplier noInstanceSupplier =
+                new CaasBindingPropertiesSupplier(serviceProvider, pemFileCreator, serverCertificateDownloader);
 
-        Map<String, String> result = supplier.get();
+        Map<String, String> result = noInstanceSupplier.get();
 
         assertThat(result).isEmpty();
     }
@@ -96,65 +98,55 @@ class CaasBindingPropertiesSupplierTest {
 
     @Test
     void shouldReturnBasicPropertiesWithoutTlsWhenClientCertMissing() {
-        when(credentials.getString("http-url")).thenReturn("https://caas.example.com:4318");
+        when(credentials.getString("http-url")).thenReturn("https://caas.example.com");
         when(credentials.getString("tls.crt")).thenReturn(null);
         when(credentials.getString("tls.key")).thenReturn("client-key");
 
         Map<String, String> result = supplier.get();
 
-        assertThat(result).containsEntry("otel.exporter.otlp.endpoint", "https://caas.example.com:4318")
-                          .containsEntry("otel.exporter.otlp.protocol", "http/protobuf")
-                          .containsEntry("otel.exporter.otlp.compression", "gzip")
-                          .doesNotContainKey("otel.exporter.otlp.certificate")
-                          .doesNotContainKey("otel.exporter.otlp.client.cert")
-                          .doesNotContainKey("otel.exporter.otlp.client.key");
+        assertThat(result).isEmpty();
     }
 
     @Test
     void shouldReturnBasicPropertiesWithoutTlsWhenClientKeyMissing() {
-        when(credentials.getString("http-url")).thenReturn("https://caas.example.com:4318");
+        when(credentials.getString("http-url")).thenReturn("https://caas.example.com");
         when(credentials.getString("tls.crt")).thenReturn("client-cert");
         when(credentials.getString("tls.key")).thenReturn(null);
 
         Map<String, String> result = supplier.get();
 
-        assertThat(result).containsEntry("otel.exporter.otlp.endpoint", "https://caas.example.com:4318")
-                          .containsEntry("otel.exporter.otlp.protocol", "http/protobuf")
-                          .containsEntry("otel.exporter.otlp.compression", "gzip")
-                          .doesNotContainKey("otel.exporter.otlp.certificate");
+        assertThat(result).isEmpty();
     }
 
     @Test
     void shouldReturnBasicPropertiesWhenServerCertDownloadFails() {
-        when(credentials.getString("http-url")).thenReturn("https://caas.example.com:4318");
+        when(credentials.getString("http-url")).thenReturn("https://caas.example.com");
         when(credentials.getString("tls.crt")).thenReturn("client-cert");
         when(credentials.getString("tls.key")).thenReturn("client-key");
         when(serverCertificateDownloader.download(anyString())).thenReturn(null);
 
         Map<String, String> result = supplier.get();
 
-        assertThat(result).containsEntry("otel.exporter.otlp.endpoint", "https://caas.example.com:4318")
-                          .containsEntry("otel.exporter.otlp.protocol", "http/protobuf")
-                          .containsEntry("otel.exporter.otlp.compression", "gzip")
-                          .doesNotContainKey("otel.exporter.otlp.certificate");
+        assertThat(result).isEmpty();
+        verifyNoInteractions(pemFileCreator);
     }
 
     @Test
     void shouldReturnBasicPropertiesWhenServerCertIsBlank() {
-        when(credentials.getString("http-url")).thenReturn("https://caas.example.com:4318");
+        when(credentials.getString("http-url")).thenReturn("https://caas.example.com");
         when(credentials.getString("tls.crt")).thenReturn("client-cert");
         when(credentials.getString("tls.key")).thenReturn("client-key");
         when(serverCertificateDownloader.download(anyString())).thenReturn("   ");
 
         Map<String, String> result = supplier.get();
 
-        assertThat(result).containsEntry("otel.exporter.otlp.endpoint", "https://caas.example.com:4318")
-                          .doesNotContainKey("otel.exporter.otlp.certificate");
+        assertThat(result).isEmpty();
+        verifyNoInteractions(pemFileCreator);
     }
 
     @Test
     void shouldReturnBasicPropertiesWhenPemFileCreationFails() throws IOException {
-        when(credentials.getString("http-url")).thenReturn("https://caas.example.com:4318");
+        when(credentials.getString("http-url")).thenReturn("https://caas.example.com");
         when(credentials.getString("tls.crt")).thenReturn("client-cert");
         when(credentials.getString("tls.key")).thenReturn("client-key");
         when(serverCertificateDownloader.download(anyString())).thenReturn("server-cert");
@@ -163,18 +155,37 @@ class CaasBindingPropertiesSupplierTest {
 
         Map<String, String> result = supplier.get();
 
-        assertThat(result).containsEntry("otel.exporter.otlp.endpoint", "https://caas.example.com:4318")
+        assertThat(result).containsEntry("otel.exporter.otlp.endpoint", "https://caas.example.com")
                           .containsEntry("otel.exporter.otlp.protocol", "http/protobuf")
                           .containsEntry("otel.exporter.otlp.compression", "gzip")
                           .doesNotContainKey("otel.exporter.otlp.certificate");
     }
 
     @Test
+    void shouldReturnPropertiesWithNoTlsWhenClientCertWriteFails() throws IOException {
+        when(credentials.getString("http-url")).thenReturn("https://caas.example.com");
+        when(credentials.getString("tls.crt")).thenReturn("client-cert");
+        when(credentials.getString("tls.key")).thenReturn("client-key");
+        when(serverCertificateDownloader.download(anyString())).thenReturn("server-cert-content");
+        when(pemFileCreator.writeFile(eq("caas-server-cert-"), eq(".crt"), eq("server-cert-content")))
+                .thenReturn(serverCertFile);
+        when(pemFileCreator.writeFile(eq("caas-client-cert-"), eq(".crt"), eq("client-cert")))
+                .thenThrow(new IOException("disk full"));
+
+        Map<String, String> result = supplier.get();
+
+        assertThat(result).containsEntry("otel.exporter.otlp.endpoint", "https://caas.example.com")
+                          .doesNotContainKey("otel.exporter.otlp.certificate")
+                          .doesNotContainKey("otel.exporter.otlp.client.certificate")
+                          .doesNotContainKey("otel.exporter.otlp.client.key");
+    }
+
+    @Test
     void shouldReturnFullPropertiesWithTlsConfiguration() throws IOException {
-        when(credentials.getString("http-url")).thenReturn("https://caas.example.com:4318");
+        when(credentials.getString("http-url")).thenReturn("https://caas.example.com");
         when(credentials.getString("tls.crt")).thenReturn("client-cert-content");
         when(credentials.getString("tls.key")).thenReturn("client-key-content");
-        when(serverCertificateDownloader.download("https://caas.example.com:4318")).thenReturn("server-cert-content");
+        when(serverCertificateDownloader.download("https://caas.example.com")).thenReturn("server-cert-content");
         when(pemFileCreator.writeFile(eq("caas-server-cert-"), eq(".crt"), eq("server-cert-content"))).thenReturn(
                 serverCertFile);
         when(pemFileCreator.writeFile(eq("caas-client-cert-"), eq(".crt"), eq("client-cert-content"))).thenReturn(
@@ -184,7 +195,7 @@ class CaasBindingPropertiesSupplierTest {
 
         Map<String, String> result = supplier.get();
 
-        assertThat(result).containsEntry("otel.exporter.otlp.endpoint", "https://caas.example.com:4318")
+        assertThat(result).containsEntry("otel.exporter.otlp.endpoint", "https://caas.example.com")
                           .containsEntry("otel.exporter.otlp.protocol", "http/protobuf")
                           .containsEntry("otel.exporter.otlp.compression", "gzip")
                           .containsEntry("otel.exporter.otlp.certificate", "/tmp/server.crt")
@@ -193,8 +204,14 @@ class CaasBindingPropertiesSupplierTest {
     }
 
     @Test
-    void shouldReplacePlaceholderInEndpointUrl() {
+    void shouldReplacePortPlaceholderInUrl() throws IOException {
         when(credentials.getString("http-url")).thenReturn("https://caas.example.com:<http-receiver-port>");
+        when(credentials.getString("tls.crt")).thenReturn("client-cert");
+        when(credentials.getString("tls.key")).thenReturn("client-key");
+        when(serverCertificateDownloader.download("https://caas.example.com:4318")).thenReturn("server-cert");
+        when(pemFileCreator.writeFile(eq("caas-server-cert-"), eq(".crt"), eq("server-cert"))).thenReturn(serverCertFile);
+        when(pemFileCreator.writeFile(eq("caas-client-cert-"), eq(".crt"), eq("client-cert"))).thenReturn(clientCertFile);
+        when(pemFileCreator.writeFile(eq("caas-client-key-"), eq(".key"), eq("client-key"))).thenReturn(clientKeyFile);
 
         Map<String, String> result = supplier.get();
 
@@ -203,18 +220,20 @@ class CaasBindingPropertiesSupplierTest {
 
     @Test
     void shouldNotDownloadServerCertWhenClientCredentialsMissing() {
-        when(credentials.getString("http-url")).thenReturn("https://caas.example.com:4318");
+        when(credentials.getString("http-url")).thenReturn("https://caas.example.com");
         when(credentials.getString("tls.crt")).thenReturn(null);
         when(credentials.getString("tls.key")).thenReturn(null);
 
-        supplier.get();
+        Map<String, String> result = supplier.get();
 
-        verify(serverCertificateDownloader, never()).download(anyString());
+        verifyNoInteractions(serverCertificateDownloader);
+        assertThat(result).containsEntry("otel.exporter.otlp.endpoint", "https://caas.example.com")
+                          .doesNotContainKey("otel.exporter.otlp.certificate");
     }
 
     @Test
     void shouldNotCreatePemFilesWhenServerCertDownloadFails() throws IOException {
-        when(credentials.getString("http-url")).thenReturn("https://caas.example.com:4318");
+        when(credentials.getString("http-url")).thenReturn("https://caas.example.com");
         when(credentials.getString("tls.crt")).thenReturn("client-cert");
         when(credentials.getString("tls.key")).thenReturn("client-key");
         when(serverCertificateDownloader.download(anyString())).thenReturn(null);

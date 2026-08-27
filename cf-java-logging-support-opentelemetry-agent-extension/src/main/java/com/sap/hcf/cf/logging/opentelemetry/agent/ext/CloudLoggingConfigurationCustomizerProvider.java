@@ -2,6 +2,7 @@ package com.sap.hcf.cf.logging.opentelemetry.agent.ext;
 
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CaasBindingPropertiesSupplier;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudLoggingBindingPropertiesSupplier;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.ConfigurableOtelBindingPropertiesSupplier;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.DefaultOtelBackendPropertiesSupplier;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter.SanitizeSpanExporterCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
@@ -20,6 +21,7 @@ public class CloudLoggingConfigurationCustomizerProvider implements AutoConfigur
         return builder() //
                          .add(new CaasBindingPropertiesSupplier()) // this has priority
                          .add(new CloudLoggingBindingPropertiesSupplier()) // look for Cloud Logging as fallback and backward compatibility
+                         .add(new ConfigurableOtelBindingPropertiesSupplier()) // look for configurable binding as additional fallback
                          .build();
     }
 

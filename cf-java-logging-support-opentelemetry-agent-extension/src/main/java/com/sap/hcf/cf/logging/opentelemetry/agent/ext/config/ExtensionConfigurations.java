@@ -269,6 +269,27 @@ public interface ExtensionConfigurations {
                     ConfigProperty<String> TAG = stringValued("sap.cloud-logging.cf.binding.tag.value").withFallback(
                             DEPRECATED.RUNTIME.CLOUD_FOUNDRY.SERVICE.CLOUD_LOGGING.TAG_OTEL).withDefaultValue(
                             "Cloud Logging").build();
+
+                    /**
+                     * <p>Parses {@code sap.cloud-logging.cf.binding.endpoint-scheme}.</p>
+                     * <p>URL scheme prefix prepended to the raw endpoint URL. Default is {@code "https://"}.</p>
+                     */
+                    ConfigProperty<String> ENDPOINT_SCHEME =
+                            stringValued("sap.cloud-logging.cf.binding.endpoint-scheme").withDefaultValue("https://").build();
+
+                    /**
+                     * <p>Parses {@code sap.cloud-logging.cf.binding.protocol}.</p>
+                     * <p>OTLP exporter protocol. Default is {@code "grpc"}.</p>
+                     */
+                    ConfigProperty<String> PROTOCOL =
+                            stringValued("sap.cloud-logging.cf.binding.protocol").withDefaultValue("grpc").build();
+
+                    /**
+                     * <p>Parses {@code sap.cloud-logging.cf.binding.compression}.</p>
+                     * <p>OTLP exporter compression. Default is {@code "gzip"}.</p>
+                     */
+                    ConfigProperty<String> COMPRESSION =
+                            stringValued("sap.cloud-logging.cf.binding.compression").withDefaultValue("gzip").build();
                 }
 
                 interface DYNATRACE {
@@ -292,6 +313,29 @@ public interface ExtensionConfigurations {
                     ConfigProperty<String> TOKEN_NAME =
                             stringValued("sap.dynatrace.cf.binding.token.name").withFallback(
                                     DEPRECATED.RUNTIME.CLOUD_FOUNDRY.SERVICE.DYNATRACE.TOKEN_NAME_OTEL).build();
+                }
+
+                interface GENERIC {
+                    /**
+                     * <p>Parses {@code sap.otel.generic.cf.binding.name}.</p>
+                     * <p>Instance name used to select a generic OTel collector service binding.</p>
+                     */
+                    ConfigProperty<String> BINDING_NAME =
+                            stringValued("sap.otel.generic.cf.binding.name").build();
+
+                    /**
+                     * <p>Parses {@code sap.otel.generic.cf.binding.label}.</p>
+                     * <p>Label value used to select a generic OTel collector service binding.</p>
+                     */
+                    ConfigProperty<String> BINDING_LABEL =
+                            stringValued("sap.otel.generic.cf.binding.label").build();
+
+                    /**
+                     * <p>Parses {@code sap.otel.generic.cf.binding.tag}.</p>
+                     * <p>Tag value used to select a generic OTel collector service binding.</p>
+                     */
+                    ConfigProperty<String> BINDING_TAG =
+                            stringValued("sap.otel.generic.cf.binding.tag").build();
                 }
 
             }
