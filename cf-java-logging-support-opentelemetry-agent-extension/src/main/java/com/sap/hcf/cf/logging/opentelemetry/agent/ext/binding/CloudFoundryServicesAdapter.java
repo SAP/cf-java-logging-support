@@ -40,8 +40,7 @@ class CloudFoundryServicesAdapter {
 
     /**
      * Stream CfServices, that match the provided properties. Empty or null values are interpreted as not applicable. No
-     * check will be performed during search. User-provided service instances will be preferred unless the
-     * {@code userProvidedLabel is null or empty. Provided only null values will return all service instances.
+     * check will be performed during search. Provided only null values will return all service instances.
      *
      * @param serviceLabels
      *         the labels of services
@@ -50,6 +49,23 @@ class CloudFoundryServicesAdapter {
      * @return a stream of service instances present in the CloudFoundry environment variable VCAP_SERVICES
      */
     Stream<CloudFoundryServiceInstance> stream(List<String> serviceLabels, List<String> serviceTags) {
+        return stream(serviceLabels, serviceTags, null);
+    }
+
+    /**
+     * Stream CfServices, that match the provided properties. Empty or null values are interpreted as not applicable. No
+     * check will be performed during search. Provided only null values will return all service instances.
+     *
+     * @param serviceLabels
+     *         the labels of services
+     * @param serviceTags
+     *         the tags of services
+     * @param serviceName
+     *         the name of the service
+     * @return a stream of service instances present in the CloudFoundry environment variable VCAP_SERVICES
+     */
+    Stream<CloudFoundryServiceInstance> stream(List<String> serviceLabels, List<String> serviceTags,
+                                               String serviceName) {
         if (vcapServicesJson == null) {
             LOG.info("No environment variable " + VCAP_SERVICES + " found. Skipping service binding detection.");
             return Stream.empty();
@@ -62,7 +78,8 @@ class CloudFoundryServicesAdapter {
                 if (isNullOrEmpty(serviceLabels) || serviceLabels.contains(label)) {
                     parseServiceInstances(parser, label, serviceInstance -> {
                         if (serviceInstance.getName() != null) {
-                            if (hasServiceTag(serviceTags, serviceInstance.getTags())) {
+                            if (hasServiceName(serviceName, serviceInstance.getName()) && hasServiceTag(serviceTags,
+                                                                                                        serviceInstance.getTags())) {
                                 services.add(serviceInstance);
                             }
                         }
@@ -166,6 +183,10 @@ class CloudFoundryServicesAdapter {
             return false;
         }
         return instanceTags.containsAll(requiredTags);
+    }
+
+    private boolean hasServiceName(String requiredName, String actualName) {
+        return requiredName == null || requiredName.isEmpty() || requiredName.equals(actualName);
     }
 
     private Comparator<CloudFoundryServiceInstance> byLabels(List<String> serviceLabels) {
