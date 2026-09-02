@@ -13,7 +13,7 @@ public class CloudFoundryCredentials {
     }
 
     public String getString(String key) {
-        return properties.get(key);
+        return key == null ? null : properties.get(key);
     }
 
     public byte[] getPEMBytes(String key) {

@@ -175,6 +175,149 @@ public interface ExtensionConfigurations {
 
             }
         }
+
+        interface VCAP_SERVICE {
+            interface GENERAL {
+
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.compression}.</p>
+                 * <p>The compression algorithm to use when exporting data to a service binding. Default is
+                 * {@code "gzip"}.</p>
+                 */
+                ConfigProperty<String> COMPRESSION =
+                        stringValued("otel.exporter.vcap-service.compression").withDefaultValue("gzip").build();
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.protocol}.</p>
+                 * <p>The protocol to use when exporting data to a service binding. Default is
+                 * {@code "http/protobuf"}.</p>
+                 */
+                ConfigProperty<String> PROTOCOL =
+                        stringValued("otel.exporter.vcap-service.protocol").withDefaultValue("http/protobuf").build();
+
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.timeout}.</p>
+                 * <p>The maximum duration to wait for a service binding when exporting data.</p>
+                 */
+                ConfigProperty<Duration> TIMEOUT = durationValued("otel.exporter.vcap-service.timeout").build();
+            }
+
+            interface LOGS {
+
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.logs.compression}.</p>
+                 * <p>The compression algorithm to use when exporting logs to a service binding. Falls back to
+                 * {@code otel.exporter.vcap-service.compression} if not set.</p>
+                 */
+                ConfigProperty<String> COMPRESSION =
+                        stringValued("otel.exporter.vcap-service.logs.compression").withFallback(
+                                EXPORTER.VCAP_SERVICE.GENERAL.COMPRESSION).build();
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.logs.protocol}.</p>
+                 * <p>The protocol to use when exporting logs to a service binding. Falls back to
+                 * {@code otel.exporter.vcap-service.protocol} if not set.</p>
+                 */
+                ConfigProperty<String> PROTOCOL = stringValued("otel.exporter.vcap-service.logs.protocol").withFallback(
+                        EXPORTER.VCAP_SERVICE.GENERAL.PROTOCOL).build();
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.logs.timeout}.</p>
+                 * <p>The maximum duration to wait for a service binding when exporting logs. Falls back to
+                 * {@code otel.exporter.vcap-service.timeout} if not set.</p>
+                 */
+                ConfigProperty<Duration> TIMEOUT =
+                        durationValued("otel.exporter.vcap-service.logs.timeout").withFallback(GENERAL.TIMEOUT).build();
+            }
+
+            interface TRACES {
+
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.traces.compression}.</p>
+                 * <p>The compression algorithm to use when exporting traces to a service binding. Falls back to
+                 * {@code otel.exporter.vcap-service.compression} if not set.</p>
+                 */
+                ConfigProperty<String> COMPRESSION =
+                        stringValued("otel.exporter.vcap-service.traces.compression").withFallback(
+                                EXPORTER.VCAP_SERVICE.GENERAL.COMPRESSION).build();
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.traces.protocol}.</p>
+                 * <p>The protocol to use when exporting traces to a service binding. Falls back to
+                 * {@code otel.exporter.vcap-service.protocol} if not set.</p>
+                 */
+                ConfigProperty<String> PROTOCOL =
+                        stringValued("otel.exporter.vcap-service.traces.protocol").withFallback(
+                                EXPORTER.VCAP_SERVICE.GENERAL.PROTOCOL).build();
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.traces.timeout}.</p>
+                 * <p>The maximum duration to wait for a service binding when exporting traces. Falls back to
+                 * {@code otel.exporter.vcap-service.timeout} if not set.</p>
+                 */
+                ConfigProperty<Duration> TIMEOUT =
+                        durationValued("otel.exporter.vcap-service.traces.timeout").withFallback(GENERAL.TIMEOUT)
+                                                                                   .build();
+            }
+
+            interface METRICS {
+
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.metrics.compression}.</p>
+                 * <p>The compression algorithm to use when exporting metrics to a service binding. Falls back to
+                 * {@code otel.exporter.vcap-service.compression} if not set.</p>
+                 */
+                ConfigProperty<String> COMPRESSION =
+                        stringValued("otel.exporter.vcap-service.metrics.compression").withFallback(
+                                EXPORTER.VCAP_SERVICE.GENERAL.COMPRESSION).build();
+
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.metrics.default.histogram.aggregation}.</p>
+                 * <p>The default histogram aggregation for metrics exported to the service binding. Delegates to
+                 * the underlying OTLP exporter, supporting all its configurations.</p>
+                 */
+                ConfigProperty<String> DEFAULT_HISTOGRAM_AGGREGATION =
+                        stringValued("otel.exporter.vcap-service.metrics.default.histogram.aggregation").build();
+
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.metrics.exclude.names}.</p>
+                 * <p>A comma-separated list of metric name patterns to be excluded. Wildcard "*" is only supported
+                 * at the end of the name. If not set, no metrics are excluded.</p>
+                 */
+                ConfigProperty<List<String>> EXCLUDE_NAMES =
+                        listValued("otel.exporter.vcap-service.metrics.exclude.names").build();
+
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.metrics.include.names}.</p>
+                 * <p>A comma-separated list of metric name patterns to be included. Wildcard "*" is only supported
+                 * at the end of the name. If not set, all metrics are exported.</p>
+                 */
+                ConfigProperty<List<String>> INCLUDE_NAMES =
+                        listValued("otel.exporter.vcap-service.metrics.include.names").build();
+
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.metrics.protocol}.</p>
+                 * <p>The protocol to use when exporting metrics to a service binding. Falls back to
+                 * {@code otel.exporter.vcap-service.protocol} if not set.</p>
+                 */
+                ConfigProperty<String> PROTOCOL =
+                        stringValued("otel.exporter.vcap-service.metrics.protocol").withFallback(
+                                EXPORTER.VCAP_SERVICE.GENERAL.PROTOCOL).build();
+
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.metrics.temporality.preference}.</p>
+                 * <p>The preferred aggregation temporality for metrics. Can be either {@code "cumulative"},
+                 * {@code "delta"}, or {@code "lowmemory"}. Default is {@code "cumulative"}.</p>
+                 */
+                ConfigProperty<String> TEMPORALITY_PREFERENCE =
+                        stringValued("otel.exporter.vcap-service.metrics.temporality.preference").withDefaultValue(
+                                "cumulative").build();
+
+                /**
+                 * <p>Parses {@code otel.exporter.vcap-service.metrics.timeout}.</p>
+                 * <p>The maximum duration to wait for a service binding when exporting metrics. Falls back to
+                 * {@code otel.exporter.vcap-service.timeout} if not set.</p>
+                 */
+                ConfigProperty<Duration> TIMEOUT =
+                        durationValued("otel.exporter.vcap-service.metrics.timeout").withFallback(GENERAL.TIMEOUT)
+                                                                                    .build();
+            }
+        }
     }
 
     interface EXTENSION {
@@ -193,8 +336,7 @@ public interface ExtensionConfigurations {
                          * <p>Parses
                          * {@code sap.cf.integration.otel.extension.sanitizer.span.attribute.filter.exclude.names}.</p>
                          * <p>A comma-separated list of span attribute name patterns to be excluded when sanitizing
-                         * span
-                         * attributes. Wildcard "*" is only supported at the end of the name. If not set, no span
+                         * span attributes. Wildcard "*" is only supported at the end of the name. If not set, no span
                          * attributes are excluded.</p>
                          */
                         ConfigProperty<List<String>> EXCLUDE_NAMES = listValued(
@@ -203,8 +345,8 @@ public interface ExtensionConfigurations {
                         /**
                          * <p>Parses
                          * {@code sap.cf.integration.otel.extension.sanitizer.span.attribute.filter.include.names}.</p>
-                         * <p>A comma-separated list of span attribute name patterns to be included when sanitizing span
-                         * attributes. Wildcard "*" is only supported at the end of the name. If not set, all span
+                         * <p>A comma-separated list of span attribute name patterns to be included when sanitizing
+                         * span attributes. Wildcard "*" is only supported at the end of the name. If not set, all span
                          * attributes are included.</p>
                          */
                         ConfigProperty<List<String>> INCLUDE_NAMES = listValued(
@@ -294,6 +436,109 @@ public interface ExtensionConfigurations {
                                     DEPRECATED.RUNTIME.CLOUD_FOUNDRY.SERVICE.DYNATRACE.TOKEN_NAME_OTEL).build();
                 }
 
+                interface VCAP_SERVICE {
+
+                    /**
+                     * <p>Parses {@code sap.vcap-service.cf.binding.label.value}.</p>
+                     * <p>The label value used to identify the generic VCAP service binding. When not set, any
+                     * label is accepted.</p>
+                     */
+                    ConfigProperty<String> LABEL = stringValued("sap.vcap-service.cf.binding.label.value").build();
+
+                    /**
+                     * <p>Parses {@code sap.vcap-service.cf.binding.name}.</p>
+                     * <p>The name of the generic VCAP service binding to use. When not set, the first matching
+                     * binding is used.</p>
+                     */
+                    ConfigProperty<String> NAME = stringValued("sap.vcap-service.cf.binding.name").build();
+
+                    /**
+                     * <p>Parses {@code sap.vcap-service.cf.binding.tag.value}.</p>
+                     * <p>The tag value used to identify the generic VCAP service binding. When not set, any
+                     * tag is accepted.</p>
+                     */
+                    ConfigProperty<String> TAG = stringValued("sap.vcap-service.cf.binding.tag.value").build();
+
+                    /**
+                     * <p>Parses {@code sap.vcap-service.cf.binding.credentials.otlp.auth-header-name}.</p>
+                     * <p>The key within the service binding credentials whose value contains the name of the HTTP
+                     * header to use for the authentication token. Default is {@code "Authorization"}. The header is
+                     * only added when an auth-token is provided.</p>
+                     */
+                    ConfigProperty<String> AUTH_HEADER_NAME = stringValued(
+                            "sap.vcap-service.cf.binding.credentials.otlp.auth-header-name").withDefaultValue(
+                            "Authorization").build();
+
+                    /**
+                     * <p>Parses {@code sap.vcap-service.cf.binding.credentials.*}.</p>
+                     * <p>The keys within the service binding credentials that should be used to configure the OTLP
+                     * connection.</p>
+                     */
+                    interface CREDENTIALS {
+                        /**
+                         * <p>Parses {@code sap.vcap-service.cf.binding.credentials.otlp.endpoint}.</p>
+                         * <p>The key within the service binding credentials whose value contains OTLP endpoint
+                         * URL.</p>
+                         */
+                        ConfigProperty<String> OTLP_ENDPOINT =
+                                stringValued("sap.vcap-service.cf.binding.credentials.otlp.endpoint").build();
+                        /**
+                         * <p>Parses {@code sap.vcap-service.cf.binding.credentials.otlp.logs.endpoint}.</p>
+                         * <p>The key within the service binding credentials whose value contains the OTLP logs
+                         * endpoint URL. Falls back to {@link #OTLP_ENDPOINT} when not set.</p>
+                         */
+                        ConfigProperty<String> OTLP_LOGS_ENDPOINT =
+                                stringValued("sap.vcap-service.cf.binding.credentials.otlp.logs.endpoint")
+                                        .withFallback(OTLP_ENDPOINT).build();
+                        /**
+                         * <p>Parses {@code sap.vcap-service.cf.binding.credentials.otlp.metrics.endpoint}.</p>
+                         * <p>The key within the service binding credentials whose value contains the OTLP metrics
+                         * endpoint URL. Falls back to {@link #OTLP_ENDPOINT} when not set.</p>
+                         */
+                        ConfigProperty<String> OTLP_METRICS_ENDPOINT =
+                                stringValued("sap.vcap-service.cf.binding.credentials.otlp.metrics.endpoint")
+                                        .withFallback(OTLP_ENDPOINT).build();
+                        /**
+                         * <p>Parses {@code sap.vcap-service.cf.binding.credentials.otlp.traces.endpoint}.</p>
+                         * <p>The key within the service binding credentials whose value contains the OTLP traces
+                         * endpoint URL. Falls back to {@link #OTLP_ENDPOINT} when not set.</p>
+                         */
+                        ConfigProperty<String> OTLP_TRACES_ENDPOINT =
+                                stringValued("sap.vcap-service.cf.binding.credentials.otlp.traces.endpoint")
+                                        .withFallback(OTLP_ENDPOINT).build();
+                        /**
+                         * <p>Parses {@code sap.vcap-service.cf.binding.credentials.otlp.client-key}.</p>
+                         * <p>The key within the service binding credentials whose value contains the client key in PEM
+                         * format.</p>
+                         */
+                        ConfigProperty<String> OTLP_CLIENT_KEY =
+                                stringValued("sap.vcap-service.cf.binding.credentials.otlp.client-key").build();
+                        /**
+                         * <p>Parses {@code sap.vcap-service.cf.binding.credentials.otlp.client-cert}.</p>
+                         * <p>The key within the service binding credentials whose value contains the client
+                         * certificate in PEM format.</p>
+                         */
+                        ConfigProperty<String> OTLP_CLIENT_CERT =
+                                stringValued("sap.vcap-service.cf.binding.credentials.otlp.client-cert").build();
+                        /**
+                         * <p>Parses {@code sap.vcap-service.cf.binding.credentials.otlp.server-cert}.</p>
+                         * <p>The key within the service binding credentials whose value contains the server
+                         * certificate in PEM format. This can be a CA that signed the server certificate. Leave empty
+                         * when the certificate should be downloaded from the endpoint instead.</p>
+                         */
+                        ConfigProperty<String> OTLP_SERVER_CERT =
+                                stringValued("sap.vcap-service.cf.binding.credentials.otlp.server-cert").build();
+                        /**
+                         * <p>Parses {@code sap.vcap-service.cf.binding.credentials.otlp.auth-token}.</p>
+                         * <p>The key within the service binding credentials whose value contains the authentication
+                         * token for the OTLP endpoint. This is optional and can be left empty if no (additional)
+                         * authentication is required.</p>
+                         */
+                        ConfigProperty<String> AUTH_TOKEN =
+                                stringValued("sap.vcap-service.cf.binding.credentials.otlp.auth-token").build();
+                    }
+
+                }
             }
         }
     }

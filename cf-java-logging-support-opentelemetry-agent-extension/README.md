@@ -12,6 +12,7 @@ The extension provides the following main features:
 * auto-configuration of the generic OpenTelemetry OTLP exporter to SAP Collector as a Service (CaaS) or [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging)
 * additional exporters for logs, metrics and traces for [SAP Cloud Logging](https://discovery-center.cloud.sap/serviceCatalog/cloud-logging)
 * additional exporter for metrics for [Dynatrace](https://docs.dynatrace.com/docs/setup-and-configuration/setup-on-container-platforms/cloud-foundry/deploy-oneagent-on-sap-cloud-platform-for-application-only-monitoring)
+* **generic `vcap-service` exporter** for logs, metrics and traces to any OTLP-compatible endpoint configured via a CF service binding
 * adding resource attributes describing the CF application
 * filtering span attributes by name before export
 
@@ -202,6 +203,34 @@ The following table summarizes all configuration properties provided by the exte
 | `sap.dynatrace.cf.binding.label.value`                              | The label value used to identify managed Dynatrace service bindings.                                                                                                                                                                                                                                                                          | `dynatrace`                                             |
 | `sap.dynatrace.cf.binding.tag.value`                                | The tag value used to identify managed Dynatrace service bindings.                                                                                                                                                                                                                                                                            | `dynatrace`                                             |
 | `sap.dynatrace.cf.binding.token.name`                               | The name of the field containing the Dynatrace API token within the service binding credentials.                                                                                                                                                                                                                                              |                                                         |
+| `sap.vcap-service.cf.binding.name`                                  | The name of the CF service binding to use for the `vcap-service` exporter. When not set, the first binding matching the label/tag filters is used.                                                                                                                                                                                            |                                                         |
+| `sap.vcap-service.cf.binding.label.value`                           | The service label used to filter CF service bindings for the `vcap-service` exporter. When not set, any label is accepted.                                                                                                                                                                                                                    |                                                         |
+| `sap.vcap-service.cf.binding.tag.value`                             | The service tag used to filter CF service bindings for the `vcap-service` exporter. When not set, any tag is accepted.                                                                                                                                                                                                                        |                                                         |
+| `sap.vcap-service.cf.binding.credentials.otlp.endpoint`             | The name of the credential field that holds the OTLP endpoint URL. Used as fallback for all signals when the signal-specific keys are not set.                                                                                                                                                                                                |                                                         |
+| `sap.vcap-service.cf.binding.credentials.otlp.logs.endpoint`        | The name of the credential field that holds the OTLP logs endpoint URL. Falls back to `otlp.endpoint`.                                                                                                                                                                                                                                       | _(from `otlp.endpoint`)_                                |
+| `sap.vcap-service.cf.binding.credentials.otlp.metrics.endpoint`     | The name of the credential field that holds the OTLP metrics endpoint URL. Falls back to `otlp.endpoint`.                                                                                                                                                                                                                                    | _(from `otlp.endpoint`)_                                |
+| `sap.vcap-service.cf.binding.credentials.otlp.traces.endpoint`      | The name of the credential field that holds the OTLP traces endpoint URL. Falls back to `otlp.endpoint`.                                                                                                                                                                                                                                     | _(from `otlp.endpoint`)_                                |
+| `sap.vcap-service.cf.binding.credentials.otlp.auth-token`           | The name of the credential field that holds the authentication token.                                                                                                                                                                                                                                                                         |                                                         |
+| `sap.vcap-service.cf.binding.credentials.otlp.auth-header-name`     | The HTTP header name used to send the authentication token.                                                                                                                                                                                                                                                                                   | `Authorization`                                         |
+| `sap.vcap-service.cf.binding.credentials.otlp.client-key`           | The name of the credential field that holds the mTLS client private key in PEM format.                                                                                                                                                                                                                                                        |                                                         |
+| `sap.vcap-service.cf.binding.credentials.otlp.client-cert`          | The name of the credential field that holds the mTLS client certificate in PEM format.                                                                                                                                                                                                                                                        |                                                         |
+| `sap.vcap-service.cf.binding.credentials.otlp.server-cert`          | The name of the credential field that holds the trusted server CA certificate in PEM format. When not set and mTLS is used, the certificate is downloaded from the endpoint automatically.                                                                                                                                                     |                                                         |
+| `otel.exporter.vcap-service.compression`                            | The compression algorithm to use for the `vcap-service` exporter. Applies to all signals unless overridden per signal.                                                                                                                                                                                                                        | `gzip`                                                  |
+| `otel.exporter.vcap-service.protocol`                               | The transport protocol for the `vcap-service` exporter: `http/protobuf` or `grpc`. Applies to all signals unless overridden per signal.                                                                                                                                                                                                       | `http/protobuf`                                         |
+| `otel.exporter.vcap-service.timeout`                                | The maximum duration to wait when exporting data. Applies to all signals unless overridden per signal.                                                                                                                                                                                                                                        | _(OTel SDK default)_                                    |
+| `otel.exporter.vcap-service.logs.compression`                       | Compression for logs. Falls back to `otel.exporter.vcap-service.compression`.                                                                                                                                                                                                                                                                | _(from `vcap-service.compression`)_                     |
+| `otel.exporter.vcap-service.logs.protocol`                          | Transport protocol for logs. Falls back to `otel.exporter.vcap-service.protocol`.                                                                                                                                                                                                                                                            | _(from `vcap-service.protocol`)_                        |
+| `otel.exporter.vcap-service.logs.timeout`                           | Export timeout for logs. Falls back to `otel.exporter.vcap-service.timeout`.                                                                                                                                                                                                                                                                 | _(from `vcap-service.timeout`)_                         |
+| `otel.exporter.vcap-service.metrics.compression`                    | Compression for metrics. Falls back to `otel.exporter.vcap-service.compression`.                                                                                                                                                                                                                                                             | _(from `vcap-service.compression`)_                     |
+| `otel.exporter.vcap-service.metrics.default.histogram.aggregation`  | The default histogram aggregation for metrics. Delegates to the underlying OTLP exporter.                                                                                                                                                                                                                                                     | _(OTel SDK default)_                                    |
+| `otel.exporter.vcap-service.metrics.exclude.names`                  | A comma-separated list of metric name patterns to be excluded. Wildcard `*` is only supported at the end of the name. Applied after the include filter.                                                                                                                                                                                       |                                                         |
+| `otel.exporter.vcap-service.metrics.include.names`                  | A comma-separated list of metric name patterns to be included. Wildcard `*` is only supported at the end of the name. When not set, all metrics are exported.                                                                                                                                                                                 |                                                         |
+| `otel.exporter.vcap-service.metrics.protocol`                       | Transport protocol for metrics. Falls back to `otel.exporter.vcap-service.protocol`.                                                                                                                                                                                                                                                         | _(from `vcap-service.protocol`)_                        |
+| `otel.exporter.vcap-service.metrics.temporality.preference`         | The preferred aggregation temporality for metrics: `cumulative`, `delta`, or `lowmemory`.                                                                                                                                                                                                                                                     | `cumulative`                                            |
+| `otel.exporter.vcap-service.metrics.timeout`                        | Export timeout for metrics. Falls back to `otel.exporter.vcap-service.timeout`.                                                                                                                                                                                                                                                              | _(from `vcap-service.timeout`)_                         |
+| `otel.exporter.vcap-service.traces.compression`                     | Compression for traces. Falls back to `otel.exporter.vcap-service.compression`.                                                                                                                                                                                                                                                              | _(from `vcap-service.compression`)_                     |
+| `otel.exporter.vcap-service.traces.protocol`                        | Transport protocol for traces. Falls back to `otel.exporter.vcap-service.protocol`.                                                                                                                                                                                                                                                          | _(from `vcap-service.protocol`)_                        |
+| `otel.exporter.vcap-service.traces.timeout`                         | Export timeout for traces. Falls back to `otel.exporter.vcap-service.timeout`.                                                                                                                                                                                                                                                               | _(from `vcap-service.timeout`)_                         |
 
 ## Using User-Provided Service Instances
 
@@ -263,6 +292,108 @@ java #... \
 SAP_DYNATRACE_CF_BINDING_TOKEN_NAME=<your_token_field>
 java #...
 ```
+
+## Generic OTLP Service Binding Exporter (vcap-service)
+
+_This feature was introduced with version 4.2.0 of the extension._
+
+The `vcap-service` exporter lets you ship logs, metrics, and traces to **any OTLP-compatible endpoint** that is described by a Cloud Foundry service binding.
+Unlike the `cloud-logging` or `dynatrace` exporters, it does not require a specific service type.
+The names of the credential fields that carry the endpoint URL, TLS certificates, and authentication token are freely configurable via environment variables.
+
+### Enabling the vcap-service Exporter
+
+Select it per signal with the standard OTel exporter environment variables:
+
+```sh
+export OTEL_LOGS_EXPORTER=vcap-service
+export OTEL_METRICS_EXPORTER=vcap-service
+export OTEL_TRACES_EXPORTER=vcap-service
+```
+
+Multiple exporters can be combined with comma separation, e.g., `OTEL_LOGS_EXPORTER=cloud-logging,vcap-service`.
+
+### Service Binding Format
+
+The exporter reads the OTLP connection details from the credentials of a CF service binding.
+It is compatible with both managed and user-provided service instances.
+The credential field names are not fixed — you tell the exporter which field to read via configuration (see [Credential Mapping](#credential-mapping) below).
+
+A minimal user-provided service binding using token authentication looks like this:
+
+```json
+{
+  "user-provided": [{
+    "name": "my-otlp-service",
+    "label": "user-provided",
+    "tags": [],
+    "credentials": {
+      "otlp-logs-endpoint":    "https://collector.example.com/v1/logs",
+      "otlp-metrics-endpoint": "https://collector.example.com/v1/metrics",
+      "otlp-traces-endpoint":  "https://collector.example.com/v1/traces",
+      "auth-token": "Bearer my-token"
+    }
+  }]
+}
+```
+
+A binding using mTLS instead of token authentication would provide three additional fields (client key, client certificate, and optionally the server CA certificate).
+
+### Selecting the Service Binding
+
+Use the following properties to tell the exporter which binding to use:
+
+| Property | Env variable | Description | Default |
+|---|---|---|---|
+| `sap.vcap-service.cf.binding.name` | `SAP_VCAP_SERVICE_CF_BINDING_NAME` | Exact name of the service binding. | _(first matching binding)_ |
+| `sap.vcap-service.cf.binding.label.value` | `SAP_VCAP_SERVICE_CF_BINDING_LABEL_VALUE` | Filter by service label (e.g. `user-provided`). | _(any label)_ |
+| `sap.vcap-service.cf.binding.tag.value` | `SAP_VCAP_SERVICE_CF_BINDING_TAG_VALUE` | Filter by service tag. | _(any tag)_ |
+
+At least `sap.vcap-service.cf.binding.name` or one of the filter properties should be set, otherwise the first binding in `VCAP_SERVICES` is picked.
+
+### Credential Mapping
+
+The following properties name the credential field that holds each piece of connection information.
+Setting a property to the value `my-field` means the exporter reads `credentials["my-field"]` from the chosen service binding.
+
+| Property | Env variable | Description | Default |
+|---|---|---|---|
+| `sap.vcap-service.cf.binding.credentials.otlp.endpoint` | `SAP_VCAP_SERVICE_CF_BINDING_CREDENTIALS_OTLP_ENDPOINT` | Credential field that holds the OTLP endpoint URL (fallback for all signals). | _(required unless signal-specific keys are set)_ |
+| `sap.vcap-service.cf.binding.credentials.otlp.logs.endpoint` | `SAP_VCAP_SERVICE_CF_BINDING_CREDENTIALS_OTLP_LOGS_ENDPOINT` | Credential field for the OTLP logs endpoint URL. Falls back to `otlp.endpoint`. | _(falls back to `otlp.endpoint`)_ |
+| `sap.vcap-service.cf.binding.credentials.otlp.metrics.endpoint` | `SAP_VCAP_SERVICE_CF_BINDING_CREDENTIALS_OTLP_METRICS_ENDPOINT` | Credential field for the OTLP metrics endpoint URL. Falls back to `otlp.endpoint`. | _(falls back to `otlp.endpoint`)_ |
+| `sap.vcap-service.cf.binding.credentials.otlp.traces.endpoint` | `SAP_VCAP_SERVICE_CF_BINDING_CREDENTIALS_OTLP_TRACES_ENDPOINT` | Credential field for the OTLP traces endpoint URL. Falls back to `otlp.endpoint`. | _(falls back to `otlp.endpoint`)_ |
+| `sap.vcap-service.cf.binding.credentials.otlp.auth-token` | `SAP_VCAP_SERVICE_CF_BINDING_CREDENTIALS_OTLP_AUTH_TOKEN` | Credential field that holds the authentication token. Not required when mTLS is used. | _(no token authentication)_ |
+| `sap.vcap-service.cf.binding.credentials.otlp.auth-header-name` | `SAP_VCAP_SERVICE_CF_BINDING_CREDENTIALS_OTLP_AUTH_HEADER_NAME` | Name of the HTTP header used to send the token. | `Authorization` |
+| `sap.vcap-service.cf.binding.credentials.otlp.client-key` | `SAP_VCAP_SERVICE_CF_BINDING_CREDENTIALS_OTLP_CLIENT_KEY` | Credential field that holds the mTLS client private key in PEM format. | _(no mTLS)_ |
+| `sap.vcap-service.cf.binding.credentials.otlp.client-cert` | `SAP_VCAP_SERVICE_CF_BINDING_CREDENTIALS_OTLP_CLIENT_CERT` | Credential field that holds the mTLS client certificate in PEM format. | _(no mTLS)_ |
+| `sap.vcap-service.cf.binding.credentials.otlp.server-cert` | `SAP_VCAP_SERVICE_CF_BINDING_CREDENTIALS_OTLP_SERVER_CERT` | Credential field that holds the trusted server CA certificate in PEM format. When not set and mTLS is used, the extension downloads the certificate from the endpoint automatically. | _(auto-download when mTLS is configured)_ |
+
+**Endpoint URL format**: The endpoint URL must include the full path for `http/protobuf` (e.g. `https://collector.example.com/v1/logs`). For `grpc`, provide the host and port without a path (e.g. `https://collector.example.com:443`).
+
+**Authentication**: Exactly one of token authentication or mTLS must be configured. When a token field is set, mTLS credential fields are ignored.
+
+### Export Settings
+
+General settings apply to all signals. Per-signal settings take precedence when set.
+
+| Property | Description | Default |
+|---|---|---|
+| `otel.exporter.vcap-service.protocol` | Transport protocol: `http/protobuf` or `grpc`. | `http/protobuf` |
+| `otel.exporter.vcap-service.compression` | Compression: `gzip` or `none`. | `gzip` |
+| `otel.exporter.vcap-service.timeout` | Export timeout (e.g. `10000ms`, `30s`). | _(OTel SDK default)_ |
+| `otel.exporter.vcap-service.logs.protocol` | Protocol for logs. Falls back to `vcap-service.protocol`. | _(from general)_ |
+| `otel.exporter.vcap-service.logs.compression` | Compression for logs. Falls back to `vcap-service.compression`. | _(from general)_ |
+| `otel.exporter.vcap-service.logs.timeout` | Timeout for logs. Falls back to `vcap-service.timeout`. | _(from general)_ |
+| `otel.exporter.vcap-service.metrics.protocol` | Protocol for metrics. Falls back to `vcap-service.protocol`. | _(from general)_ |
+| `otel.exporter.vcap-service.metrics.compression` | Compression for metrics. Falls back to `vcap-service.compression`. | _(from general)_ |
+| `otel.exporter.vcap-service.metrics.timeout` | Timeout for metrics. Falls back to `vcap-service.timeout`. | _(from general)_ |
+| `otel.exporter.vcap-service.metrics.temporality.preference` | Aggregation temporality: `cumulative`, `delta`, or `lowmemory`. | `cumulative` |
+| `otel.exporter.vcap-service.metrics.default.histogram.aggregation` | Default histogram aggregation. Delegates to the OTLP exporter. | _(OTel SDK default)_ |
+| `otel.exporter.vcap-service.metrics.include.names` | Comma-separated metric name patterns to include. Wildcard `*` supported at end. | _(all metrics)_ |
+| `otel.exporter.vcap-service.metrics.exclude.names` | Comma-separated metric name patterns to exclude. Wildcard `*` supported at end. Applied after include filter. | _(none excluded)_ |
+| `otel.exporter.vcap-service.traces.protocol` | Protocol for traces. Falls back to `vcap-service.protocol`. | _(from general)_ |
+| `otel.exporter.vcap-service.traces.compression` | Compression for traces. Falls back to `vcap-service.compression`. | _(from general)_ |
+| `otel.exporter.vcap-service.traces.timeout` | Timeout for traces. Falls back to `vcap-service.timeout`. | _(from general)_ |
 
 ## Implementation Differences between Cloud-Logging and OTLP Exporter
 
