@@ -1,0 +1,53 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>cf-java-logging-support-bom</artifactId>
+    <packaging>pom</packaging>
+
+    <name>cf-java-logging-support-bom</name>
+
+    <parent>
+        <groupId>com.sap.hcp.cf.logging</groupId>
+        <artifactId>cf-java-logging-support-parent</artifactId>
+        <version>4.2.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.sap.hcp.cf.logging</groupId>
+                <artifactId>cf-java-logging-support-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sap.hcp.cf.logging</groupId>
+                <artifactId>cf-java-logging-support-logback</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sap.hcp.cf.logging</groupId>
+                <artifactId>cf-java-logging-support-log4j2</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sap.hcp.cf.logging</groupId>
+                <artifactId>cf-java-logging-support-servlet</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sap.hcp.cf.logging</groupId>
+                <artifactId>cf-java-logging-support-servlet-dynlog-jwt</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- unclear if this is good to manage, as it is mainly agent/runtime-extension specific -->
+            <dependency>
+                <groupId>com.sap.hcp.cf.logging</groupId>
+                <artifactId>cf-java-logging-support-opentelemetry-agent-extension</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>
