@@ -5,7 +5,7 @@ The extension scans the service bindings of an application for SAP Collector as 
 If such a binding is found, the OpenTelemetry Java Agent is configured to ship observability data to those services.
 Thus, this extension provides a convenient auto-instrumentation for Java applications running on SAP BTP.
 
-> Note: CaaS currently is an SAP internal only service.
+> Note: CaaS is an SAP internal only service. The service bindings supported by this extension (v1) are no longer created. CaaS support is deprecated as of version 4.3.0 and will be removed in a future release.
 
 The extension provides the following main features:
 
@@ -95,7 +95,7 @@ The extension itself can be configured by specifying the following system proper
 
 | Property                                   | Description                                                                                                                                     | Default Value   |
 |--------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|
-| `sap.caas.cf.binding.label.value`          | The label of the managed CaaS service binding to bind to.                                                                                       | `caas-service`  |
+| `sap.caas.cf.binding.label.value`          | **Deprecated since 4.3.0.** The label of the managed CaaS service binding to bind to.                                                                                       | `caas-service`  |
 | `sap.cloud-logging.cf.binding.label.value` | The label of the managed service binding to bind to.                                                                                            | `cloud-logging` |
 | `sap.cloud-logging.cf.binding.tag.value`   | The tag of any service binding (managed or user-provided) to bind to.                                                                           | `Cloud Logging` |
 | `sap.dynatrace.cf.binding.label.value`     | The label of the managed service binding to bind to.                                                                                            | `dynatrace`     |
