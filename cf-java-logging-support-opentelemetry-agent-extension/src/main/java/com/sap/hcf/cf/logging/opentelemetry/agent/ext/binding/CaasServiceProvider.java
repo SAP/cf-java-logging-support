@@ -6,6 +6,12 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.util.Collections;
 import java.util.function.Supplier;
 
+/**
+ * Provides the CaaS (Collector as a Service) service binding.
+ *
+ * @deprecated CaaS is an SAP internal only service. The service bindings supported by this extension (v1) are no longer created. Will be removed in a future release.
+ */
+@Deprecated(since = "4.3.0", forRemoval = true)
 public class CaasServiceProvider implements Supplier<CloudFoundryServiceInstance> {
 
     private final CloudFoundryServiceInstance service;
