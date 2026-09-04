@@ -382,12 +382,20 @@ public interface ExtensionConfigurations {
     interface RUNTIME {
         interface CLOUD_FOUNDRY {
             interface SERVICE {
+                /**
+                 * @deprecated CaaS is an SAP internal only service. The service bindings supported by this extension (v1) are no longer created.
+                 *             Will be removed in a future release.
+                 */
+                @Deprecated(since = "4.3.0", forRemoval = true)
                 interface CAAS {
                     /**
                      * <p>Parses {@code sap.caas.cf.binding.label.value}.</p>
                      * <p>The label value used to identify managed CaaS service bindings. Default is
                      * {@code "caas-service"}.</p>
+                     *
+                     * @deprecated CaaS is an SAP internal only service. The service bindings supported by this extension (v1) are no longer created.
                      */
+                    @Deprecated(since = "4.3.0", forRemoval = true)
                     ConfigProperty<String> LABEL =
                             stringValued("sap.caas.cf.binding.label.value").withDefaultValue("caas-service").build();
                 }

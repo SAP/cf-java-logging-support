@@ -14,6 +14,12 @@ import java.util.logging.Logger;
 
 import static java.util.Collections.emptyMap;
 
+/**
+ * Supplies OTel configuration properties derived from a CaaS (Collector as a Service) service binding.
+ *
+ * @deprecated CaaS is an SAP internal only service. The service bindings supported by this extension (v1) are no longer created. Will be removed in a future release.
+ */
+@Deprecated(since = "4.3.0", forRemoval = true)
 public class CaasBindingPropertiesSupplier implements Supplier<Map<String, String>> {
 
     private static final String CAAS_CLIENT_KEY = "tls.key";
