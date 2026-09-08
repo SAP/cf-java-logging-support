@@ -295,7 +295,7 @@ java #...
 
 ## Generic OTLP Service Binding Exporter (vcap-service)
 
-_This feature was introduced with version 4.2.0 of the extension._
+_This feature was introduced with version 4.3.0 of the extension._
 
 The `vcap-service` exporter lets you ship logs, metrics, and traces to **any OTLP-compatible endpoint** that is described by a Cloud Foundry service binding.
 Unlike the `cloud-logging` or `dynatrace` exporters, it does not require a specific service type.
