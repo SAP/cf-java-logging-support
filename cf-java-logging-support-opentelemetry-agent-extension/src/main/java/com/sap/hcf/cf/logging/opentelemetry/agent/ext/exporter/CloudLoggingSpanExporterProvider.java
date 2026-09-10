@@ -65,7 +65,12 @@ public class CloudLoggingSpanExporterProvider implements ConfigurableSpanExporte
         OtlpGrpcSpanExporterBuilder builder = OtlpGrpcSpanExporter.builder();
         builder.setEndpoint(credentials.getEndpoint()).setCompression(getCompression(config))
                .setClientTls(credentials.getClientKey(), credentials.getClientCert())
-               .setTrustedCertificates(credentials.getServerCert()).setRetryPolicy(RetryPolicy.getDefault());
+               .setRetryPolicy(RetryPolicy.getDefault());
+
+        byte[] serverCert = credentials.getServerCert();
+        if (serverCert != null && serverCert.length > 0) {
+            builder.setTrustedCertificates(serverCert);
+        }
 
         Duration timeOut = getTimeOut(config);
         if (timeOut != null) {

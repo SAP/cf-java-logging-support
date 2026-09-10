@@ -114,9 +114,14 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
         OtlpGrpcMetricExporterBuilder builder = OtlpGrpcMetricExporter.builder();
         builder.setEndpoint(credentials.getEndpoint()).setCompression(getCompression(config))
                .setClientTls(credentials.getClientKey(), credentials.getClientCert())
-               .setTrustedCertificates(credentials.getServerCert()).setRetryPolicy(RetryPolicy.getDefault())
+               .setRetryPolicy(RetryPolicy.getDefault())
                .setAggregationTemporalitySelector(getAggregationTemporalitySelector(config))
                .setDefaultAggregationSelector(getDefaultAggregationSelector(config));
+
+        byte[] serverCert = credentials.getServerCert();
+        if (serverCert != null && serverCert.length > 0) {
+            builder.setTrustedCertificates(serverCert);
+        }
 
         Duration timeOut = getTimeOut(config);
         if (timeOut != null) {

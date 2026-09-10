@@ -56,9 +56,8 @@ public class CloudLoggingCredentials {
         }
 
         if (isNullOrEmpty(serverCert)) {
-            LOG.warning(
-                    "Credential \"" + CRED_OTLP_SERVER_CERT + "\" not found. Skipping cloud-logging exporter configuration");
-            return false;
+            LOG.fine("Credential \"" + CRED_OTLP_SERVER_CERT
+                    + "\" not present in service binding. Falling back to the JVM default trust store for the ingest endpoint.");
         }
         return true;
     }
