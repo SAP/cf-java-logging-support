@@ -56,7 +56,7 @@ public class CloudLoggingCredentials {
         }
 
         if (isNullOrEmpty(serverCert)) {
-            LOG.fine("Credential \"" + CRED_OTLP_SERVER_CERT
+            LOG.info("Credential \"" + CRED_OTLP_SERVER_CERT
                     + "\" not present in service binding. Falling back to the JVM default trust store for the ingest endpoint.");
         }
         return true;

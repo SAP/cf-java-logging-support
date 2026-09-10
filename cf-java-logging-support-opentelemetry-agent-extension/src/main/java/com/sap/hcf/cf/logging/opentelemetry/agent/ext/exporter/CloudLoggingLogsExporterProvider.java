@@ -3,6 +3,9 @@ package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryServiceInstance;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudLoggingServicesProvider;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.EXPORTER;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.tls.BindingServerCertificateSource;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.tls.SystemTrustAnchorSource;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.tls.TrustedCertificatesJoiner;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporterBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -65,12 +68,10 @@ public class CloudLoggingLogsExporterProvider implements ConfigurableLogRecordEx
         OtlpGrpcLogRecordExporterBuilder builder = OtlpGrpcLogRecordExporter.builder();
         builder.setEndpoint(credentials.getEndpoint()).setCompression(getCompression(config))
                .setClientTls(credentials.getClientKey(), credentials.getClientCert())
+               .setTrustedCertificates(TrustedCertificatesJoiner.toPemBytes(
+                       new SystemTrustAnchorSource(),
+                       new BindingServerCertificateSource(credentials.getServerCert())))
                .setRetryPolicy(RetryPolicy.getDefault());
-
-        byte[] serverCert = credentials.getServerCert();
-        if (serverCert != null && serverCert.length > 0) {
-            builder.setTrustedCertificates(AppendedTrustCertificates.mergedWithSystemDefaults(serverCert));
-        }
 
         Duration timeOut = getTimeOut(config);
         if (timeOut != null) {
