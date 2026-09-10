@@ -69,7 +69,7 @@ public class CloudLoggingSpanExporterProvider implements ConfigurableSpanExporte
 
         byte[] serverCert = credentials.getServerCert();
         if (serverCert != null && serverCert.length > 0) {
-            builder.setTrustedCertificates(serverCert);
+            builder.setTrustedCertificates(AppendedTrustCertificates.mergedWithSystemDefaults(serverCert));
         }
 
         Duration timeOut = getTimeOut(config);
