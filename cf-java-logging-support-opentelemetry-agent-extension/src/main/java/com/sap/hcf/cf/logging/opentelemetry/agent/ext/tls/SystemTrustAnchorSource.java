@@ -1,6 +1,5 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.tls;
 
-import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import java.security.KeyStore;
@@ -19,23 +18,24 @@ import java.util.stream.Stream;
  * <p>This is the same set the platform uses to validate ordinary HTTPS connections,
  * so any endpoint whose server certificate chains to a public root is trusted without
  * additional configuration.</p>
+ *
+ * <p>The stream aggregates the accepted issuers of <em>every</em>
+ * {@link X509TrustManager} returned by the default {@link TrustManagerFactory}, so a
+ * runtime with multiple configured trust managers contributes all of them.</p>
  */
 public class SystemTrustAnchorSource implements X509CertificateSource {
 
     private static final Logger LOG = Logger.getLogger(SystemTrustAnchorSource.class.getName());
 
     @Override
-    public Stream<X509Certificate> get() {
+    public Stream<X509Certificate> stream() {
         try {
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init((KeyStore) null);
-            for (TrustManager tm : tmf.getTrustManagers()) {
-                if (tm instanceof X509TrustManager) {
-                    return Arrays.stream(((X509TrustManager) tm).getAcceptedIssuers());
-                }
-            }
-            LOG.warning("No X509TrustManager returned by the default TrustManagerFactory; system trust anchors will be omitted.");
-            return Stream.empty();
+            return Arrays.stream(tmf.getTrustManagers())
+                         .filter(X509TrustManager.class::isInstance)
+                         .map(X509TrustManager.class::cast)
+                         .flatMap(tm -> Arrays.stream(tm.getAcceptedIssuers()));
         } catch (NoSuchAlgorithmException | KeyStoreException e) {
             LOG.log(Level.WARNING, e, () -> "Failed to enumerate JVM default trust anchors; system trust anchors will be omitted.");
             return Stream.empty();

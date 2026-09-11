@@ -12,16 +12,16 @@ class SystemTrustAnchorSourceTest {
     void yieldsTheJvmDefaultTrustAnchors() {
         SystemTrustAnchorSource source = new SystemTrustAnchorSource();
 
-        assertThat(source.get()).isNotEmpty()
-                                .allSatisfy(cert -> assertThat(cert).isInstanceOf(X509Certificate.class));
+        assertThat(source.stream()).isNotEmpty()
+                                   .allSatisfy(cert -> assertThat(cert).isInstanceOf(X509Certificate.class));
     }
 
     @Test
     void repeatedInvocationsProduceIndependentStreams() {
         SystemTrustAnchorSource source = new SystemTrustAnchorSource();
 
-        long first = source.get().count();
-        long second = source.get().count();
+        long first = source.stream().count();
+        long second = source.stream().count();
 
         assertThat(first).isPositive().isEqualTo(second);
     }

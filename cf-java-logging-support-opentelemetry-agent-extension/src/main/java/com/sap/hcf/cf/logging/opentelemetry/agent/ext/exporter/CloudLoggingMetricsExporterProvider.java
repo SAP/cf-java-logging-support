@@ -35,15 +35,21 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
 
     private final Function<ConfigProperties, Stream<CloudFoundryServiceInstance>> servicesProvider;
     private final CloudLoggingCredentials.Parser credentialParser;
+    private final Function<CloudLoggingCredentials, byte[]> trustedCertificatesProvider;
 
     public CloudLoggingMetricsExporterProvider() {
-        this(config -> new CloudLoggingServicesProvider(config).get(), CloudLoggingCredentials.parser());
+        this(config -> new CloudLoggingServicesProvider(config).get(),
+             CloudLoggingCredentials.parser(),
+             credentials -> TrustedCertificatesJoiner.toPemBytes(new SystemTrustAnchorSource(),
+                                                                  new BindingServerCertificateSource(credentials.getServerCert())));
     }
 
     CloudLoggingMetricsExporterProvider(Function<ConfigProperties, Stream<CloudFoundryServiceInstance>> serviceProvider,
-                                        CloudLoggingCredentials.Parser credentialParser) {
+                                        CloudLoggingCredentials.Parser credentialParser,
+                                        Function<CloudLoggingCredentials, byte[]> trustedCertificatesProvider) {
         this.servicesProvider = serviceProvider;
         this.credentialParser = credentialParser;
+        this.trustedCertificatesProvider = trustedCertificatesProvider;
     }
 
     private static String getCompression(ConfigProperties config) {
@@ -117,9 +123,7 @@ public class CloudLoggingMetricsExporterProvider implements ConfigurableMetricEx
         OtlpGrpcMetricExporterBuilder builder = OtlpGrpcMetricExporter.builder();
         builder.setEndpoint(credentials.getEndpoint()).setCompression(getCompression(config))
                .setClientTls(credentials.getClientKey(), credentials.getClientCert())
-               .setTrustedCertificates(TrustedCertificatesJoiner.toPemBytes(
-                       new SystemTrustAnchorSource(),
-                       new BindingServerCertificateSource(credentials.getServerCert())))
+               .setTrustedCertificates(trustedCertificatesProvider.apply(credentials))
                .setRetryPolicy(RetryPolicy.getDefault())
                .setAggregationTemporalitySelector(getAggregationTemporalitySelector(config))
                .setDefaultAggregationSelector(getDefaultAggregationSelector(config));

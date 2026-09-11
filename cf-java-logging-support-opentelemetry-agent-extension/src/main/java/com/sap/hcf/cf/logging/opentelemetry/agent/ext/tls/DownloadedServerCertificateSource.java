@@ -30,7 +30,7 @@ public class DownloadedServerCertificateSource implements X509CertificateSource 
     }
 
     @Override
-    public Stream<X509Certificate> get() {
+    public Stream<X509Certificate> stream() {
         String pem = downloader.download(endpointUrl);
         if (pem == null || pem.isEmpty()) {
             return Stream.empty();

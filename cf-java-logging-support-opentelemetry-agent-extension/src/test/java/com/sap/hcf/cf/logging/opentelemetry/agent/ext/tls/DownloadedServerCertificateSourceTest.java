@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,7 +23,7 @@ class DownloadedServerCertificateSourceTest {
     private static String validPem() throws Exception {
         try (InputStream is = DownloadedServerCertificateSourceTest.class.getClassLoader()
                                                                          .getResourceAsStream("certificate.pem")) {
-            assertThat(is).isNotNull();
+            assumeThat(is).as("test resource certificate.pem must be present on the classpath").isNotNull();
             return new String(is.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
@@ -32,7 +33,7 @@ class DownloadedServerCertificateSourceTest {
         when(downloader.download(ENDPOINT)).thenReturn(validPem());
         DownloadedServerCertificateSource source = new DownloadedServerCertificateSource(downloader, ENDPOINT);
 
-        assertThat(source.get()).hasSize(1);
+        assertThat(source.stream()).hasSize(1);
     }
 
     @Test
@@ -40,7 +41,7 @@ class DownloadedServerCertificateSourceTest {
         when(downloader.download(ENDPOINT)).thenReturn(null);
         DownloadedServerCertificateSource source = new DownloadedServerCertificateSource(downloader, ENDPOINT);
 
-        assertThat(source.get()).isEmpty();
+        assertThat(source.stream()).isEmpty();
     }
 
     @Test
@@ -48,6 +49,6 @@ class DownloadedServerCertificateSourceTest {
         when(downloader.download(ENDPOINT)).thenReturn("not a pem");
         DownloadedServerCertificateSource source = new DownloadedServerCertificateSource(downloader, ENDPOINT);
 
-        assertThat(source.get()).isEmpty();
+        assertThat(source.stream()).isEmpty();
     }
 }

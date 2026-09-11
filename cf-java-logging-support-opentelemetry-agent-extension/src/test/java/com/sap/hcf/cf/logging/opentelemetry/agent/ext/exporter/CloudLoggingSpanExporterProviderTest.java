@@ -7,7 +7,6 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -35,20 +34,23 @@ public class CloudLoggingSpanExporterProviderTest {
     private CloudLoggingCredentials.Parser credentialParser;
 
     @Mock(strictness = LENIENT)
+    private Function<CloudLoggingCredentials, byte[]> trustedCertificatesProvider;
+
+    @Mock(strictness = LENIENT)
     private ConfigProperties config;
 
-    @InjectMocks
     private CloudLoggingSpanExporterProvider exporterProvider;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         when(config.getString(any(), any())).thenAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 return invocation.getArguments()[1];
             }
         });
-
+        when(trustedCertificatesProvider.apply(any())).thenReturn(PEMUtil.read("certificate.pem"));
+        exporterProvider = new CloudLoggingSpanExporterProvider(servicesProvider, credentialParser, trustedCertificatesProvider);
     }
 
     @Test
@@ -91,7 +93,6 @@ public class CloudLoggingSpanExporterProviderTest {
         when(validCredentials.getEndpoint()).thenReturn("https://otlp-example.sap");
         when(validCredentials.getClientCert()).thenReturn(PEMUtil.read("certificate.pem"));
         when(validCredentials.getClientKey()).thenReturn(PEMUtil.read("private.pem"));
-        when(validCredentials.getServerCert()).thenReturn(PEMUtil.read("certificate.pem"));
         when(credentialParser.parse(any())).thenReturn(invalidCredentials).thenReturn(validCredentials);
         SpanExporter exporter = exporterProvider.createExporter(config);
         assertThat(exporter).isNotNull();

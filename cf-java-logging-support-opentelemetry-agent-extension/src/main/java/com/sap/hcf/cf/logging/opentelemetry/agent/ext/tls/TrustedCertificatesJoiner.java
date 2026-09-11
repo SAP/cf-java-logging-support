@@ -29,7 +29,7 @@ public final class TrustedCertificatesJoiner {
     public static byte[] toPemBytes(X509CertificateSource... sources) {
         StringBuilder pem = new StringBuilder();
         for (X509CertificateSource source : sources) {
-            source.get().forEach(cert -> appendPem(pem, cert));
+            source.stream().forEach(cert -> appendPem(pem, cert));
         }
         return pem.toString().getBytes(StandardCharsets.UTF_8);
     }

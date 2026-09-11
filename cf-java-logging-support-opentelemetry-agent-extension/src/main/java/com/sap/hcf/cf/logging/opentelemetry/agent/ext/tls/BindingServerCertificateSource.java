@@ -27,7 +27,7 @@ public class BindingServerCertificateSource implements X509CertificateSource {
     }
 
     @Override
-    public Stream<X509Certificate> get() {
+    public Stream<X509Certificate> stream() {
         if (pemBytes == null || pemBytes.length == 0) {
             return Stream.empty();
         }

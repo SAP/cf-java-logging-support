@@ -20,5 +20,5 @@ public interface X509CertificateSource {
      * Returns the certificates supplied by this source. Callers must consume the
      * stream fully; sources are not required to be repeatable.
      */
-    Stream<X509Certificate> get();
+    Stream<X509Certificate> stream();
 }

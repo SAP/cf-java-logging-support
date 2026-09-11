@@ -15,7 +15,7 @@ final class PemEncoder {
 
     private static final String LINE_SEPARATOR = "\n";
     private static final Base64.Encoder BASE64_ENCODER =
-            Base64.getMimeEncoder(64, LINE_SEPARATOR.getBytes(StandardCharsets.US_ASCII));
+            Base64.getMimeEncoder(64, LINE_SEPARATOR.getBytes(StandardCharsets.UTF_8));
 
     private PemEncoder() {
     }

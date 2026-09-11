@@ -9,37 +9,40 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 class PemEncoderTest {
 
-    static X509Certificate loadTestCertificate() throws Exception {
+    private static final X509Certificate CERTIFICATE = loadTestCertificate();
+
+    private static X509Certificate loadTestCertificate() {
         try (InputStream is = PemEncoderTest.class.getClassLoader().getResourceAsStream("certificate.pem")) {
-            assertThat(is).isNotNull();
+            assumeThat(is).as("test resource certificate.pem must be present on the classpath").isNotNull();
             return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to load test certificate", e);
         }
     }
 
     @Test
     void encodesCertificateWithArmorAndTrailingNewline() throws Exception {
-        String pem = PemEncoder.encode(loadTestCertificate());
+        String pem = PemEncoder.encode(CERTIFICATE);
 
         assertThat(pem).startsWith("-----BEGIN CERTIFICATE-----\n").endsWith("-----END CERTIFICATE-----\n");
     }
 
     @Test
     void encodedOutputRoundtripsBackToTheSameCertificate() throws Exception {
-        X509Certificate original = loadTestCertificate();
-
-        String pem = PemEncoder.encode(original);
+        String pem = PemEncoder.encode(CERTIFICATE);
 
         X509Certificate parsed = (X509Certificate) CertificateFactory.getInstance("X.509")
                 .generateCertificate(new ByteArrayInputStream(pem.getBytes(StandardCharsets.UTF_8)));
-        assertThat(parsed).isEqualTo(original);
+        assertThat(parsed).isEqualTo(CERTIFICATE);
     }
 
     @Test
     void wrapsBase64BodyAt64Characters() throws Exception {
-        String pem = PemEncoder.encode(loadTestCertificate());
+        String pem = PemEncoder.encode(CERTIFICATE);
         String body = pem.replace("-----BEGIN CERTIFICATE-----\n", "").replace("\n-----END CERTIFICATE-----\n", "");
 
         for (String line : body.split("\n")) {
@@ -52,7 +55,7 @@ class PemEncoderTest {
     void isCompatibleWithPreviousServerCertificateDownloaderFormat() throws Exception {
         // Guard against accidental drift: the format must remain interchangeable with the
         // one previously produced by ServerCertificateDownloader#download.
-        String pem = PemEncoder.encode(loadTestCertificate());
+        String pem = PemEncoder.encode(CERTIFICATE);
 
         assertThat(pem).matches("(?s)^-----BEGIN CERTIFICATE-----\\n([A-Za-z0-9+/=]{1,64}\\n)+-----END CERTIFICATE-----\\n$");
     }
