@@ -4,7 +4,7 @@
 
     <groupId>com.sap.hcp.cf.logging</groupId>
     <artifactId>cf-java-logging-support-parent</artifactId>
-    <version>4.2.0</version>
+    <version>4.3.0</version>
     <packaging>pom</packaging>
 
     <name>Cloud Foundry Java logging support components</name>
@@ -70,9 +70,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Runtime dependencies (aligned with Spring Boot 3.5.12) -->
-        <jackson.version>2.22.0</jackson.version>
-        <slf4j.version>2.0.18</slf4j.version>
-        <logback.version>1.5.32</logback.version>
+        <jackson.version>2.22.2</jackson.version>
+        <slf4j.version>2.0.19</slf4j.version>
+        <logback.version>1.6.3</logback.version>
         <log4j2.version>2.25.3</log4j2.version>
         <servlet.api.version>6.0.0</servlet.api.version>
 
@@ -86,11 +86,11 @@
 
         <!-- Plugin dependencies -->
         <buildnumber.plugin.version>3.3.0</buildnumber.plugin.version>
-        <compiler.plugin.version>3.15.0</compiler.plugin.version>
+        <compiler.plugin.version>3.16.0</compiler.plugin.version>
         <enforcer.plugin.version>3.6.3</enforcer.plugin.version>
         <source.plugin.version>3.4.0</source.plugin.version>
         <jar.plugin.version>3.5.1</jar.plugin.version>
-        <surefire.plugin.version>3.5.6</surefire.plugin.version>
+        <surefire.plugin.version>3.6.0</surefire.plugin.version>
         <exec.plugin.version>3.6.3</exec.plugin.version>
         <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
         <javadoc.plugin.version>3.12.0</javadoc.plugin.version>

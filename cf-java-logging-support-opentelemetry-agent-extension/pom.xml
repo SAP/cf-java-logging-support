@@ -12,7 +12,7 @@
     <parent>
         <artifactId>cf-java-logging-support-parent</artifactId>
         <groupId>com.sap.hcp.cf.logging</groupId>
-        <version>4.2.0</version>
+        <version>4.3.0</version>
     </parent>
 
     <properties>
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>io.opentelemetry.contrib</groupId>
             <artifactId>opentelemetry-cloudfoundry-resources</artifactId>
-            <version>1.59.0-alpha</version>
+            <version>1.60.0-alpha</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>5.4.0</version>
+            <version>5.5.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -77,7 +77,7 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
-            <version>2.2.21</version>
+            <version>2.4.10</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

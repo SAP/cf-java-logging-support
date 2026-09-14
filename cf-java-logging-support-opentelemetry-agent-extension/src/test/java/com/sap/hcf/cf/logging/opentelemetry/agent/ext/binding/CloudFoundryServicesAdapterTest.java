@@ -112,6 +112,14 @@ public class CloudFoundryServicesAdapterTest {
 
     @ParameterizedTest
     @MethodSource("adapters")
+    void filtersByName(CloudFoundryServicesAdapter adapter) {
+        List<CloudFoundryServiceInstance> services =
+                adapter.stream(emptyList(), emptyList(), "managed-find-me1").collect(toList());
+        assertServiceNames(services).containsExactly("managed-find-me1");
+    }
+
+    @ParameterizedTest
+    @MethodSource("adapters")
     void standardUseCase(CloudFoundryServicesAdapter adapter) {
         List<CloudFoundryServiceInstance> services =
                 adapter.stream(List.of("user-provided", "managed-find-me-service"), List.of("Find Me!"))

@@ -1,5 +1,6 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -12,7 +13,12 @@ public class CloudFoundryCredentials {
     }
 
     public String getString(String key) {
-        return properties.get(key);
+        return key == null ? null : properties.get(key);
+    }
+
+    public byte[] getPEMBytes(String key) {
+        String raw = getString(key);
+        return raw == null ? null : raw.trim().replace("\\n", "\n").getBytes(StandardCharsets.UTF_8);
     }
 
     public static Builder builder() {
