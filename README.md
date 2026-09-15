@@ -86,6 +86,27 @@ This feature only depends on the servlet API which you have included in your POM
 about the *servlet filter* feature (like e.g. how to adjust the web.xml) in
 the [Wiki](https://github.com/SAP/cf-java-logging-support/wiki/Instrumenting-Servlets).
 
+### Bill of Materials (BOM)
+
+If you want to use multiple features, you may want to consider using the provided BOM (Bill of Materials) to avoid
+version conflicts. You can find the BOM in the `cf-java-logging-support-bom` module. To use it, add the following to your POM:
+
+``` xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>com.sap.hcp.cf.logging</groupId>
+            <artifactId>cf-java-logging-support-bom</artifactId>
+            <version>${cf-java-logging-support.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```   
+
+Then you can control the version of all features by just changing the property `cf-java-logging-support.version` in your POM an omitting any version in your `cf-java-logging-support` dependencies. Please note that our BOM manages solely the versions of the `cf-java-logging-support` features, but not the versions of the logging implementation backends or other used libraries (e.g. logback or log4j2).
+
 ## Implementation variants and logging configurations
 
 The *core* feature (on which all other features rely) is just using the `org.slf4j` API, but to actually get logs
