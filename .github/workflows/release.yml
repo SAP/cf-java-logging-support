@@ -32,16 +32,17 @@ jobs:
           distribution: temurin
           java-version: '17'
           server-id: central
-          # username/password are env-var NAMES: setup-java writes them into
-          # settings.xml and Maven resolves them from env at runtime (never on disk).
+          # username/password/passphrase are env-var NAMES: setup-java writes them
+          # into settings.xml and Maven resolves them from env at runtime (never on disk).
           # gpg-private-key is the actual key value: setup-java imports it here.
-          # The key has no passphrase, so gpg signs non-interactively (no pinentry).
           server-username: MAVEN_CENTRAL_USERNAME
           server-password: MAVEN_CENTRAL_PASSWORD
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
       - name: Deploy (uploads and stages; Publish is a manual click in the Portal)
         run: mvn -B -ntp -P central deploy
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
