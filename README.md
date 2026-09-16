@@ -105,7 +105,7 @@ version conflicts. You can find the BOM in the `cf-java-logging-support-bom` mod
 </dependencyManagement>
 ```   
 
-Then you can control the version of all features by just changing the property `cf-java-logging-support.version` in your POM an omitting any version in your `cf-java-logging-support` dependencies. Please note that our BOM manages solely the versions of the `cf-java-logging-support` features, but not the versions of the logging implementation backends or other used libraries (e.g. logback or log4j2).
+You can control the version of all features by just changing the property `cf-java-logging-support.version` in your POM an omitting any version in your `cf-java-logging-support` dependencies. Please note that our BOM manages solely the versions of the `cf-java-logging-support` features, but not the versions of the logging implementation backends or other used libraries (e.g. logback or log4j2).
 
 ## Implementation variants and logging configurations
 
