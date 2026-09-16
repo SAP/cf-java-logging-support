@@ -4,7 +4,7 @@
 
     <artifactId>cf-java-logging-support-bom</artifactId>
     <packaging>pom</packaging>
-
+    <description>Bill of Materials for cf-java-logging-support dependencies</description>
     <name>cf-java-logging-support-bom</name>
 
     <parent>
