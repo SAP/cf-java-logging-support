@@ -29,7 +29,7 @@ jobs:
       - name: Set up JDK, Maven settings, GPG
         uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
         with:
-          distribution: temurin
+          distribution: sapmachine
           java-version: '17'
           server-id: central
           # username/password/passphrase are env-var NAMES: setup-java writes them
