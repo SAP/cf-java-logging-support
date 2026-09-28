@@ -3,22 +3,18 @@ package com.sap.hcf.cf.logging.opentelemetry.agent.ext.tls;
 import javax.net.ssl.*;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ServerCertificateDownloader {
 
     private static final Logger LOG = Logger.getLogger(ServerCertificateDownloader.class.getName());
-    private static final byte[] LINE_SEPARATOR = "\n".getBytes(StandardCharsets.UTF_8);
-    private static final Base64.Encoder BASE64_ENCODER = Base64.getMimeEncoder(64, LINE_SEPARATOR);
 
     private final SSLSocketFactory sslSocketFactory;
 
@@ -78,12 +74,7 @@ public class ServerCertificateDownloader {
                     return null;
                 }
 
-                X509Certificate x509Cert = (X509Certificate) serverCertificates[0];
-                byte[] encoded = x509Cert.getEncoded();
-                return "-----BEGIN CERTIFICATE-----\n" //
-                        + BASE64_ENCODER.encodeToString(encoded) //
-                        + "\n-----END CERTIFICATE-----\n";
-
+                return PemEncoder.encode((X509Certificate) serverCertificates[0]);
             }
         } catch (CertificateEncodingException | IOException e) {
             LOG.log(Level.WARNING, e, () -> "Failed to download server certificate from " + endpointUrl);
