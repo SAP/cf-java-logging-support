@@ -1,9 +1,14 @@
 package com.sap.hcf.cf.logging.opentelemetry.agent.ext.tls;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -57,6 +62,19 @@ class PemFileCreatorTest {
         PemFileCreator creator = new PemFileCreator();
 
         assertThatThrownBy(() -> creator.writeFile("\0invalid", ".pem", "content")).isInstanceOf(IOException.class);
+    }
+
+    @Test
+    @DisabledOnOs(OS.WINDOWS)
+    void shouldCreateFileWithOwnerOnlyPermissions() throws IOException {
+        PemFileCreator creator = new PemFileCreator();
+
+        File file = creator.writeFile("test-key", ".pem", "private-key-content");
+
+        Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(file.toPath());
+        assertThat(permissions).containsExactlyInAnyOrder(
+                PosixFilePermission.OWNER_READ,
+                PosixFilePermission.OWNER_WRITE);
     }
     
 }
