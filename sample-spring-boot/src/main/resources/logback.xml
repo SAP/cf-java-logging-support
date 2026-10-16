@@ -20,4 +20,6 @@
     </root>
 
     <logger name="com.sap.hcp.cf" level="${LOG_HCP_CF_LEVEL:-INFO}"/>
+    <!-- The generated development password is printed as a plain-text local-only banner. -->
+    <logger name="org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration" level="ERROR"/>
 </configuration>

@@ -15,24 +15,39 @@ See the section [Adding the OpenTelemetry Java Agent](#adding-the-opentelemetry-
 This sample application is contained in the Maven module sample-spring-boot.
 It can be built with a simple `mvn install`.
 A minimal CF application manifest is provided in [manifest.yml.](manifest.yml)
-This allows to deploy the newly built app with `cf push`, provided a login to a CF instance.
+This allows to deploy the newly built app, provided a login to a CF instance and Basic Authentication credentials:
 
-### Changing the Credentials
+```bash
+cf push --var basic-auth-username='<username>' --var basic-auth-password='<password>'
+```
 
-This sample application contains several credentials to secure the access.
-The credentials should be changed, before the application is built and deployed.
-
-#### Basic Authentication
-
-Every Rest endpoint is secured with Basic Authentication.
-The corresponding username and password are contained in the [application.yml](src/main/resources/application.yml).
-Please change the values of `username` and `password` in the following section of that file.
+Do not commit deployment credentials to this repository or add literal credentials to the manifest. A private variables
+file outside the repository can be supplied with `cf push --vars-file <path>` instead:
 
 ```yaml
-auth:
-  basic:
-    username: user
-    password: secret
+basic-auth-username: <username>
+basic-auth-password: <password>
+```
+
+### Basic Authentication
+
+Every REST endpoint is secured with Basic Authentication.
+The CF manifests require the username and password to be supplied as deployment variables and expose them to Spring
+Boot through `SPRING_SECURITY_USER_NAME` and `SPRING_SECURITY_USER_PASSWORD`. Deployment fails when either manifest
+variable is missing. The credentials become part of the application environment and are visible to users authorized
+to inspect it. Use unique, disposable credentials and do not reuse personal or production passwords.
+
+When the application is started locally without credentials, Spring Boot uses the username `user` and generates a
+random password. A plain-text `Local development credentials` banner prints the username and password after startup,
+so they remain easy to find among the JSON logs. The supplied deployment manifests activate the `cloud` Spring
+profile, which disables this development-only banner.
+
+Set the following shell variables to the local credentials from the banner or to the credentials supplied during
+deployment. These variables are used only by the curl examples below:
+
+```bash
+export BASIC_AUTH_USERNAME='<username>'
+export BASIC_AUTH_PASSWORD='<password>'
 ```
 
 ### Changing the Logging Backend
@@ -69,7 +84,7 @@ This allows testing the logging configuration with respect to packages and loggi
 **Example:**
 
 ```bash
-$ curl -X POST -u user:secret localhost:8080/log/test/info
+$ curl -X POST -u "${BASIC_AUTH_USERNAME}:${BASIC_AUTH_PASSWORD}" localhost:8080/log/test/info
 Generated info log with message: "This is the default log message!".
 ```
 
@@ -140,7 +155,7 @@ Since this example was executed locally, the CF metadata is empty.
 A custom message can be given as well:
 
 ```bash
-$ curl -X POST -u user:secret 'localhost:8080/log/test/info?m=Hello+cf-java-logging-support!'
+$ curl -X POST -u "${BASIC_AUTH_USERNAME}:${BASIC_AUTH_PASSWORD}" 'localhost:8080/log/test/info?m=Hello+cf-java-logging-support!'
 Generated info log with message: "Hello cf-java-logging-support!".
 ```
 
@@ -174,7 +189,7 @@ in [application.yml](src/main/resources/application.yml).
 **Example:**
 
 ```bash
-$ curl -u user:secret 'localhost:8080/token/DEBUG?p=com,org'
+$ curl -u "${BASIC_AUTH_USERNAME}:${BASIC_AUTH_PASSWORD}" 'localhost:8080/token/DEBUG?p=com,org'
 eyJraWQiOiJqd3QtdG9rZW4iLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJsZXZlbCI6IkRFQlVHIiwiaXNzIjoic2FtcGxlLWFwcC1zcHJpbmctYm9vdCIsImV4cCI6MTYxMzM4Njg2MCwicGFja2FnZXMiOiJjb20sb3JnIiwiaWF0IjoxNjEzMjE0MDYwfQ.YtTk8VnMGN2i3SRLK8GRCDfgQcnAQL04IqojZdVYwEJFCezJsot20MYN-WpAWizVVV3midunnBrNzR3_dByK2gRzTQGGE9rXh4KpLw_4UM6XUJTgpMU8yzqt4pCBT-wpMbJ8UOKbT2RCdqOU1oWJL6rggxi5hGBItTvu0PZzjSG3Zv1eIvDKZcNF9pq4F1r8H2og1Mun28o1r-J5SCURjmolunKDNp4e6fsGSeUttbT5EulIcfHcM9nD4Byyywc2Khs0H13YPqAjdxxFcu_5fYp8JFgbns2Lo5PYjMbY8nxnuZFJmILwXHHRtAoxrcSbpSzFRtZfQsI4earGBGSyog
 ```
 
@@ -201,7 +216,7 @@ Note, that the package name prefixes `org` and `com` will trigger debug logs fro
 org.springframework.\*) and this library (com.sap.\*).
 
 ```bash
-$ curl -X POST -u user:secret 'localhost:8080/log/test/info?m=Hello+cf-java-logging-support!' -H 'SAP-LOG-LEVEL: eyJraWQiOiJqd3QtdG9rZW4iLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJsZXZlbCI6IkRFQlVHIiwiaXNzIjoic2FtcGxlLWFwcC1zcHJpbmctYm9vdCIsImV4cCI6MTYxMzM4Njg2MCwicGFja2FnZXMiOiJjb20sb3JnIiwiaWF0IjoxNjEzMjE0MDYwfQ.YtTk8VnMGN2i3SRLK8GRCDfgQcnAQL04IqojZdVYwEJFCezJsot20MYN-WpAWizVVV3midunnBrNzR3_dByK2gRzTQGGE9rXh4KpLw_4UM6XUJTgpMU8yzqt4pCBT-wpMbJ8UOKbT2RCdqOU1oWJL6rggxi5hGBItTvu0PZzjSG3Zv1eIvDKZcNF9pq4F1r8H2og1Mun28o1r-J5SCURjmolunKDNp4e6fsGSeUttbT5EulIcfHcM9nD4Byyywc2Khs0H13YPqAjdxxFcu_5fYp8JFgbns2Lo5PYjMbY8nxnuZFJmILwXHHRtAoxrcSbpSzFRtZfQsI4earGBGSyog'
+$ curl -X POST -u "${BASIC_AUTH_USERNAME}:${BASIC_AUTH_PASSWORD}" 'localhost:8080/log/test/info?m=Hello+cf-java-logging-support!' -H 'SAP-LOG-LEVEL: eyJraWQiOiJqd3QtdG9rZW4iLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJsZXZlbCI6IkRFQlVHIiwiaXNzIjoic2FtcGxlLWFwcC1zcHJpbmctYm9vdCIsImV4cCI6MTYxMzM4Njg2MCwicGFja2FnZXMiOiJjb20sb3JnIiwiaWF0IjoxNjEzMjE0MDYwfQ.YtTk8VnMGN2i3SRLK8GRCDfgQcnAQL04IqojZdVYwEJFCezJsot20MYN-WpAWizVVV3midunnBrNzR3_dByK2gRzTQGGE9rXh4KpLw_4UM6XUJTgpMU8yzqt4pCBT-wpMbJ8UOKbT2RCdqOU1oWJL6rggxi5hGBItTvu0PZzjSG3Zv1eIvDKZcNF9pq4F1r8H2og1Mun28o1r-J5SCURjmolunKDNp4e6fsGSeUttbT5EulIcfHcM9nD4Byyywc2Khs0H13YPqAjdxxFcu_5fYp8JFgbns2Lo5PYjMbY8nxnuZFJmILwXHHRtAoxrcSbpSzFRtZfQsI4earGBGSyog'
 Generated info log with message: "Hello cf-java-logging-support!".
 ```
 
@@ -447,7 +462,7 @@ For the configuration of those application cf-java-logging-support needs the pub
 This public key can be obtained
 
 ```bash
-$ curl -u user:secret 'localhost:8080/publickey'            
+$ curl -u "${BASIC_AUTH_USERNAME}:${BASIC_AUTH_PASSWORD}" 'localhost:8080/publickey'
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk/a5ZKvQ0voLi29klo5GCtN40JpscGud5diz2y5mNVCMvU6rdE+yNMs5zfgjy2PhR0TLXWfZrwHeX75dhC49hJup39pClv83FJWVbu6ScWNQUGYgdUY5zGkFcBayZlt1yXybQaCUtC8ksHe+QOAUW9Y43nPa8/vznH+zbROlF/kSHIjegcr0GF6ZOLMBAj+9p6Xp+kZxsFUgnqgIZWUp4YI3+j2xDuBgNptZbjUg7WsqEU/u+CA5uCyjGVriq++qSW1fj1A0C29uj1+n3IqrMlL2MdMQayS/5ppyrjApsSYDG56wQEAOrOKaSeBsZexIvIdhQ12+5SkqwPlQGCUHpQIDAQAB
 ```
 
