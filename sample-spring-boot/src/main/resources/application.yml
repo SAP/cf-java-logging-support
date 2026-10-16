@@ -3,7 +3,3 @@ defaults:
   token:
     expiration: P2D
     issuer: sample-app-spring-boot
-auth:
-  basic:
-    username: user
-    password: secret

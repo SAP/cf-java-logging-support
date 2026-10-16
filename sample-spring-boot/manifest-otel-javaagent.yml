@@ -10,6 +10,9 @@ applications:
     memory: 256M
     random-route: true
     env:
+      SPRING_SECURITY_USER_NAME: ((basic-auth-username))
+      SPRING_SECURITY_USER_PASSWORD: ((basic-auth-password))
+      SPRING_PROFILES_ACTIVE: cloud
       # Set LOG_*: true to activate logging of respective field
       LOG_SENSITIVE_CONNECTION_DATA: false
       LOG_REMOTE_USER: false
