@@ -87,7 +87,7 @@
         <!-- Plugin dependencies -->
         <buildnumber.plugin.version>3.3.1</buildnumber.plugin.version>
         <compiler.plugin.version>3.16.0</compiler.plugin.version>
-        <enforcer.plugin.version>3.6.3</enforcer.plugin.version>
+        <enforcer.plugin.version>3.7.0</enforcer.plugin.version>
         <source.plugin.version>3.4.0</source.plugin.version>
         <jar.plugin.version>3.5.1</jar.plugin.version>
         <surefire.plugin.version>3.6.1</surefire.plugin.version>
