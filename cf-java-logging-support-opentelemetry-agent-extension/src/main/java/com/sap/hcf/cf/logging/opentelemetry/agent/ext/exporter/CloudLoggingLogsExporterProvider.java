@@ -3,6 +3,9 @@ package com.sap.hcf.cf.logging.opentelemetry.agent.ext.exporter;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudFoundryServiceInstance;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.binding.CloudLoggingServicesProvider;
 import com.sap.hcf.cf.logging.opentelemetry.agent.ext.config.ExtensionConfigurations.EXPORTER;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.tls.BindingServerCertificateSource;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.tls.SystemTrustAnchorSource;
+import com.sap.hcf.cf.logging.opentelemetry.agent.ext.tls.TrustedCertificatesJoiner;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporterBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -23,15 +26,21 @@ public class CloudLoggingLogsExporterProvider implements ConfigurableLogRecordEx
 
     private final Function<ConfigProperties, Stream<CloudFoundryServiceInstance>> servicesProvider;
     private final CloudLoggingCredentials.Parser credentialParser;
+    private final Function<CloudLoggingCredentials, byte[]> trustedCertificatesProvider;
 
     public CloudLoggingLogsExporterProvider() {
-        this(config -> new CloudLoggingServicesProvider(config).get(), CloudLoggingCredentials.parser());
+        this(config -> new CloudLoggingServicesProvider(config).get(),
+             CloudLoggingCredentials.parser(),
+             credentials -> TrustedCertificatesJoiner.toPemBytes(new SystemTrustAnchorSource(),
+                                                                  new BindingServerCertificateSource(credentials.getServerCert())));
     }
 
     CloudLoggingLogsExporterProvider(Function<ConfigProperties, Stream<CloudFoundryServiceInstance>> serviceProvider,
-                                     CloudLoggingCredentials.Parser credentialParser) {
+                                     CloudLoggingCredentials.Parser credentialParser,
+                                     Function<CloudLoggingCredentials, byte[]> trustedCertificatesProvider) {
         this.servicesProvider = serviceProvider;
         this.credentialParser = credentialParser;
+        this.trustedCertificatesProvider = trustedCertificatesProvider;
     }
 
     private static String getCompression(ConfigProperties config) {
@@ -65,7 +74,8 @@ public class CloudLoggingLogsExporterProvider implements ConfigurableLogRecordEx
         OtlpGrpcLogRecordExporterBuilder builder = OtlpGrpcLogRecordExporter.builder();
         builder.setEndpoint(credentials.getEndpoint()).setCompression(getCompression(config))
                .setClientTls(credentials.getClientKey(), credentials.getClientCert())
-               .setTrustedCertificates(credentials.getServerCert()).setRetryPolicy(RetryPolicy.getDefault());
+               .setTrustedCertificates(trustedCertificatesProvider.apply(credentials))
+               .setRetryPolicy(RetryPolicy.getDefault());
 
         Duration timeOut = getTimeOut(config);
         if (timeOut != null) {

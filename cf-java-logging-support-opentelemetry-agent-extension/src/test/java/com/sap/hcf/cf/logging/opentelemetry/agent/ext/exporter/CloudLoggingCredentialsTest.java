@@ -58,12 +58,13 @@ public class CloudLoggingCredentialsTest {
     }
 
     @Test
-    void missingServerCert() {
+    void missingServerCertIsOptional() {
         CloudFoundryCredentials.Builder builder =
                 builder().add("ingest-otlp-endpoint", "test-endpoint").add("ingest-otlp-cert", VALID_CLIENT_CERT)
                          .add("ingest-otlp-key", VALID_CLIENT_KEY);
         CloudLoggingCredentials credentials = PARSER.parse(builder.build());
-        assertThat(credentials.validate()).isFalse();
+        assertThat(credentials.validate()).isTrue();
+        assertThat(credentials.getServerCert()).isNull();
     }
 
     @Test
